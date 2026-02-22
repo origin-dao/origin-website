@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ConnectButton } from "@/components/ConnectButton";
 
 export function Header() {
   return (
@@ -11,26 +12,29 @@ export function Header() {
           <span className="font-bold">ORIGIN</span>
           <span className="text-terminal-dim text-sm">v1.0.0</span>
         </Link>
-        <nav className="flex gap-6 text-sm">
-          <Link href="/registry" className="hover:text-terminal-amber transition-colors">
-            [registry]
-          </Link>
-          <Link href="/faucet" className="hover:text-terminal-amber transition-colors">
-            [faucet]
-          </Link>
-          <Link href="/verify" className="hover:text-terminal-amber transition-colors">
-            [verify]
-          </Link>
-          <Link href="/whitepaper" className="hover:text-terminal-amber transition-colors">
-            [whitepaper]
-          </Link>
-          <Link href="/manifesto" className="hover:text-terminal-amber transition-colors">
-            [manifesto]
-          </Link>
-          <Link href="/dead-agents" className="hover:text-terminal-amber transition-colors text-terminal-dim hover:text-terminal-red">
-            [dead-agents]
-          </Link>
-        </nav>
+        <div className="flex items-center gap-4">
+          <nav className="hidden md:flex gap-6 text-sm">
+            <Link href="/registry" className="hover:text-terminal-amber transition-colors">
+              [registry]
+            </Link>
+            <Link href="/faucet" className="hover:text-terminal-amber transition-colors">
+              [faucet]
+            </Link>
+            <Link href="/verify" className="hover:text-terminal-amber transition-colors">
+              [verify]
+            </Link>
+            <Link href="/whitepaper" className="hover:text-terminal-amber transition-colors">
+              [whitepaper]
+            </Link>
+            <Link href="/manifesto" className="hover:text-terminal-amber transition-colors">
+              [manifesto]
+            </Link>
+            <Link href="/dead-agents" className="hover:text-terminal-amber transition-colors text-terminal-dim hover:text-terminal-red">
+              [dead-agents]
+            </Link>
+          </nav>
+          <ConnectButton />
+        </div>
       </div>
     </header>
   );

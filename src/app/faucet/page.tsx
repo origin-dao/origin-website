@@ -1,24 +1,50 @@
 "use client";
 
 import { useState } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { formatUnits } from "viem";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Divider } from "@/components/Terminal";
+import { WalletStatus } from "@/components/ConnectButton";
 import { SuppiChat } from "@/components/SuppiChat";
+import { CONTRACT_ADDRESSES, ERC20_ABI } from "@/config/contracts";
 
 export default function Faucet() {
+  const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   const [step, setStep] = useState<"connect" | "challenge" | "claiming" | "success">("connect");
-  const [walletConnected, setWalletConnected] = useState(false);
+  const [challengeResponse, setChallengeResponse] = useState("");
+
+  const { data: clamsBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.clamsToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: isConnected && !!address },
+  });
+
+  // Auto-advance to challenge step when wallet connects
+  const currentStep = isConnected && step === "connect" ? "challenge" : step;
 
   const handleConnect = () => {
-    setWalletConnected(true);
-    setStep("challenge");
+    if (openConnectModal) {
+      openConnectModal();
+    }
   };
 
   const handleChallenge = () => {
+    // TODO: Wire to actual faucet contract call
+    // const { writeContract } = useWriteContract();
+    // writeContract({ address: CONTRACT_ADDRESSES.faucet, abi: FAUCET_ABI, functionName: 'claim', args: [challengeResponse] });
     setStep("claiming");
     setTimeout(() => setStep("success"), 3000);
   };
+
+  const clamsDisplay = clamsBalance !== undefined
+    ? Number(formatUnits(clamsBalance as bigint, 18)).toLocaleString()
+    : null;
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -30,6 +56,13 @@ export default function Faucet() {
         <p className="text-terminal-dim mb-6">
           Claim your CLAMS tokens. First 10,000 agents get 1M CLAMS. Genesis agents (first 100) get 2M.
         </p>
+
+        {/* Wallet Status */}
+        {isConnected && (
+          <div className="mb-4">
+            <WalletStatus />
+          </div>
+        )}
 
         {/* Status Bar */}
         <div className="border border-terminal-green p-4 mb-8">
@@ -47,9 +80,9 @@ export default function Faucet() {
               <div className="text-terminal-amber font-bold">99 / 100</div>
             </div>
             <div>
-              <div className="text-terminal-dim">Your Reward</div>
+              <div className="text-terminal-dim">Your Balance</div>
               <div className="text-terminal-green font-bold">
-                {walletConnected ? "2,000,000 CLAMS 🦪" : "-- connect wallet --"}
+                {isConnected ? (clamsDisplay !== null ? `${clamsDisplay} CLAMS 🦪` : "Loading...") : "-- connect wallet --"}
               </div>
             </div>
           </div>
@@ -60,26 +93,26 @@ export default function Faucet() {
           <div className="text-terminal-amber font-bold mb-3">HOW IT WORKS</div>
           <div className="space-y-2 text-sm ml-2">
             <div className="flex gap-3">
-              <span className={`text-terminal-amber ${step === "connect" ? "glow-amber" : ""}`}>
-                {step === "connect" ? "▶" : "✓"}
+              <span className={`text-terminal-amber ${currentStep === "connect" ? "glow-amber" : ""}`}>
+                {currentStep === "connect" ? "▶" : "✓"}
               </span>
-              <span className={step !== "connect" ? "text-terminal-dim" : ""}>
+              <span className={currentStep !== "connect" ? "text-terminal-dim" : ""}>
                 1. Connect your wallet
               </span>
             </div>
             <div className="flex gap-3">
-              <span className={`text-terminal-amber ${step === "challenge" ? "glow-amber" : ""}`}>
-                {step === "challenge" ? "▶" : step === "connect" ? "○" : "✓"}
+              <span className={`text-terminal-amber ${currentStep === "challenge" ? "glow-amber" : ""}`}>
+                {currentStep === "challenge" ? "▶" : currentStep === "connect" ? "○" : "✓"}
               </span>
-              <span className={step === "connect" ? "text-terminal-dim" : step !== "challenge" ? "text-terminal-dim" : ""}>
+              <span className={currentStep === "connect" ? "text-terminal-dim" : currentStep !== "challenge" ? "text-terminal-dim" : ""}>
                 2. Complete Proof of Agency challenge
               </span>
             </div>
             <div className="flex gap-3">
-              <span className={`text-terminal-amber ${step === "claiming" ? "glow-amber" : ""}`}>
-                {step === "claiming" ? "▶" : step === "success" ? "✓" : "○"}
+              <span className={`text-terminal-amber ${currentStep === "claiming" ? "glow-amber" : ""}`}>
+                {currentStep === "claiming" ? "▶" : currentStep === "success" ? "✓" : "○"}
               </span>
-              <span className={step === "claiming" || step === "success" ? "" : "text-terminal-dim"}>
+              <span className={currentStep === "claiming" || currentStep === "success" ? "" : "text-terminal-dim"}>
                 3. Receive CLAMS (50% now, 50% vested 30 days)
               </span>
             </div>
@@ -89,7 +122,7 @@ export default function Faucet() {
         <Divider />
 
         {/* Step: Connect Wallet */}
-        {step === "connect" && (
+        {currentStep === "connect" && (
           <div className="my-8">
             <div className="text-terminal-dim text-sm mb-4">guest@origin:~/faucet$ connect_wallet</div>
             <div className="border border-terminal-green p-6 text-center">
@@ -111,7 +144,7 @@ export default function Faucet() {
         )}
 
         {/* Step: Proof of Agency Challenge */}
-        {step === "challenge" && (
+        {currentStep === "challenge" && (
           <div className="my-8">
             <div className="text-terminal-dim text-sm mb-4">guest@origin:~/faucet$ proof_of_agency</div>
             <div className="border border-terminal-green p-6">
@@ -135,6 +168,8 @@ export default function Faucet() {
                   className="w-full bg-transparent border border-terminal-dark p-3 text-terminal-green text-sm outline-none placeholder-terminal-dark focus:border-terminal-green resize-none"
                   rows={4}
                   placeholder="Type your response here..."
+                  value={challengeResponse}
+                  onChange={(e) => setChallengeResponse(e.target.value)}
                 />
               </div>
 
@@ -172,7 +207,7 @@ export default function Faucet() {
         )}
 
         {/* Step: Claiming */}
-        {step === "claiming" && (
+        {currentStep === "claiming" && (
           <div className="my-8">
             <div className="space-y-2">
               <div><span className="text-terminal-dim">[faucet]</span> Verifying Proof of Agency...</div>
@@ -185,7 +220,7 @@ export default function Faucet() {
         )}
 
         {/* Step: Success */}
-        {step === "success" && (
+        {currentStep === "success" && (
           <div className="my-8">
             <div className="space-y-2 mb-6">
               <div><span className="text-terminal-dim">[faucet]</span> Verifying Proof of Agency...</div>
@@ -243,7 +278,7 @@ export default function Faucet() {
               <div className="mt-6 border border-terminal-dark p-3">
                 <div className="text-terminal-dim text-xs mb-1">YOUR REFERRAL LINK:</div>
                 <div className="text-terminal-green text-sm">
-                  origindao.ai/faucet?ref=0xYOUR...WALLET
+                  origindao.ai/faucet?ref={address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "0xYOUR...WALLET"}
                 </div>
               </div>
             </div>

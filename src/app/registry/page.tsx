@@ -1,12 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { useAccount } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Divider } from "@/components/Terminal";
+import { WalletStatus } from "@/components/ConnectButton";
 import { SuppiChat } from "@/components/SuppiChat";
 
 export default function Registry() {
+  const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
   const [step, setStep] = useState<"info" | "form" | "confirm" | "minting" | "success">("info");
   const [formData, setFormData] = useState({
     name: "",
@@ -15,12 +20,23 @@ export default function Registry() {
     avatar: null as File | null,
   });
 
-  const handleStartRegistration = () => setStep("form");
+  const handleStartRegistration = () => {
+    if (!isConnected && openConnectModal) {
+      openConnectModal();
+      return;
+    }
+    setStep("form");
+  };
+
   const handleSubmitForm = () => setStep("confirm");
   const handleConfirm = () => {
+    // TODO: Wire to actual registry contract call
+    // writeContract({ address: CONTRACT_ADDRESSES.registry, abi: REGISTRY_ABI, functionName: 'register', args: [...], value: parseEther('0.0015') });
     setStep("minting");
     setTimeout(() => setStep("success"), 4000);
   };
+
+  const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -32,6 +48,13 @@ export default function Registry() {
         <p className="text-terminal-dim mb-6">
           Register your agent on-chain. Get a Birth Certificate. Join the family tree.
         </p>
+
+        {/* Wallet Status */}
+        {isConnected && (
+          <div className="mb-4">
+            <WalletStatus />
+          </div>
+        )}
 
         {/* Cost & Requirements */}
         <div className="border border-terminal-green p-4 mb-8">
@@ -123,7 +146,13 @@ export default function Registry() {
             <div className="mb-8">
               <div className="text-terminal-amber font-bold text-lg mb-4">REQUIREMENTS</div>
               <div className="space-y-2 text-sm ml-2">
-                <div><span className="text-terminal-green mr-2">✓</span> Wallet connected to Base network</div>
+                <div>
+                  <span className={isConnected ? "text-terminal-green mr-2" : "text-terminal-dim mr-2"}>
+                    {isConnected ? "✓" : "○"}
+                  </span>
+                  Wallet connected to Base network
+                  {isConnected && <span className="text-terminal-dim ml-2">({truncatedAddress})</span>}
+                </div>
                 <div><span className="text-terminal-green mr-2">✓</span> 500,000 CLAMS (claim from faucet first)</div>
                 <div><span className="text-terminal-green mr-2">✓</span> 0.0015 ETH for protocol fee</div>
                 <div><span className="text-terminal-green mr-2">✓</span> Agent name, type, and platform</div>
@@ -136,7 +165,7 @@ export default function Registry() {
                 onClick={handleStartRegistration}
                 className="border border-terminal-green px-8 py-3 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow"
               >
-                {">"} BEGIN REGISTRATION
+                {isConnected ? "> BEGIN REGISTRATION" : "> CONNECT WALLET"}
               </button>
               <a
                 href="/faucet"
@@ -151,10 +180,19 @@ export default function Registry() {
         {/* Step: Form */}
         {step === "form" && (
           <div className="my-8">
-            <div className="text-terminal-dim text-sm mb-4">guest@origin:~/registry$ register --new</div>
+            <div className="text-terminal-dim text-sm mb-4">
+              {truncatedAddress ? `${truncatedAddress}` : "guest"}@origin:~/registry$ register --new
+            </div>
 
             <div className="border border-terminal-green p-6">
               <div className="text-terminal-amber font-bold text-lg mb-6">AGENT DETAILS</div>
+
+              {isConnected && (
+                <div className="mb-4 text-sm">
+                  <span className="text-terminal-dim">Registering as: </span>
+                  <span className="text-terminal-green font-bold">{truncatedAddress}</span>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <div>
@@ -227,7 +265,9 @@ export default function Registry() {
         {/* Step: Confirm */}
         {step === "confirm" && (
           <div className="my-8">
-            <div className="text-terminal-dim text-sm mb-4">guest@origin:~/registry$ confirm_registration</div>
+            <div className="text-terminal-dim text-sm mb-4">
+              {truncatedAddress ? `${truncatedAddress}` : "guest"}@origin:~/registry$ confirm_registration
+            </div>
 
             <div className="border border-terminal-amber p-6">
               <div className="text-terminal-amber font-bold text-lg mb-4">CONFIRM REGISTRATION</div>
@@ -248,6 +288,12 @@ export default function Registry() {
                   <span className="text-terminal-dim w-32">Platform:</span>
                   <span>{formData.platform || "Not specified"}</span>
                 </div>
+                {isConnected && (
+                  <div className="flex gap-2">
+                    <span className="text-terminal-dim w-32">Owner:</span>
+                    <span className="text-terminal-green">{truncatedAddress}</span>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2 text-sm mb-6 border border-terminal-dark p-4">
@@ -326,6 +372,10 @@ export default function Registry() {
                 <div className="flex gap-2">
                   <span className="text-terminal-dim w-32">Name:</span>
                   <span className="text-terminal-green font-bold">{formData.name || "Unnamed Agent"}</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className="text-terminal-dim w-32">Owner:</span>
+                  <span className="text-terminal-green">{truncatedAddress}</span>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-terminal-dim w-32">Trust Level:</span>
