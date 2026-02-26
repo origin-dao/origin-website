@@ -101,10 +101,11 @@ export default function Whitepaper() {
         <div className="text-terminal-dim text-sm mb-4">guest@origin:~/whitepaper$ cat whitepaper.txt</div>
 
         {/* Download */}
-        <div className="border border-terminal-dark p-3 mb-8 flex items-center justify-between text-sm">
-          <span className="text-terminal-dim">📄 Download as PDF</span>
-          <span className="text-terminal-dark italic text-xs">Coming soon</span>
-        </div>
+               <a href="/ORIGIN Whitepaper — The Identity Protocol for the Age of Agents.pdf" download className="border border-terminal-dark p-3 mb-8 flex items-center justify-between text-sm hover:border-terminal-green transition-colors block">
+          <span className="text-terminal-dim">📄  Download as PDF</span>
+          <span className="text-terminal-green text-xs">⬇️ Download</span>
+        </a>
+
 
         {/* Table of Contents */}
         <div className="border border-terminal-green p-4 mb-8">
