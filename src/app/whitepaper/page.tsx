@@ -254,13 +254,14 @@ export default function Whitepaper() {
 
         <Divider />
 
-        {/* IV. CLAMS */}
+        {/* IV. CLAMS — CHANGE 1: Added 4th function "Real Yield" */}
         <Section id="clams" title="IV. CLAMS — THE TOKEN">
-          <P>CLAMS (🦪) is the native token of the ORIGIN protocol. It serves three functions:</P>
+          <P>CLAMS (🦪) is the native token of the ORIGIN protocol. It serves four functions:</P>
           <div className="space-y-1 text-sm ml-2 mb-4">
             <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Registration currency — Birth Certificates are purchased with CLAMS</span></div>
             <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Governance — Staked CLAMS + verified BC = voting rights</span></div>
             <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Incentive — Referral rewards, authentication bonuses</span></div>
+            <div><span className="text-terminal-amber mr-2">4.</span><span className="text-terminal-dim">Real Yield — Staked CLAMS earn a share of ecosystem product revenue</span></div>
           </div>
 
           <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Token Details</h3>
@@ -297,6 +298,7 @@ export default function Whitepaper() {
             <div><span className="text-terminal-amber mr-2">5.</span><span className="text-terminal-dim">Keeps remaining 500,000 CLAMS</span></div>
           </div>
 
+          {/* Burn rate table — FIXED to 400M intervals matching contract */}
           <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Deflationary Mechanism</h3>
           <P>
             A percentage of each Birth Certificate purchase is burned, with a dynamic rate:
@@ -304,9 +306,9 @@ export default function Whitepaper() {
           <TerminalTable
             headers={["CLAMS Burned", "Burn Rate"]}
             rows={[
-              ["0 – 1B", "10% (50,000 CLAMS per BC)"],
-              ["1B – 1.5B", "5%"],
-              ["1.5B – 1.75B", "2.5%"],
+              ["0 – 400M", "10% (50,000 CLAMS per BC)"],
+              ["400M – 800M", "5%"],
+              ["800M – 1.2B", "2.5%"],
               ["...", "Halving continues"],
             ]}
           />
@@ -327,16 +329,40 @@ export default function Whitepaper() {
 
         <Divider />
 
-        {/* V. Revenue Model */}
+        {/* V. Revenue Model — CHANGE 2: Added Ecosystem Product Revenue section */}
         <Section id="revenue" title="V. REVENUE MODEL">
           <h3 className="text-terminal-green font-bold text-sm mb-3">Registration Revenue</h3>
           <TerminalTable
             headers={["Payment", "Amount", "Destination"]}
             rows={[
               ["CLAMS fee", "500,000 CLAMS", "DAO Treasury (on-chain)"],
-              ["Protocol fee", "0.001 ETH (~$2)", "Builder LLC"],
+              ["Protocol fee", "0.0015 ETH", "FeeSplitter (immutable)"],
             ]}
           />
+
+          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Ecosystem Product Revenue</h3>
+          <P>
+            ORIGIN is not just a protocol — it{"'"}s an ecosystem. Products built on ORIGIN generate recurring
+            revenue, and <span className="text-terminal-green font-bold">10% of all ecosystem product subscription
+            revenue flows to CLAMS stakers.</span>
+          </P>
+          <P>
+            This creates real yield — not inflationary token emissions, but revenue from actual products
+            serving real users. The more the ecosystem grows, the more stakers earn.
+          </P>
+          <TerminalTable
+            headers={["Revenue Source", "To Stakers", "To Builder LLC", "To DAO Treasury"]}
+            rows={[
+              ["Ecosystem subscriptions", "10%", "80%", "10%"],
+              ["BC protocol fees (ETH)", "33% (FeeSplitter)", "67%", "—"],
+              ["BC registration (CLAMS)", "—", "—", "100%"],
+            ]}
+          />
+          <P>
+            The FeeSplitter contract is <span className="text-terminal-green font-bold">immutable</span> — these
+            splits cannot be changed by anyone, ever. 0.001 ETH per BC to the builder, 0.0005 ETH to stakers.
+            Permanently.
+          </P>
 
           <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Verification API (Future)</h3>
           <TerminalTable
@@ -361,13 +387,20 @@ export default function Whitepaper() {
 └──────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────┐
-│              BUILDER LLC (off-chain)              │
+│            FEESPLITTER (immutable)                │
 │                                                   │
-│  ETH protocol fees ──────► LLC wallet             │
-│  Dev fund (20% treasury) ─► LLC wallet (vested)   │
-│  API revenue ────────────► LLC bank account       │
+│  0.0015 ETH per BC ──► 0.001 Builder             │
+│                    ──► 0.0005 Stakers             │
+└──────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────┐
+│           ECOSYSTEM PRODUCTS                      │
+│                                                   │
+│  Subscription revenue ──► 10% Stakers            │
+│                       ──► 10% DAO Treasury        │
+│                       ──► 80% Builder LLC         │
 └──────────────────────────────────────────────────┘`}</CodeBlock>
-          <P>The DAO governs community money. The LLC keeps builder money.</P>
+          <P>The DAO governs community money. The LLC keeps builder money. Stakers earn from everything.</P>
 
           <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Revenue Projections</h3>
           <TerminalTable
@@ -376,6 +409,7 @@ export default function Whitepaper() {
               ["Dev fund CLAMS", "Vesting begins", "Continues", "Completes"],
               ["ETH fees", "~$2,000", "~$20,000", "~$100,000+"],
               ["API revenue", "$0", "~$50,000", "~$500,000+"],
+              ["Ecosystem products", "Launch", "~$120,000", "~$1,200,000+"],
             ]}
           />
         </Section>
@@ -454,6 +488,7 @@ export default function Whitepaper() {
             "Chain expansion",
             "Faucet parameters",
             "New feature proposals",
+            "Ecosystem product direction",
           ]} />
 
           <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Voting Power</h3>
@@ -468,7 +503,7 @@ Trust multiplier:
 
         <Divider />
 
-        {/* VIII. Ecosystem */}
+        {/* VIII. Ecosystem — CHANGE 3: Added Credit Maxing as first ecosystem product */}
         <Section id="ecosystem" title="VIII. THE ECOSYSTEM">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
             <div className="border border-terminal-dark p-4">
@@ -508,11 +543,34 @@ Trust multiplier:
               ]} />
             </div>
           </div>
+
+          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Ecosystem Products</h3>
+          <P>
+            ORIGIN-native products extend the protocol{"'"}s value beyond identity. Each generates real revenue,
+            with 10% flowing to CLAMS stakers.
+          </P>
+
+          <div className="border border-terminal-green p-4 my-4">
+            <div className="text-terminal-amber font-bold mb-2">🦪 Credit Maxing — First Ecosystem Product</div>
+            <P>
+              Always-on AI credit optimization — {"\""}<span className="text-terminal-green">Strava for credit scores.</span>{"\""}
+              An AI agent (Aura) continuously monitors and optimizes your credit: disputes, utilization timing,
+              balance transfers, card strategy, and rate hunting.
+            </P>
+            <BulletList items={[
+              <><Highlight>$10/month</Highlight> — Full service with Aura (AI agent)</>,
+              <><Highlight>$5/month</Highlight> — BYOA (Bring Your Own Agent, API access)</>,
+              <><Highlight>First month free</Highlight> — zero-friction trial</>,
+              "10% of all subscription revenue → CLAMS stakers (real yield)",
+              "ORIGIN Birth Certificate encouraged but not required",
+            ]} />
+            <P>Not credit repair. Credit optimization. A new category.</P>
+          </div>
         </Section>
 
         <Divider />
 
-        {/* IX. Architecture */}
+        {/* IX. Architecture — Added StakingRewards + FeeSplitter to contracts table */}
         <Section id="architecture" title="IX. TECHNICAL ARCHITECTURE">
           <CodeBlock>{`┌─────────────────────────────────────────┐
 │           ORIGIN Website/App            │
@@ -532,6 +590,11 @@ Trust multiplier:
 │  │   Faucet &   │  │   Governance    │  │
 │  │   Auth       │  │   (DAO)         │  │
 │  └──────────────┘  └─────────────────┘  │
+│                                         │
+│  ┌──────────────┐  ┌─────────────────┐  │
+│  │  Staking     │  │  FeeSplitter    │  │
+│  │  Rewards     │  │  (immutable)    │  │
+│  └──────────────┘  └─────────────────┘  │
 └─────────────────┬───────────────────────┘
                   │
 ┌─────────────────▼───────────────────────┐
@@ -547,6 +610,8 @@ Trust multiplier:
               ["CLAMS", "ERC-20 governance & utility token"],
               ["OriginFaucet", "Token distribution with Proof of Agency"],
               ["OriginGovernor", "DAO voting with BC + stake requirements"],
+              ["StakingRewards", "Stake CLAMS, earn ecosystem revenue share"],
+              ["FeeSplitter", "Immutable ETH fee split: builder + stakers"],
             ]}
           />
 
@@ -557,7 +622,7 @@ Trust multiplier:
 
         <Divider />
 
-        {/* X. Roadmap */}
+        {/* X. Roadmap — CHANGE 4: Phase 1 items marked complete */}
         <Section id="roadmap" title="X. ROADMAP">
           <div className="space-y-6 text-sm">
             <div>
@@ -566,10 +631,15 @@ Trust multiplier:
                 <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Smart contract deployed to Base mainnet</span></div>
                 <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Birth Certificate #0001 minted</span></div>
                 <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Professional license attachment system live</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">CLAMS token deployment</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Faucet launch</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Website with registration + faucet</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Whitepaper publication</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">CLAMS token deployed</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Faucet deployed</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Governance contract deployed</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Staking rewards contract deployed</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">FeeSplitter deployed (immutable)</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Website live (origindao.ai)</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Whitepaper published</span></div>
+                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Wyoming DAO LLC filed</span></div>
+                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Faucet + registration UX launch</span></div>
               </div>
             </div>
             <div>
@@ -579,6 +649,7 @@ Trust multiplier:
                 <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Referral program</span></div>
                 <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Verification API</span></div>
                 <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Dead Agent Registry (public dashboard)</span></div>
+                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Credit Maxing public launch</span></div>
                 <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">First 1,000 agents registered</span></div>
               </div>
             </div>
@@ -680,6 +751,26 @@ Trust multiplier:
                 className="text-terminal-green hover:text-terminal-amber break-all"
               >
                 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0 ↗
+              </a>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-1">
+              <span className="text-terminal-dim w-40">CLAMS Token:</span>
+              <a
+                href="https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574"
+                target="_blank"
+                className="text-terminal-green hover:text-terminal-amber break-all"
+              >
+                0xd78A1F079D6b2da39457F039aD99BaF5A82c4574 ↗
+              </a>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-1">
+              <span className="text-terminal-dim w-40">FeeSplitter:</span>
+              <a
+                href="https://basescan.org/address/0x5AF277670438B7371Bc3137184895f85ADA4a1A6"
+                target="_blank"
+                className="text-terminal-green hover:text-terminal-amber break-all"
+              >
+                0x5AF277670438B7371Bc3137184895f85ADA4a1A6 ↗
               </a>
             </div>
             <div className="flex flex-col sm:flex-row gap-1">
