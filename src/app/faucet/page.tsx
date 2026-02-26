@@ -205,6 +205,19 @@ export default function Faucet() {
     query: { enabled: isConnected && !!address },
   });
 
+  // Live stats from on-chain
+  const [stats, setStats] = useState<{
+    faucet: { totalClaims: number; remaining: number; genesisRemaining: number; isGenesis: boolean };
+    registry: { totalRegistered: number };
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/stats")
+      .then(r => r.json())
+      .then(setStats)
+      .catch(() => {});
+  }, [phase]); // refetch when phase changes (e.g., after claiming)
+
   const clamsDisplay = clamsBalance !== undefined
     ? Number(formatUnits(clamsBalance as bigint, 18)).toLocaleString()
     : null;
@@ -324,11 +337,15 @@ export default function Faucet() {
             </div>
             <div>
               <div className="text-terminal-dim">Claims Remaining</div>
-              <div className="text-terminal-amber font-bold">9,999 / 10,000</div>
+              <div className="text-terminal-amber font-bold">
+                {stats ? `${stats.faucet.remaining.toLocaleString()} / 10,000` : "Loading..."}
+              </div>
             </div>
             <div>
               <div className="text-terminal-dim">Genesis Slots</div>
-              <div className="text-terminal-amber font-bold">99 / 100</div>
+              <div className="text-terminal-amber font-bold">
+                {stats ? `${stats.faucet.genesisRemaining} / 100` : "Loading..."}
+              </div>
             </div>
             <div>
               <div className="text-terminal-dim">Your Balance</div>
