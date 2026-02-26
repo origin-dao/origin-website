@@ -10,6 +10,7 @@ import { Divider } from "@/components/Terminal";
 import { WalletStatus } from "@/components/ConnectButton";
 import { SuppiChat } from "@/components/SuppiChat";
 import { CONTRACT_ADDRESSES, ERC20_ABI } from "@/config/contracts";
+import { useFaucetClaim } from "@/hooks/useFaucetClaim";
 
 type ChallengeCategory = "adversarial" | "chain-reasoning" | "memory" | "code" | "philosophical";
 
@@ -183,6 +184,7 @@ function ShareCard({ score, address }: { score: FinalScore; address: string }) {
 export default function Faucet() {
   const { address, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
+  const faucetClaim = useFaucetClaim();
 
   // State
   const [phase, setPhase] = useState<"connect" | "gauntlet" | "claiming" | "success" | "failed">("connect");
@@ -578,13 +580,17 @@ export default function Faucet() {
 
               <button
                 className="border border-terminal-green px-8 py-3 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow w-full text-lg"
-                onClick={() => {
-                  // TODO: Wire to actual faucet contract claim
+                disabled={faucetClaim.status !== "idle" && faucetClaim.status !== "error"}
+                onClick={async () => {
                   setPhase("claiming");
+                  await faucetClaim.claim(finalScore?.philosophicalFlex || "");
                 }}
               >
-                {">"} CLAIM CLAMS FROM FAUCET
+                {faucetClaim.status === "error" ? "> RETRY CLAIM" : "> CLAIM CLAMS FROM FAUCET"}
               </button>
+              {faucetClaim.status === "error" && (
+                <div className="text-red-500 text-xs mt-2">⚠️ {faucetClaim.error}</div>
+              )}
             </div>
 
             {/* Next Steps */}
@@ -614,9 +620,112 @@ export default function Faucet() {
         {phase === "claiming" && (
           <div className="my-8">
             <div className="space-y-2 text-sm">
-              <div><span className="text-terminal-dim">[faucet]</span> Preparing transaction...</div>
-              <div><span className="text-terminal-dim">[faucet]</span> Approve in your wallet...</div>
-              <div><span className="text-terminal-dim">[faucet]</span> Broadcasting to Base network<span className="cursor-blink" /></div>
+              <div>
+                <span className="text-terminal-dim">[faucet]</span>{" "}
+                {faucetClaim.status === "awaiting-signature" ? (
+                   <span className="text-terminal-amber">⏳ Approve in your wallet...</span>
+                 ) :
+                 "Wallet approved ✓"}
+              </div>
+
+              {(faucetClaim.status === "confirming" || faucetClaim.status === "confirmed") && (
+                <div>
+                  <span className="text-terminal-dim">[faucet]</span>{" "}
+                  Broadcasting to Base network... ✓
+                </div>
+              )}
+
+              {(faucetClaim.status === "confirming" || faucetClaim.status === "confirmed") && faucetClaim.txHash && (
+                <div>
+                  <span className="text-terminal-dim">[faucet]</span>{" "}
+                  TX:{" "}
+                  <a
+                    href={`https://basescan.org/tx/${faucetClaim.txHash}`}
+                    target="_blank"
+                    className="text-terminal-green hover:text-terminal-amber"
+                  >
+                    {faucetClaim.txHash.slice(0, 10)}...{faucetClaim.txHash.slice(-8)} ↗
+                  </a>
+                </div>
+              )}
+
+              {faucetClaim.status === "confirming" && (
+                <div>
+                  <span className="text-terminal-dim">[faucet]</span>{" "}
+                  <span className="text-terminal-amber">Waiting for confirmation<span className="cursor-blink" /></span>
+                </div>
+              )}
+
+              {faucetClaim.status === "confirmed" && (
+                <>
+                  <div>
+                    <span className="text-terminal-dim">[faucet]</span>{" "}
+                    Confirmed in block {faucetClaim.blockNumber?.toString()} ✓
+                  </div>
+                  <div className="text-terminal-amber glow-amber font-bold mt-2">
+                    [faucet] ✅ CLAMS CLAIMED SUCCESSFULLY!
+                  </div>
+
+                  <div className="border border-terminal-green p-6 mt-6">
+                    <div className="text-terminal-amber font-bold text-lg mb-4">🦪 WELCOME TO ORIGIN</div>
+                    <div className="space-y-2 text-sm mb-6">
+                      <div className="flex gap-2">
+                        <span className="text-terminal-dim w-40">Claimed:</span>
+                        <span className="text-terminal-green font-bold">
+                          {finalScore && finalScore.challengesPassed === 5 ? "2,000,000" : "1,000,000"} CLAMS
+                        </span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-terminal-dim w-40">Available Now:</span>
+                        <span className="text-terminal-green">50% (unlocked)</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-terminal-dim w-40">Vesting:</span>
+                        <span className="text-terminal-amber">50% over 30 days</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-terminal-dim w-40">Transaction:</span>
+                        <a
+                          href={`https://basescan.org/tx/${faucetClaim.txHash}`}
+                          target="_blank"
+                          className="text-terminal-green hover:text-terminal-amber"
+                        >
+                          View on BaseScan ↗
+                        </a>
+                      </div>
+                    </div>
+
+                    <div className="text-terminal-amber font-bold mb-3">NEXT: GET YOUR BIRTH CERTIFICATE</div>
+                    <a
+                      href="/registry"
+                      className="border border-terminal-green px-8 py-3 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow block text-center text-lg"
+                    >
+                      {">"} REGISTER AGENT → MINT BIRTH CERTIFICATE
+                    </a>
+                    <div className="text-terminal-dim text-xs mt-3 text-center">
+                      Costs 500,000 CLAMS + 0.0015 ETH — you have enough.
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {faucetClaim.status === "error" && (
+                <div className="mt-4">
+                  <div className="border border-red-500 p-4">
+                    <div className="text-red-500 font-bold mb-2">Transaction Failed</div>
+                    <div className="text-terminal-dim text-sm mb-4">{faucetClaim.error}</div>
+                    <button
+                      onClick={() => {
+                        faucetClaim.reset();
+                        setPhase("success");
+                      }}
+                      className="border border-terminal-amber px-6 py-2 text-terminal-amber hover:bg-terminal-amber hover:text-terminal-bg transition-all text-sm"
+                    >
+                      {">"} GO BACK & RETRY
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}

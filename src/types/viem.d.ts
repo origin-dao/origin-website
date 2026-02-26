@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module "viem" {
   export type Address = `0x${string}`;
   export function formatEther(value: bigint): string;
@@ -11,6 +12,16 @@ declare module "viem" {
     rpcUrls: Record<string, { http: readonly string[] }>;
     blockExplorers?: Record<string, { name: string; url: string }>;
   };
-  export function createPublicClient(config: Record<string, unknown>): unknown;
-  export function http(url?: string): unknown;
+  export function createPublicClient(config: Record<string, any>): any;
+  export function createWalletClient(config: Record<string, any>): any;
+  export function createClient(config: Record<string, any>): any;
+  export function http(url?: string): any;
+  export function custom(provider: any): any;
+}
+
+declare module "viem/chains" {
+  import { Chain } from "viem";
+  export const base: Chain;
+  export const baseSepolia: Chain;
+  export const mainnet: Chain;
 }
