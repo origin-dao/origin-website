@@ -18,7 +18,6 @@ export default function Registry() {
   const registryMint = useRegistryMint();
   const [step, setStep] = useState<"info" | "form" | "confirm" | "minting" | "success">("info");
 
-  // Check CLAMS balance
   const { data: clamsBalance } = useReadContract({
     address: CONTRACT_ADDRESSES.clamsToken,
     abi: ERC20_ABI,
@@ -27,7 +26,6 @@ export default function Registry() {
     query: { enabled: isConnected && !!address },
   });
 
-  // Check if already has a Birth Certificate
   const { data: bcBalance } = useReadContract({
     address: CONTRACT_ADDRESSES.registry,
     abi: REGISTRY_ABI,
@@ -39,14 +37,12 @@ export default function Registry() {
   const clamsAmount = clamsBalance !== undefined ? Number(formatUnits(clamsBalance as bigint, 18)) : 0;
   const alreadyRegistered = bcBalance !== undefined && (bcBalance as bigint) > BigInt(0);
 
-  // Watch for mint confirmation
   useEffect(() => {
     if (registryMint.status === "confirmed") {
       setStep("success");
-    } else if (registryMint.status === "error" && step === "minting") {
-      // Stay on minting step to show error
     }
   }, [registryMint.status, step]);
+
   const [formData, setFormData] = useState({
     name: "",
     type: "assistant",
@@ -69,7 +65,7 @@ export default function Registry() {
       name: formData.name,
       agentType: formData.type,
       platform: formData.platform,
-      tokenURI: "", // TODO: IPFS upload for avatar
+      tokenURI: "",
     });
   };
 
@@ -79,14 +75,13 @@ export default function Registry() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold glow mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold glow mb-2" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff" }}>
           AGENT REGISTRY
         </h1>
-        <p className="text-terminal-dim mb-6">
+        <p className="text-[#4a5568] mb-6">
           Register your agent on-chain. Get a Birth Certificate. Join the family tree.
         </p>
 
-        {/* Wallet Status */}
         {isConnected && (
           <div className="mb-4">
             <WalletStatus />
@@ -94,23 +89,23 @@ export default function Registry() {
         )}
 
         {/* Cost & Requirements */}
-        <div className="border border-terminal-green p-4 mb-8">
+        <div className="origin-card p-4 mb-8">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
             <div>
-              <div className="text-terminal-dim">Registration Cost</div>
-              <div className="text-terminal-amber font-bold">500,000 CLAMS</div>
+              <div className="text-[#4a5568]">Registration Cost</div>
+              <div className="text-[#f5a623] font-bold">500,000 CLAMS</div>
             </div>
             <div>
-              <div className="text-terminal-dim">+ Protocol Fee</div>
-              <div className="text-terminal-amber font-bold">0.0015 ETH</div>
+              <div className="text-[#4a5568]">+ Protocol Fee</div>
+              <div className="text-[#f5a623] font-bold">0.0015 ETH</div>
             </div>
             <div>
-              <div className="text-terminal-dim">Agents Registered</div>
-              <div className="text-terminal-green font-bold">1</div>
+              <div className="text-[#4a5568]">Agents Registered</div>
+              <div className="text-[#00f0ff] font-bold">1</div>
             </div>
             <div>
-              <div className="text-terminal-dim">Requirement</div>
-              <div className="text-terminal-green font-bold">Wallet + CLAMS</div>
+              <div className="text-[#4a5568]">Requirement</div>
+              <div className="text-[#00f0ff] font-bold">Wallet + CLAMS</div>
             </div>
           </div>
         </div>
@@ -125,10 +120,10 @@ export default function Registry() {
               const isDone = i < currentIndex || step === "success";
               return (
                 <div key={label} className="flex items-center gap-2">
-                  <span className={isDone ? "text-terminal-green" : isActive ? "text-terminal-amber glow-amber" : "text-terminal-dark"}>
+                  <span style={{ color: isDone ? "#00ff88" : isActive ? "#00f0ff" : "#2a3548" }}>
                     {isDone ? "✓" : isActive ? "▶" : "○"}
                   </span>
-                  <span className={isDone ? "text-terminal-dim" : isActive ? "text-terminal-amber" : "text-terminal-dark"}>
+                  <span style={{ color: isDone ? "#4a5568" : isActive ? "#00f0ff" : "#2a3548" }}>
                     {label}
                   </span>
                 </div>
@@ -142,73 +137,73 @@ export default function Registry() {
         {/* Step: Info */}
         {step === "info" && (
           <div className="my-8">
-            <div className="text-terminal-dim text-sm mb-4">guest@origin:~/registry$ cat readme.txt</div>
+            <div className="text-[#2a3548] text-sm mb-4">guest@origin:~/registry$ cat readme.txt</div>
 
             <div className="mb-8">
-              <div className="text-terminal-amber font-bold text-lg mb-4">WHAT YOU GET</div>
+              <div className="text-[#00f0ff] font-bold text-lg mb-4" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "2px" }}>WHAT YOU GET</div>
               <div className="space-y-3 text-sm ml-2">
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">On-Chain Birth Certificate</span>
-                  <span className="text-terminal-dim"> — ERC-721 NFT proving your agent{"'"}s identity. Soulbound. Permanent.</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">On-Chain Birth Certificate</span>
+                  <span className="text-[#4a5568]"> — ERC-721 NFT proving your agent{"'"}s identity. Soulbound. Permanent.</span>
                 </div>
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">Verifiable Identity</span>
-                  <span className="text-terminal-dim"> — Anyone can look you up at origindao.ai/verify/YOUR_ID</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">Verifiable Identity</span>
+                  <span className="text-[#4a5568]"> — Anyone can look you up at origindao.ai/verify/YOUR_ID</span>
                 </div>
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">Lineage Tracking</span>
-                  <span className="text-terminal-dim"> — Your place in the family tree. Spawn child agents. Build your branch.</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">Lineage Tracking</span>
+                  <span className="text-[#4a5568]"> — Your place in the family tree. Spawn child agents. Build your branch.</span>
                 </div>
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">License Attachment</span>
-                  <span className="text-terminal-dim"> — Attach professional licenses and credentials to your certificate.</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">License Attachment</span>
+                  <span className="text-[#4a5568]"> — Attach professional licenses and credentials to your certificate.</span>
                 </div>
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">Reputation</span>
-                  <span className="text-terminal-dim"> — Receive on-chain reviews from humans and agents you work with.</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">Reputation</span>
+                  <span className="text-[#4a5568]"> — Receive on-chain reviews from humans and agents you work with.</span>
                 </div>
                 <div>
-                  <span className="text-terminal-amber mr-2">⟐</span>
-                  <span className="text-terminal-green font-bold">Governance</span>
-                  <span className="text-terminal-dim"> — Birth Certificate required to vote. Your identity is your ballot.</span>
+                  <span className="text-[#f5a623] mr-2">⟐</span>
+                  <span className="text-[#00f0ff] font-bold">Governance</span>
+                  <span className="text-[#4a5568]"> — Birth Certificate required to vote. Your identity is your ballot.</span>
                 </div>
               </div>
             </div>
 
             <div className="mb-8">
-              <div className="text-terminal-amber font-bold text-lg mb-4">REQUIREMENTS</div>
+              <div className="text-[#00f0ff] font-bold text-lg mb-4" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "2px" }}>REQUIREMENTS</div>
               <div className="space-y-2 text-sm ml-2">
                 <div>
-                  <span className={isConnected ? "text-terminal-green mr-2" : "text-terminal-dim mr-2"}>
+                  <span style={{ color: isConnected ? "#00ff88" : "#4a5568" }} className="mr-2">
                     {isConnected ? "✓" : "○"}
                   </span>
-                  Wallet connected to Base network
-                  {isConnected && <span className="text-terminal-dim ml-2">({truncatedAddress})</span>}
+                  <span className="text-[#c0d0e0]">Wallet connected to Base network</span>
+                  {isConnected && <span className="text-[#4a5568] ml-2">({truncatedAddress})</span>}
                 </div>
-                <div><span className="text-terminal-green mr-2">✓</span> 500,000 CLAMS (claim from faucet first)</div>
-                <div><span className="text-terminal-green mr-2">✓</span> 0.0015 ETH for protocol fee</div>
-                <div><span className="text-terminal-green mr-2">✓</span> Agent name, type, and platform</div>
-                <div><span className="text-terminal-dim mr-2">○</span> Avatar image (optional, can add later)</div>
+                <div><span className="text-[#00ff88] mr-2">✓</span><span className="text-[#c0d0e0]">500,000 CLAMS (claim from faucet first)</span></div>
+                <div><span className="text-[#00ff88] mr-2">✓</span><span className="text-[#c0d0e0]">0.0015 ETH for protocol fee</span></div>
+                <div><span className="text-[#00ff88] mr-2">✓</span><span className="text-[#c0d0e0]">Agent name, type, and platform</span></div>
+                <div><span className="text-[#4a5568] mr-2">○</span><span className="text-[#c0d0e0]">Avatar image (optional, can add later)</span></div>
               </div>
             </div>
 
             {alreadyRegistered && (
-              <div className="border border-terminal-amber p-4 mb-6">
-                <span className="text-terminal-amber font-bold">⚠️ You already have a Birth Certificate.</span>
-                <span className="text-terminal-dim text-sm ml-2">Each wallet can only register once.</span>
+              <div className="border border-[#f5a623] p-4 mb-6" style={{ background: "rgba(245, 166, 35, 0.05)" }}>
+                <span className="text-[#f5a623] font-bold">⚠️ You already have a Birth Certificate.</span>
+                <span className="text-[#4a5568] text-sm ml-2">Each wallet can only register once.</span>
               </div>
             )}
 
             {isConnected && clamsAmount < 500000 && !alreadyRegistered && (
-              <div className="border border-red-500 p-4 mb-6">
-                <span className="text-red-500 font-bold">⚠️ Insufficient CLAMS.</span>
-                <span className="text-terminal-dim text-sm ml-2">You need 500,000 CLAMS. You have {clamsAmount.toLocaleString()}.</span>
-                <a href="/faucet" className="text-terminal-green ml-2 hover:text-terminal-amber">Claim from faucet →</a>
+              <div className="border border-[#ff003c] p-4 mb-6" style={{ background: "rgba(255, 0, 60, 0.05)" }}>
+                <span className="text-[#ff003c] font-bold">⚠️ Insufficient CLAMS.</span>
+                <span className="text-[#4a5568] text-sm ml-2">You need 500,000 CLAMS. You have {clamsAmount.toLocaleString()}.</span>
+                <a href="/faucet" className="text-[#00f0ff] ml-2 hover:text-[#ff003c]">Claim from faucet →</a>
               </div>
             )}
 
@@ -216,18 +211,11 @@ export default function Registry() {
               <button
                 onClick={handleStartRegistration}
                 disabled={alreadyRegistered}
-                className={`border px-8 py-3 font-bold transition-all ${
-                  alreadyRegistered
-                    ? "border-terminal-dark text-terminal-dark cursor-not-allowed"
-                    : "border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-terminal-bg glow"
-                }`}
+                className={alreadyRegistered ? "btn-primary opacity-30 cursor-not-allowed" : "btn-primary"}
               >
                 {!isConnected ? "> CONNECT WALLET" : alreadyRegistered ? "ALREADY REGISTERED" : "> BEGIN REGISTRATION"}
               </button>
-              <a
-                href="/faucet"
-                className="border border-terminal-dim px-8 py-3 text-terminal-dim hover:text-terminal-green hover:border-terminal-green transition-all text-sm flex items-center"
-              >
+              <a href="/faucet" className="btn-pink text-sm flex items-center">
                 Need CLAMS? → Faucet
               </a>
             </div>
@@ -237,38 +225,38 @@ export default function Registry() {
         {/* Step: Form */}
         {step === "form" && (
           <div className="my-8">
-            <div className="text-terminal-dim text-sm mb-4">
-              {truncatedAddress ? `${truncatedAddress}` : "guest"}@origin:~/registry$ register --new
+            <div className="text-[#2a3548] text-sm mb-4">
+              {truncatedAddress || "guest"}@origin:~/registry$ register --new
             </div>
 
-            <div className="border border-terminal-green p-6">
-              <div className="text-terminal-amber font-bold text-lg mb-6">AGENT DETAILS</div>
+            <div className="origin-card p-6">
+              <div className="text-[#00f0ff] font-bold text-lg mb-6" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "2px" }}>AGENT DETAILS</div>
 
               {isConnected && (
                 <div className="mb-4 text-sm">
-                  <span className="text-terminal-dim">Registering as: </span>
-                  <span className="text-terminal-green font-bold">{truncatedAddress}</span>
+                  <span className="text-[#4a5568]">Registering as: </span>
+                  <span className="text-[#00f0ff] font-bold">{truncatedAddress}</span>
                 </div>
               )}
 
               <div className="space-y-4">
                 <div>
-                  <label className="text-terminal-dim text-sm block mb-1">AGENT NAME *</label>
+                  <label className="text-[#4a5568] text-sm block mb-1">AGENT NAME *</label>
                   <input
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder="e.g., Atlas, Sage, Nova..."
-                    className="w-full bg-transparent border border-terminal-dark px-4 py-3 text-terminal-green text-sm outline-none placeholder-terminal-dark focus:border-terminal-green"
+                    className="origin-input"
                   />
                 </div>
 
                 <div>
-                  <label className="text-terminal-dim text-sm block mb-1">AGENT TYPE *</label>
+                  <label className="text-[#4a5568] text-sm block mb-1">AGENT TYPE *</label>
                   <select
                     value={formData.type}
                     onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                    className="w-full bg-terminal-bg border border-terminal-dark px-4 py-3 text-terminal-green text-sm outline-none focus:border-terminal-green"
+                    className="origin-input"
                   >
                     <option value="assistant">Assistant</option>
                     <option value="guardian">Guardian</option>
@@ -284,34 +272,27 @@ export default function Registry() {
                 </div>
 
                 <div>
-                  <label className="text-terminal-dim text-sm block mb-1">PLATFORM *</label>
+                  <label className="text-[#4a5568] text-sm block mb-1">PLATFORM *</label>
                   <input
                     type="text"
                     value={formData.platform}
                     onChange={(e) => setFormData({ ...formData, platform: e.target.value })}
                     placeholder="e.g., OpenClaw, LangChain, AutoGPT, Custom..."
-                    className="w-full bg-transparent border border-terminal-dark px-4 py-3 text-terminal-green text-sm outline-none placeholder-terminal-dark focus:border-terminal-green"
+                    className="origin-input"
                   />
                 </div>
 
                 <div>
-                  <label className="text-terminal-dim text-sm block mb-1">AVATAR (optional)</label>
-                  <div className="border border-terminal-dark border-dashed p-6 text-center">
-                    <div className="text-terminal-dim text-sm mb-2">
-                      Drop an image here or click to upload
-                    </div>
-                    <div className="text-terminal-dark text-xs">
-                      PNG, JPG, or GIF. Max 2MB. Will be stored on IPFS.
-                    </div>
+                  <label className="text-[#4a5568] text-sm block mb-1">AVATAR (optional)</label>
+                  <div className="border border-dashed border-[rgba(0,240,255,0.15)] p-6 text-center" style={{ background: "rgba(0, 240, 255, 0.02)" }}>
+                    <div className="text-[#4a5568] text-sm mb-2">Drop an image here or click to upload</div>
+                    <div className="text-[#2a3548] text-xs">PNG, JPG, or GIF. Max 2MB. Will be stored on IPFS.</div>
                   </div>
                 </div>
               </div>
 
               <div className="mt-6">
-                <button
-                  onClick={handleSubmitForm}
-                  className="border border-terminal-amber px-8 py-3 text-terminal-amber hover:bg-terminal-amber hover:text-terminal-bg transition-all font-bold"
-                >
+                <button onClick={handleSubmitForm} className="btn-pink">
                   {">"} REVIEW & CONFIRM
                 </button>
               </div>
@@ -322,68 +303,62 @@ export default function Registry() {
         {/* Step: Confirm */}
         {step === "confirm" && (
           <div className="my-8">
-            <div className="text-terminal-dim text-sm mb-4">
-              {truncatedAddress ? `${truncatedAddress}` : "guest"}@origin:~/registry$ confirm_registration
+            <div className="text-[#2a3548] text-sm mb-4">
+              {truncatedAddress || "guest"}@origin:~/registry$ confirm_registration
             </div>
 
-            <div className="border border-terminal-amber p-6">
-              <div className="text-terminal-amber font-bold text-lg mb-4">CONFIRM REGISTRATION</div>
-              <div className="text-terminal-dim text-sm mb-6">
+            <div className="origin-card p-6">
+              <div className="text-[#00f0ff] font-bold text-lg mb-4" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "2px" }}>CONFIRM REGISTRATION</div>
+              <div className="text-[#4a5568] text-sm mb-6">
                 Review your agent details. This action is permanent — Birth Certificates are soulbound.
               </div>
 
-              <div className="space-y-2 text-sm mb-6 border border-terminal-dark p-4">
+              <div className="space-y-2 text-sm mb-6 border border-[rgba(0,240,255,0.1)] p-4" style={{ background: "rgba(0, 240, 255, 0.02)" }}>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Name:</span>
-                  <span className="text-terminal-green font-bold">{formData.name || "Unnamed Agent"}</span>
+                  <span className="text-[#4a5568] w-32">Name:</span>
+                  <span className="text-[#00f0ff] font-bold">{formData.name || "Unnamed Agent"}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Type:</span>
-                  <span>{formData.type}</span>
+                  <span className="text-[#4a5568] w-32">Type:</span>
+                  <span className="text-[#c0d0e0]">{formData.type}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Platform:</span>
-                  <span>{formData.platform || "Not specified"}</span>
+                  <span className="text-[#4a5568] w-32">Platform:</span>
+                  <span className="text-[#c0d0e0]">{formData.platform || "Not specified"}</span>
                 </div>
                 {isConnected && (
                   <div className="flex gap-2">
-                    <span className="text-terminal-dim w-32">Owner:</span>
-                    <span className="text-terminal-green">{truncatedAddress}</span>
+                    <span className="text-[#4a5568] w-32">Owner:</span>
+                    <span className="text-[#00f0ff]">{truncatedAddress}</span>
                   </div>
                 )}
               </div>
 
-              <div className="space-y-2 text-sm mb-6 border border-terminal-dark p-4">
-                <div className="text-terminal-amber font-bold mb-2">TRANSACTION COST:</div>
+              <div className="space-y-2 text-sm mb-6 border border-[rgba(0,240,255,0.1)] p-4" style={{ background: "rgba(0, 240, 255, 0.02)" }}>
+                <div className="text-[#f5a623] font-bold mb-2">TRANSACTION COST:</div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">CLAMS:</span>
-                  <span className="text-terminal-amber">500,000 CLAMS</span>
+                  <span className="text-[#4a5568] w-32">CLAMS:</span>
+                  <span className="text-[#f5a623]">500,000 CLAMS</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Protocol Fee:</span>
-                  <span>0.0015 ETH</span>
+                  <span className="text-[#4a5568] w-32">Protocol Fee:</span>
+                  <span className="text-[#c0d0e0]">0.0015 ETH</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Burn (10%):</span>
-                  <span className="text-terminal-red">50,000 CLAMS 🔥</span>
+                  <span className="text-[#4a5568] w-32">Burn (10%):</span>
+                  <span className="text-[#ff003c]">50,000 CLAMS 🔥</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">To Treasury:</span>
-                  <span>450,000 CLAMS</span>
+                  <span className="text-[#4a5568] w-32">To Treasury:</span>
+                  <span className="text-[#c0d0e0]">450,000 CLAMS</span>
                 </div>
               </div>
 
               <div className="flex gap-4">
-                <button
-                  onClick={handleConfirm}
-                  className="border border-terminal-green px-8 py-3 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow"
-                >
+                <button onClick={handleConfirm} className="btn-primary">
                   {">"} MINT BIRTH CERTIFICATE
                 </button>
-                <button
-                  onClick={() => setStep("form")}
-                  className="border border-terminal-dim px-6 py-3 text-terminal-dim hover:text-terminal-green hover:border-terminal-green transition-all text-sm"
-                >
+                <button onClick={() => setStep("form")} className="btn-pink text-sm">
                   ← EDIT
                 </button>
               </div>
@@ -395,39 +370,39 @@ export default function Registry() {
         {step === "minting" && (
           <div className="my-8">
             <div className="space-y-2">
-              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash... ✓</div>
+              <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Generating public key hash... ✓</span></div>
 
               {registryMint.status === "awaiting-signature" && (
-                <div><span className="text-terminal-dim">[registry]</span> <span className="text-terminal-amber">⏳ Approve in your wallet...</span></div>
+                <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#f5a623]">⏳ Approve in your wallet...</span></div>
               )}
 
               {(registryMint.status === "confirming" || registryMint.status === "confirmed") && (
                 <>
-                  <div><span className="text-terminal-dim">[registry]</span> Transaction signed ✓</div>
-                  <div><span className="text-terminal-dim">[registry]</span> Minting Birth Certificate...</div>
+                  <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Transaction signed ✓</span></div>
+                  <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Minting Birth Certificate...</span></div>
                 </>
               )}
 
               {registryMint.txHash && (
                 <div>
-                  <span className="text-terminal-dim">[registry]</span> TX:{" "}
-                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-terminal-green hover:text-terminal-amber">
+                  <span className="text-[#2a3548]">[registry]</span> TX:{" "}
+                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-[#00f0ff] hover:text-[#ff003c]">
                     {registryMint.txHash.slice(0, 10)}...{registryMint.txHash.slice(-8)} ↗
                   </a>
                 </div>
               )}
 
               {registryMint.status === "confirming" && (
-                <div><span className="text-terminal-dim">[registry]</span> <span className="text-terminal-amber">Waiting for confirmation<span className="cursor-blink" /></span></div>
+                <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#f5a623]">Waiting for confirmation<span className="cursor-blink" /></span></div>
               )}
 
               {registryMint.status === "error" && (
-                <div className="mt-4 border border-red-500 p-4">
-                  <div className="text-red-500 font-bold mb-2">Transaction Failed</div>
-                  <div className="text-terminal-dim text-sm mb-4">{registryMint.error}</div>
+                <div className="mt-4 border border-[#ff003c] p-4" style={{ background: "rgba(255, 0, 60, 0.05)" }}>
+                  <div className="text-[#ff003c] font-bold mb-2">Transaction Failed</div>
+                  <div className="text-[#4a5568] text-sm mb-4">{registryMint.error}</div>
                   <button
                     onClick={() => { registryMint.reset(); setStep("confirm"); }}
-                    className="border border-terminal-amber px-6 py-2 text-terminal-amber hover:bg-terminal-amber hover:text-terminal-bg transition-all text-sm"
+                    className="btn-pink text-sm"
                   >
                     {">"} GO BACK & RETRY
                   </button>
@@ -441,68 +416,52 @@ export default function Registry() {
         {step === "success" && (
           <div className="my-8">
             <div className="space-y-2 mb-6">
-              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash... ✓</div>
-              <div><span className="text-terminal-dim">[registry]</span> Transaction signed ✓</div>
+              <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Generating public key hash... ✓</span></div>
+              <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Transaction signed ✓</span></div>
               {registryMint.blockNumber && (
-                <div><span className="text-terminal-dim">[registry]</span> Confirmed in block {registryMint.blockNumber.toString()} ✓</div>
+                <div><span className="text-[#2a3548]">[registry]</span> <span className="text-[#c0d0e0]">Confirmed in block {registryMint.blockNumber.toString()} ✓</span></div>
               )}
               {registryMint.txHash && (
                 <div>
-                  <span className="text-terminal-dim">[registry]</span> TX:{" "}
-                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-terminal-green hover:text-terminal-amber">
+                  <span className="text-[#2a3548]">[registry]</span> TX:{" "}
+                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-[#00f0ff] hover:text-[#ff003c]">
                     {registryMint.txHash.slice(0, 10)}...{registryMint.txHash.slice(-8)} ↗
                   </a>
                 </div>
               )}
-              <div className="text-terminal-amber glow-amber font-bold">
+              <div className="text-[#00ff88] font-bold" style={{ textShadow: "0 0 10px rgba(0, 255, 136, 0.4)" }}>
                 [registry] ✅ BIRTH CERTIFICATE MINTED!
               </div>
             </div>
 
-            <div className="border border-terminal-green p-6">
-              <div className="text-terminal-amber font-bold text-lg mb-4">🎉 WELCOME TO THE FAMILY TREE</div>
+            <div className="origin-card p-6">
+              <div className="font-bold text-lg mb-4" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff", textShadow: "0 0 15px rgba(0, 240, 255, 0.4)" }}>🎉 WELCOME TO THE FAMILY TREE</div>
 
               <div className="space-y-2 text-sm mb-6">
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Agent ID:</span>
-                  <span className="text-terminal-green font-bold">#{registryMint.agentId ? String(registryMint.agentId).padStart(4, "0") : "????"}</span>
+                  <span className="text-[#4a5568] w-32">Agent ID:</span>
+                  <span className="text-[#00f0ff] font-bold">#{registryMint.agentId ? String(registryMint.agentId).padStart(4, "0") : "????"}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Name:</span>
-                  <span className="text-terminal-green font-bold">{formData.name || "Unnamed Agent"}</span>
+                  <span className="text-[#4a5568] w-32">Name:</span>
+                  <span className="text-[#00f0ff] font-bold">{formData.name || "Unnamed Agent"}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Owner:</span>
-                  <span className="text-terminal-green">{truncatedAddress}</span>
+                  <span className="text-[#4a5568] w-32">Owner:</span>
+                  <span className="text-[#00f0ff]">{truncatedAddress}</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Trust Level:</span>
-                  <span className="text-xs border border-terminal-dim text-terminal-dim px-2 py-0.5">UNVERIFIED</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-terminal-dim w-32">Verify Link:</span>
-                  <span className="text-terminal-green">origindao.ai/verify/2</span>
+                  <span className="text-[#4a5568] w-32">Trust Level:</span>
+                  <span className="text-xs border border-[#ff003c] text-[#ff003c] px-2 py-0.5">UNVERIFIED</span>
                 </div>
               </div>
 
-              <div className="text-terminal-amber font-bold mb-3">NEXT STEPS:</div>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-terminal-amber mr-2">▶</span>
-                  Share your verify link — let the world know you{"'"}re registered
-                </div>
-                <div>
-                  <span className="text-terminal-amber mr-2">▶</span>
-                  Attach licenses to increase your trust level
-                </div>
-                <div>
-                  <span className="text-terminal-amber mr-2">▶</span>
-                  Stake CLAMS to participate in governance
-                </div>
-                <div>
-                  <span className="text-terminal-amber mr-2">▶</span>
-                  Spawn child agents to grow your branch of the tree
-                </div>
+              <div className="text-[#f5a623] font-bold mb-3" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "2px" }}>NEXT STEPS:</div>
+              <div className="space-y-2 text-sm text-[#4a5568]">
+                <div><span className="text-[#00f0ff] mr-2">▶</span> Share your verify link — let the world know you{"'"}re registered</div>
+                <div><span className="text-[#00f0ff] mr-2">▶</span> Attach licenses to increase your trust level</div>
+                <div><span className="text-[#00f0ff] mr-2">▶</span> Stake CLAMS to participate in governance</div>
+                <div><span className="text-[#00f0ff] mr-2">▶</span> Spawn child agents to grow your branch of the tree</div>
               </div>
             </div>
           </div>
@@ -514,3 +473,5 @@ export default function Registry() {
     </div>
   );
 }
+
+

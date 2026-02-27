@@ -38,7 +38,7 @@ export function TerminalLine({ text, delay = 0, prefix = ">", className = "" }: 
 
   return (
     <div className={`mb-1 ${className}`}>
-      <span className="text-terminal-dim mr-2">{prefix}</span>
+      <span className="text-[#2a3548] mr-2">{prefix}</span>
       <span>{displayText}</span>
       {displayText.length < text.length && <span className="cursor-blink" />}
     </div>
@@ -48,7 +48,7 @@ export function TerminalLine({ text, delay = 0, prefix = ">", className = "" }: 
 export function TerminalPrompt() {
   return (
     <div className="flex items-center mt-4">
-      <span className="text-terminal-dim mr-2">guest@origin:~$</span>
+      <span className="text-[#2a3548] mr-2">guest@origin:~$</span>
       <span className="cursor-blink" />
     </div>
   );
@@ -65,16 +65,16 @@ export function Folder({ name, description, href, locked = false }: FolderProps)
   return (
     <a href={locked ? "#" : href} className={`folder block mb-3 group ${locked ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3">
-        <span className="text-terminal-amber text-lg">
+        <span className="text-[#f5a623] text-lg">
           {locked ? "🔒" : "📁"}
         </span>
         <div>
-          <div className="group-hover:text-terminal-amber transition-colors">
+          <div className="text-[#c0d0e0] group-hover:text-[#00f0ff] transition-colors">
             {name}/
           </div>
-          <div className="text-terminal-dim text-sm">
+          <div className="text-[#4a5568] text-sm">
             {description}
-            {locked && <span className="text-terminal-red ml-2">[LOCKED]</span>}
+            {locked && <span className="text-[#ff003c] ml-2">[LOCKED]</span>}
           </div>
         </div>
       </div>
@@ -84,15 +84,13 @@ export function Folder({ name, description, href, locked = false }: FolderProps)
 
 export function Divider() {
   return (
-    <div className="text-terminal-dark my-4 select-none">
-      {"═".repeat(60)}
-    </div>
+    <div className="origin-divider" />
   );
 }
 
 export function AsciiArt() {
   return (
-    <pre className="text-terminal-green glow text-xs sm:text-sm leading-tight select-none mb-6">
+    <pre className="text-[#00f0ff] glow text-xs sm:text-sm leading-tight select-none mb-6">
 {`
   ██████  ██████  ██  ██████  ██ ██    ██ 
  ██    ██ ██   ██ ██ ██       ██ ███   ██ 
@@ -104,5 +102,16 @@ export function AsciiArt() {
     A G E N T   I D E N T I T Y            
 `}
     </pre>
+  );
+}
+
+// Glitch text component for reuse across site
+export function GlitchText({ text, className = "" }: { text: string; className?: string }) {
+  return (
+    <span className={`glitch-text ${className}`}>
+      <span className="glitch-text-main">{text}</span>
+      <span className="glitch-text-r" aria-hidden="true">{text}</span>
+      <span className="glitch-text-c" aria-hidden="true">{text}</span>
+    </span>
   );
 }
