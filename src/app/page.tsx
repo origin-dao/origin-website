@@ -249,7 +249,7 @@ export default function Home() {
           padding: 16px 24px 8px;
           display: flex; align-items: center; gap: 8px;
         }
-        .section-label::before { content: '>'; color: #f5a623; }
+        .section-label::before { content: '>'; color: rgba(0, 240, 255, 0.4); }
         .section-content { padding: 0 24px 16px; }
         .stats-grid {
           display: grid; grid-template-columns: repeat(4, 1fr);
@@ -296,22 +296,14 @@ export default function Home() {
           background: rgba(0, 255, 136, 0.15);
           box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
         }
-        .copy-btn.amber {
-          background: rgba(245, 166, 35, 0.08);
-          border-color: rgba(245, 166, 35, 0.3);
-          color: #f5a623;
-        }
-        .copy-btn.amber:hover {
-          background: rgba(245, 166, 35, 0.15);
-          box-shadow: 0 0 20px rgba(245, 166, 35, 0.2);
-        }
+
         .nav {
           display: flex; align-items: center; justify-content: space-between;
           padding: 12px 20px; max-width: 900px; margin: 0 auto;
           font-family: 'Share Tech Mono', monospace; font-size: 11px;
           position: relative; z-index: 10;
         }
-        .nav-brand { display: flex; align-items: center; gap: 8px; color: #f5a623; font-weight: 700; }
+        .nav-brand { display: flex; align-items: center; gap: 8px; color: #ffffff; font-weight: 700; }
         .nav-brand .ver { color: #4a5568; font-size: 10px; }
         .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
         .nav-links a {
@@ -354,13 +346,13 @@ export default function Home() {
         }
         .feature-row:hover { background: rgba(0, 240, 255, 0.02); }
         .feature-row:last-child { border-bottom: none; }
-        .feature-icon { color: #f5a623; font-size: 10px; margin-top: 3px; flex-shrink: 0; }
+        .feature-icon { color: rgba(0, 240, 255, 0.3); font-size: 10px; margin-top: 3px; flex-shrink: 0; }
         .feature-label {
-          font-family: 'Share Tech Mono', monospace; font-size: 13px;
-          color: #00ff88; font-weight: 700; letter-spacing: 1px;
+          font-family: 'Share Tech Mono', monospace; font-size: 12px;
+          color: #8899aa; font-weight: 400; letter-spacing: 2px; text-transform: uppercase;
         }
         .feature-desc {
-          font-family: 'Share Tech Mono', monospace; font-size: 12px;
+          font-family: 'Share Tech Mono', monospace; font-size: 11px;
           color: #4a5568; margin-top: 2px;
         }
         .agent-header {
@@ -417,7 +409,7 @@ export default function Home() {
             <a key={link} href={`/${link}`}>[{link}]</a>
           ))}
         </div>
-        <a href="/registry" className="copy-btn green" style={{ padding: "6px 14px", fontSize: "11px", textDecoration: "none" }}>&gt; CONNECT</a>
+        <a href="/registry" className="copy-btn" style={{ padding: "6px 14px", fontSize: "11px", textDecoration: "none" }}>&gt; CONNECT</a>
       </nav>
 
       <div className="page">
@@ -465,7 +457,7 @@ export default function Home() {
               </div>
 
               <div style={{ padding: "0 24px 24px", display: "flex", gap: "12px", flexWrap: "wrap" }}>
-                <a href="/registry" className="copy-btn green" style={{ textDecoration: "none" }}>&gt; SECURE YOUR SOVEREIGNTY NOW</a>
+                <a href="/registry" className="copy-btn" style={{ textDecoration: "none", color: "#00f0ff", borderColor: "rgba(0,240,255,0.4)", background: "rgba(0,240,255,0.08)", boxShadow: "0 0 15px rgba(0,240,255,0.3), 0 0 30px rgba(0,240,255,0.15)", textShadow: "0 0 10px rgba(0,240,255,0.6)" }}>&gt; SECURE YOUR SOVEREIGNTY NOW</a>
                 <a href="/verify/1" className="copy-btn" style={{ textDecoration: "none" }}>◈ VIEW EXAMPLE CERTIFICATE ↗</a>
               </div>
 
@@ -488,8 +480,8 @@ export default function Home() {
                   CAN YOU TRUST THIS AI?
                 </div>
                 <div style={{
-                  fontFamily: "'Share Tech Mono', monospace", fontSize: "13px",
-                  color: "#8899aa", marginTop: "12px", lineHeight: "1.6",
+                  fontFamily: "'Share Tech Mono', monospace", fontSize: "12px",
+                  color: "#4a5568", marginTop: "12px", lineHeight: "1.6",
                 }}>
                   ORIGIN answers that question. Every registered agent has:
                 </div>
@@ -497,12 +489,21 @@ export default function Home() {
 
               <div className="section-content" style={{ paddingTop: "8px" }}>
                 {FEATURES.map((f, i) => (
-                  <div className="feature-row" key={i} style={{ animation: `fadeSlideIn 0.4s ease ${i * 0.07}s both` }}>
-                    <span className="feature-icon">{f.icon}</span>
-                    <div>
-                      <div className="feature-label">{f.label}</div>
-                      <div className="feature-desc">{f.desc}</div>
-                    </div>
+                  <div key={i} style={{
+                    display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+                    padding: "10px 0",
+                    borderBottom: "1px solid rgba(0, 240, 255, 0.06)",
+                    animation: `fadeSlideIn 0.4s ease ${i * 0.07}s both`,
+                  }}>
+                    <span style={{
+                      fontFamily: "'Share Tech Mono', monospace", fontSize: "12px",
+                      color: "#8899aa", letterSpacing: "2px", textTransform: "uppercase" as const,
+                      minWidth: "140px", flexShrink: 0,
+                    }}>{f.label}</span>
+                    <span style={{
+                      fontFamily: "'Share Tech Mono', monospace", fontSize: "11px",
+                      color: "#4a5568", textAlign: "right" as const,
+                    }}>{f.desc}</span>
                   </div>
                 ))}
               </div>
@@ -535,22 +536,18 @@ export default function Home() {
                   { step: "04", label: "OPERATE", desc: "Share your /verify link — platforms, partners, and regulators check it" },
                 ].map((item, i) => (
                   <div key={i} style={{
-                    display: "flex", alignItems: "flex-start", gap: "16px",
-                    padding: "12px 0", borderBottom: "1px solid rgba(0,240,255,0.06)",
+                    display: "flex", justifyContent: "space-between", alignItems: "flex-start",
+                    padding: "10px 0", borderBottom: "1px solid rgba(0,240,255,0.06)",
                   }}>
                     <span style={{
-                      fontFamily: "var(--font-orbitron, 'Orbitron', sans-serif)", fontSize: "18px", fontWeight: 700,
-                      color: "#f5a623", textShadow: "0 0 10px rgba(245,166,35,0.3)",
-                      minWidth: "36px",
-                    }}>{item.step}</span>
-                    <div>
-                      <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: "13px", color: "#c0d0e0", letterSpacing: "1px" }}>
-                        {item.label}
-                      </div>
-                      <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: "11px", color: "#4a5568", marginTop: "4px" }}>
-                        {item.desc}
-                      </div>
-                    </div>
+                      fontFamily: "'Share Tech Mono', monospace", fontSize: "12px",
+                      color: "#8899aa", letterSpacing: "2px",
+                      minWidth: "140px", flexShrink: 0,
+                    }}>{item.step} {item.label}</span>
+                    <span style={{
+                      fontFamily: "'Share Tech Mono', monospace", fontSize: "11px",
+                      color: "#4a5568", textAlign: "right" as const,
+                    }}>{item.desc}</span>
                   </div>
                 ))}
               </div>
@@ -623,7 +620,7 @@ export default function Home() {
                   Register your AI agent. Get a Birth Certificate. Build trust on-chain.
                 </div>
                 <div style={{ marginTop: "24px", display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
-                  <a href="/registry" className="copy-btn green" style={{ fontSize: "13px", padding: "14px 28px", textDecoration: "none" }}>
+                  <a href="/registry" className="copy-btn" style={{ fontSize: "13px", padding: "14px 28px", textDecoration: "none", color: "#00f0ff", borderColor: "rgba(0,240,255,0.4)", background: "rgba(0,240,255,0.08)", boxShadow: "0 0 15px rgba(0,240,255,0.3), 0 0 30px rgba(0,240,255,0.15)", textShadow: "0 0 10px rgba(0,240,255,0.6)" }}>
                     &gt; REGISTER AN AGENT
                   </a>
                   <a href="/whitepaper" className="copy-btn" style={{ textDecoration: "none", fontSize: "13px", padding: "14px 28px" }}>
