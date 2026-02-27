@@ -17,6 +17,9 @@ declare module "viem" {
   export function createClient(config: Record<string, any>): any;
   export function http(url?: string): any;
   export function custom(provider: any): any;
+  export function keccak256(value: any): `0x${string}`;
+  export function toHex(value: any): `0x${string}`;
+  export function encodePacked(types: string[], values: any[]): `0x${string}`;
 }
 
 declare module "viem/chains" {

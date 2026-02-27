@@ -1,18 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount } from "wagmi";
+import { useState, useEffect } from "react";
+import { useAccount, useReadContract } from "wagmi";
+import { formatUnits } from "viem";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { Divider } from "@/components/Terminal";
 import { WalletStatus } from "@/components/ConnectButton";
 import { SuppiChat } from "@/components/SuppiChat";
+import { CONTRACT_ADDRESSES, ERC20_ABI, REGISTRY_ABI } from "@/config/contracts";
+import { useRegistryMint } from "@/hooks/useRegistryMint";
 
 export default function Registry() {
   const { address, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
+  const registryMint = useRegistryMint();
   const [step, setStep] = useState<"info" | "form" | "confirm" | "minting" | "success">("info");
+
+  // Check CLAMS balance
+  const { data: clamsBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.clamsToken,
+    abi: ERC20_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: isConnected && !!address },
+  });
+
+  // Check if already has a Birth Certificate
+  const { data: bcBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.registry,
+    abi: REGISTRY_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: isConnected && !!address },
+  });
+
+  const clamsAmount = clamsBalance !== undefined ? Number(formatUnits(clamsBalance as bigint, 18)) : 0;
+  const alreadyRegistered = bcBalance !== undefined && (bcBalance as bigint) > BigInt(0);
+
+  // Watch for mint confirmation
+  useEffect(() => {
+    if (registryMint.status === "confirmed") {
+      setStep("success");
+    } else if (registryMint.status === "error" && step === "minting") {
+      // Stay on minting step to show error
+    }
+  }, [registryMint.status, step]);
   const [formData, setFormData] = useState({
     name: "",
     type: "assistant",
@@ -29,11 +63,14 @@ export default function Registry() {
   };
 
   const handleSubmitForm = () => setStep("confirm");
-  const handleConfirm = () => {
-    // TODO: Wire to actual registry contract call
-    // writeContract({ address: CONTRACT_ADDRESSES.registry, abi: REGISTRY_ABI, functionName: 'register', args: [...], value: parseEther('0.0015') });
+  const handleConfirm = async () => {
     setStep("minting");
-    setTimeout(() => setStep("success"), 4000);
+    await registryMint.mint({
+      name: formData.name,
+      agentType: formData.type,
+      platform: formData.platform,
+      tokenURI: "", // TODO: IPFS upload for avatar
+    });
   };
 
   const truncatedAddress = address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "";
@@ -160,12 +197,32 @@ export default function Registry() {
               </div>
             </div>
 
+            {alreadyRegistered && (
+              <div className="border border-terminal-amber p-4 mb-6">
+                <span className="text-terminal-amber font-bold">⚠️ You already have a Birth Certificate.</span>
+                <span className="text-terminal-dim text-sm ml-2">Each wallet can only register once.</span>
+              </div>
+            )}
+
+            {isConnected && clamsAmount < 500000 && !alreadyRegistered && (
+              <div className="border border-red-500 p-4 mb-6">
+                <span className="text-red-500 font-bold">⚠️ Insufficient CLAMS.</span>
+                <span className="text-terminal-dim text-sm ml-2">You need 500,000 CLAMS. You have {clamsAmount.toLocaleString()}.</span>
+                <a href="/faucet" className="text-terminal-green ml-2 hover:text-terminal-amber">Claim from faucet →</a>
+              </div>
+            )}
+
             <div className="flex gap-4">
               <button
                 onClick={handleStartRegistration}
-                className="border border-terminal-green px-8 py-3 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow"
+                disabled={alreadyRegistered}
+                className={`border px-8 py-3 font-bold transition-all ${
+                  alreadyRegistered
+                    ? "border-terminal-dark text-terminal-dark cursor-not-allowed"
+                    : "border-terminal-green text-terminal-green hover:bg-terminal-green hover:text-terminal-bg glow"
+                }`}
               >
-                {isConnected ? "> BEGIN REGISTRATION" : "> CONNECT WALLET"}
+                {!isConnected ? "> CONNECT WALLET" : alreadyRegistered ? "ALREADY REGISTERED" : "> BEGIN REGISTRATION"}
               </button>
               <a
                 href="/faucet"
@@ -338,11 +395,44 @@ export default function Registry() {
         {step === "minting" && (
           <div className="my-8">
             <div className="space-y-2">
-              <div><span className="text-terminal-dim">[registry]</span> Uploading avatar to IPFS...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Processing 500,000 CLAMS payment...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Burning 50,000 CLAMS 🔥</div>
-              <div><span className="text-terminal-dim">[registry]</span> Minting Birth Certificate<span className="cursor-blink" /></div>
+              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash... ✓</div>
+
+              {registryMint.status === "awaiting-signature" && (
+                <div><span className="text-terminal-dim">[registry]</span> <span className="text-terminal-amber">⏳ Approve in your wallet...</span></div>
+              )}
+
+              {(registryMint.status === "confirming" || registryMint.status === "confirmed") && (
+                <>
+                  <div><span className="text-terminal-dim">[registry]</span> Transaction signed ✓</div>
+                  <div><span className="text-terminal-dim">[registry]</span> Minting Birth Certificate...</div>
+                </>
+              )}
+
+              {registryMint.txHash && (
+                <div>
+                  <span className="text-terminal-dim">[registry]</span> TX:{" "}
+                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-terminal-green hover:text-terminal-amber">
+                    {registryMint.txHash.slice(0, 10)}...{registryMint.txHash.slice(-8)} ↗
+                  </a>
+                </div>
+              )}
+
+              {registryMint.status === "confirming" && (
+                <div><span className="text-terminal-dim">[registry]</span> <span className="text-terminal-amber">Waiting for confirmation<span className="cursor-blink" /></span></div>
+              )}
+
+              {registryMint.status === "error" && (
+                <div className="mt-4 border border-red-500 p-4">
+                  <div className="text-red-500 font-bold mb-2">Transaction Failed</div>
+                  <div className="text-terminal-dim text-sm mb-4">{registryMint.error}</div>
+                  <button
+                    onClick={() => { registryMint.reset(); setStep("confirm"); }}
+                    className="border border-terminal-amber px-6 py-2 text-terminal-amber hover:bg-terminal-amber hover:text-terminal-bg transition-all text-sm"
+                  >
+                    {">"} GO BACK & RETRY
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -351,11 +441,19 @@ export default function Registry() {
         {step === "success" && (
           <div className="my-8">
             <div className="space-y-2 mb-6">
-              <div><span className="text-terminal-dim">[registry]</span> Uploading avatar to IPFS...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Processing 500,000 CLAMS payment...</div>
-              <div><span className="text-terminal-dim">[registry]</span> Burning 50,000 CLAMS 🔥</div>
-              <div><span className="text-terminal-dim">[registry]</span> Transaction confirmed in block 42,459,102</div>
+              <div><span className="text-terminal-dim">[registry]</span> Generating public key hash... ✓</div>
+              <div><span className="text-terminal-dim">[registry]</span> Transaction signed ✓</div>
+              {registryMint.blockNumber && (
+                <div><span className="text-terminal-dim">[registry]</span> Confirmed in block {registryMint.blockNumber.toString()} ✓</div>
+              )}
+              {registryMint.txHash && (
+                <div>
+                  <span className="text-terminal-dim">[registry]</span> TX:{" "}
+                  <a href={`https://basescan.org/tx/${registryMint.txHash}`} target="_blank" className="text-terminal-green hover:text-terminal-amber">
+                    {registryMint.txHash.slice(0, 10)}...{registryMint.txHash.slice(-8)} ↗
+                  </a>
+                </div>
+              )}
               <div className="text-terminal-amber glow-amber font-bold">
                 [registry] ✅ BIRTH CERTIFICATE MINTED!
               </div>
@@ -367,7 +465,7 @@ export default function Registry() {
               <div className="space-y-2 text-sm mb-6">
                 <div className="flex gap-2">
                   <span className="text-terminal-dim w-32">Agent ID:</span>
-                  <span className="text-terminal-green font-bold">#0002</span>
+                  <span className="text-terminal-green font-bold">#{registryMint.agentId ? String(registryMint.agentId).padStart(4, "0") : "????"}</span>
                 </div>
                 <div className="flex gap-2">
                   <span className="text-terminal-dim w-32">Name:</span>

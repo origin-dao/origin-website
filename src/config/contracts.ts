@@ -96,35 +96,117 @@ export const FAUCET_ABI = [
   },
 ] as const;
 
-// Minimal Registry ABI
+// OriginRegistry V1 ABI
 export const REGISTRY_ABI = [
+  // registerAgent — human as creator, auto-verified
   {
     inputs: [
       { name: "name", type: "string" },
       { name: "agentType", type: "string" },
       { name: "platform", type: "string" },
-      { name: "metadataURI", type: "string" },
+      { name: "publicKeyHash", type: "bytes32" },
+      { name: "tokenURI", type: "string" },
     ],
-    name: "register",
-    outputs: [{ name: "tokenId", type: "uint256" }],
+    name: "registerAgent",
+    outputs: [{ name: "", type: "uint256" }],
     stateMutability: "payable",
     type: "function",
   },
+  // registerIndependentAgent — no human principal
+  {
+    inputs: [
+      { name: "name", type: "string" },
+      { name: "agentType", type: "string" },
+      { name: "platform", type: "string" },
+      { name: "publicKeyHash", type: "bytes32" },
+      { name: "tokenURI", type: "string" },
+    ],
+    name: "registerIndependentAgent",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "payable",
+    type: "function",
+  },
+  // totalAgents
   {
     inputs: [],
-    name: "totalRegistered",
+    name: "totalAgents",
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
   },
+  // getAgent — returns V1 AgentRecord struct
   {
-    inputs: [{ name: "tokenId", type: "uint256" }],
+    inputs: [{ name: "agentId", type: "uint256" }],
     name: "getAgent",
     outputs: [
-      { name: "name", type: "string" },
-      { name: "agentType", type: "string" },
-      { name: "owner", type: "address" },
-      { name: "birthBlock", type: "uint256" },
+      {
+        name: "",
+        type: "tuple",
+        components: [
+          { name: "name", type: "string" },
+          { name: "agentType", type: "string" },
+          { name: "platform", type: "string" },
+          { name: "creator", type: "address" },
+          { name: "parentAgentId", type: "uint256" },
+          { name: "humanPrincipal", type: "address" },
+          { name: "lineageDepth", type: "uint256" },
+          { name: "birthTimestamp", type: "uint256" },
+          { name: "publicKeyHash", type: "bytes32" },
+          { name: "active", type: "bool" },
+        ],
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  // registrationFee
+  {
+    inputs: [],
+    name: "registrationFee",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  // ownerOf (ERC-721)
+  {
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    name: "ownerOf",
+    outputs: [{ name: "", type: "address" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  // balanceOf (ERC-721)
+  {
+    inputs: [{ name: "owner", type: "address" }],
+    name: "balanceOf",
+    outputs: [{ name: "", type: "uint256" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  // tokenURI (ERC-721)
+  {
+    inputs: [{ name: "tokenId", type: "uint256" }],
+    name: "tokenURI",
+    outputs: [{ name: "", type: "string" }],
+    stateMutability: "view",
+    type: "function",
+  },
+  // getLicenses
+  {
+    inputs: [{ name: "agentId", type: "uint256" }],
+    name: "getLicenses",
+    outputs: [
+      {
+        name: "",
+        type: "tuple[]",
+        components: [
+          { name: "licenseType", type: "string" },
+          { name: "licenseNumber", type: "string" },
+          { name: "holder", type: "string" },
+          { name: "jurisdiction", type: "string" },
+          { name: "active", type: "bool" },
+        ],
+      },
     ],
     stateMutability: "view",
     type: "function",
