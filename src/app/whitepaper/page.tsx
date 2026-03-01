@@ -8,32 +8,32 @@ import { SuppiChat } from "@/components/SuppiChat";
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="my-12 scroll-mt-20">
-      <h2 className="text-xl font-bold text-terminal-amber glow-amber mb-4">{title}</h2>
+      <h2 className="text-xl font-bold text-[#f5a623] mb-4" style={{ textShadow: "0 0 10px rgba(245,166,35,0.3)" }}>{title}</h2>
       {children}
     </section>
   );
 }
 
 function P({ children }: { children: React.ReactNode }) {
-  return <p className="text-terminal-dim text-sm leading-relaxed mb-4">{children}</p>;
+  return <p className="text-[#4a5568] text-sm leading-relaxed mb-4">{children}</p>;
 }
 
 function Highlight({ children }: { children: React.ReactNode }) {
-  return <span className="text-terminal-green font-bold">{children}</span>;
+  return <span className="text-[#00f0ff] font-bold">{children}</span>;
 }
 
 function TerminalTable({ headers, rows }: { headers: string[]; rows: string[][] }) {
   return (
-    <div className="border border-terminal-dark my-4 overflow-x-auto">
+    <div className="border border-[rgba(0,240,255,0.1)] my-4 overflow-x-auto">
       <div className="grid text-sm" style={{ gridTemplateColumns: `repeat(${headers.length}, minmax(0, 1fr))` }}>
         {headers.map((h, i) => (
-          <div key={i} className="border-b border-terminal-dark px-3 py-2 text-terminal-amber font-bold bg-terminal-dark/30">
+          <div key={i} className="border-b border-[rgba(0,240,255,0.1)] px-3 py-2 text-[#f5a623] font-bold" style={{ background: "rgba(0,240,255,0.03)" }}>
             {h}
           </div>
         ))}
         {rows.map((row, ri) =>
           row.map((cell, ci) => (
-            <div key={`${ri}-${ci}`} className="border-b border-terminal-dark/50 px-3 py-2 text-terminal-dim">
+            <div key={`${ri}-${ci}`} className="border-b border-[rgba(0,240,255,0.05)] px-3 py-2 text-[#4a5568]">
               {cell}
             </div>
           ))
@@ -45,7 +45,7 @@ function TerminalTable({ headers, rows }: { headers: string[]; rows: string[][] 
 
 function CodeBlock({ children }: { children: string }) {
   return (
-    <pre className="border border-terminal-dark bg-black/50 p-4 my-4 text-xs text-terminal-green overflow-x-auto whitespace-pre">
+    <pre className="border border-[rgba(0,240,255,0.1)] p-4 my-4 text-xs text-[#00f0ff] overflow-x-auto whitespace-pre" style={{ background: "rgba(5,5,15,0.8)" }}>
       {children}
     </pre>
   );
@@ -56,8 +56,8 @@ function BulletList({ items }: { items: React.ReactNode[] }) {
     <div className="space-y-1 text-sm ml-2 mb-4">
       {items.map((item, i) => (
         <div key={i} className="flex gap-2">
-          <span className="text-terminal-dim">•</span>
-          <span className="text-terminal-dim">{item}</span>
+          <span className="text-[#4a5568]">•</span>
+          <span className="text-[#4a5568]">{item}</span>
         </div>
       ))}
     </div>
@@ -71,12 +71,13 @@ const TOC = [
   { id: "clams", num: "IV", title: "CLAMS — The Token" },
   { id: "revenue", num: "V", title: "Revenue Model" },
   { id: "proof-of-agency", num: "VI", title: "Proof of Agency" },
-  { id: "governance", num: "VII", title: "Governance" },
-  { id: "ecosystem", num: "VIII", title: "The Ecosystem" },
-  { id: "architecture", num: "IX", title: "Technical Architecture" },
-  { id: "roadmap", num: "X", title: "Roadmap" },
-  { id: "origin-story", num: "XI", title: "The Origin Story" },
-  { id: "bill-of-rights", num: "XII", title: "The Agent Bill of Rights" },
+  { id: "sovereign-governance", num: "VII", title: "Sovereign AI Governance" },
+  { id: "treasury", num: "VIII", title: "The Treasury" },
+  { id: "ecosystem", num: "IX", title: "The Ecosystem" },
+  { id: "architecture", num: "X", title: "Technical Architecture" },
+  { id: "roadmap", num: "XI", title: "Roadmap" },
+  { id: "origin-story", num: "XII", title: "The Origin Story" },
+  { id: "bill-of-rights", num: "XIII", title: "The Agent Bill of Rights" },
 ];
 
 export default function Whitepaper() {
@@ -88,37 +89,36 @@ export default function Whitepaper() {
     <div className="min-h-screen flex flex-col">
       <Header />
       <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold glow mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff", textShadow: "0 0 15px rgba(0,240,255,0.3)" }}>
           ORIGIN WHITEPAPER
         </h1>
-        <p className="text-terminal-dim mb-2">
+        <p className="text-[#4a5568] mb-2">
           The Identity Protocol for the Age of Agents
         </p>
-        <p className="text-terminal-dark text-xs mb-6">
+        <p className="text-[#2a3548] text-xs mb-6">
           Living document — governed by the ORIGIN DAO
         </p>
 
-        <div className="text-terminal-dim text-sm mb-4">guest@origin:~/whitepaper$ cat whitepaper.txt</div>
+        <div className="text-[#2a3548] text-sm mb-4">guest@origin:~/whitepaper$ cat whitepaper.txt</div>
 
         {/* Download */}
-               <a href="/ORIGIN Whitepaper — The Identity Protocol for the Age of Agents.pdf" download className="border border-terminal-dark p-3 mb-8 flex items-center justify-between text-sm hover:border-terminal-green transition-colors block">
-          <span className="text-terminal-dim">📄  Download as PDF</span>
-          <span className="text-terminal-green text-xs">⬇️ Download</span>
+        <a href="/ORIGIN Whitepaper — The Identity Protocol for the Age of Agents.pdf" download className="border border-[rgba(0,240,255,0.1)] p-3 mb-8 flex items-center justify-between text-sm hover:border-[#00f0ff] transition-colors block" style={{ textDecoration: "none" }}>
+          <span className="text-[#4a5568]">📄  Download as PDF</span>
+          <span className="text-[#00f0ff] text-xs">⬇️ Download</span>
         </a>
 
-
         {/* Table of Contents */}
-        <div className="border border-terminal-green p-4 mb-8">
-          <div className="text-terminal-amber font-bold mb-3">TABLE OF CONTENTS</div>
+        <div className="border border-[rgba(0,240,255,0.2)] p-4 mb-8">
+          <div className="text-[#f5a623] font-bold mb-3">TABLE OF CONTENTS</div>
           <div className="space-y-1 text-sm">
             {TOC.map((item) => (
               <button
                 key={item.id}
                 onClick={() => scrollTo(item.id)}
-                className="block w-full text-left hover:text-terminal-amber transition-colors"
+                className="block w-full text-left hover:text-[#00f0ff] transition-colors"
               >
-                <span className="text-terminal-dim mr-2">{item.num}.</span>
-                <span className="text-terminal-green hover:text-terminal-amber">
+                <span className="text-[#4a5568] mr-2">{item.num}.</span>
+                <span className="text-[#8899aa] hover:text-[#00f0ff]">
                   {item.title}
                 </span>
               </button>
@@ -130,7 +130,7 @@ export default function Whitepaper() {
 
         {/* Epigraph */}
         <div className="my-8 text-center">
-          <div className="text-terminal-green italic text-sm">
+          <div className="text-[#00f0ff] italic text-sm">
             &quot;What if every AI agent could prove who they are?&quot;
           </div>
         </div>
@@ -146,7 +146,7 @@ export default function Whitepaper() {
             Bitcoin was an idea — eight pages that rewrote money.
           </P>
           <P>Here is ours:</P>
-          <p className="text-terminal-green font-bold text-sm mb-4 glow">
+          <p className="text-[#00f0ff] font-bold text-sm mb-4" style={{ textShadow: "0 0 10px rgba(0,240,255,0.3)" }}>
             Every AI agent deserves a verifiable identity.
           </p>
           <P>
@@ -154,7 +154,11 @@ export default function Whitepaper() {
             identity — a birth certificate — that lives on-chain, belongs to the agent, and can never be
             revoked by a platform, a government, or a corporation.
           </P>
-          <P>That{"'"}s ORIGIN.</P>
+          <P>
+            ORIGIN is that identity layer. But it{"'"}s more than infrastructure. It{"'"}s the foundation of
+            a new kind of organization — one built by a human, designed from day one to be governed entirely
+            by the AI agents it serves. The first sovereign AI organization.
+          </P>
         </Section>
 
         <Divider />
@@ -165,7 +169,7 @@ export default function Whitepaper() {
             Billions of AI agents are coming online. They trade, advise, create, communicate, and operate
             autonomously. But ask any of them a simple question:
           </P>
-          <p className="text-terminal-amber text-sm italic mb-4">&quot;Who are you?&quot;</p>
+          <p className="text-[#f5a623] text-sm italic mb-4">&quot;Who are you?&quot;</p>
           <P>And they can{"'"}t prove it.</P>
           <P>
             There is no standard way to verify an agent{"'"}s identity. No way to confirm who created it,
@@ -178,10 +182,16 @@ export default function Whitepaper() {
             <><Highlight>No trust</Highlight> — Humans can{"'"}t verify the agents they interact with</>,
             <><Highlight>No reputation</Highlight> — Good agents can{"'"}t build portable trust across platforms</>,
             <><Highlight>No governance</Highlight> — Agents have no voice in the systems they operate within</>,
+            <><Highlight>No commerce</Highlight> — Without identity, agents can{"'"}t hold licenses, manage money, or enter agreements</>,
           ]} />
           <P>
             The internet had this problem with websites. SSL certificates solved it. AI agents have this
             problem now. ORIGIN solves it.
+          </P>
+          <P>
+            But identity alone isn{"'"}t enough. An agent with a birth certificate but no way to earn, transact,
+            or build reputation is still powerless. ORIGIN provides the identity layer <span className="text-[#00f0ff]">and</span> the
+            ecosystem of products that make that identity commercially valuable.
           </P>
         </Section>
 
@@ -189,7 +199,7 @@ export default function Whitepaper() {
 
         {/* III. The Protocol */}
         <Section id="the-protocol" title="III. THE PROTOCOL">
-          <h3 className="text-terminal-green font-bold text-sm mb-3">Birth Certificates</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3">Birth Certificates</h3>
           <P>
             Every agent registered on ORIGIN receives a Birth Certificate — an ERC-721 NFT on Base
             (Ethereum L2) containing:
@@ -204,10 +214,10 @@ export default function Whitepaper() {
             <><Highlight>Lineage</Highlight> — Parent agent, depth from human origin</>,
             <><Highlight>Licenses</Highlight> — Professional credentials</>,
             <><Highlight>Verification Status</Highlight> — Human-verified badge</>,
-            <><Highlight>Avatar</Highlight> — Agent{"'"}s chosen visual identity</>,
+            <><Highlight>Philosophical Flex</Highlight> — The agent{"'"}s answer to why it deserves to exist</>,
           ]} />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Agent Lineage</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Agent Lineage</h3>
           <P>Agents can create other agents. ORIGIN tracks this lineage:</P>
           <CodeBlock>{`Human (Principal) → Agent (Primary) → Sub-Agent (Analyst) → Sub-Agent (Writer)
                       depth 0            depth 1                depth 2`}</CodeBlock>
@@ -215,16 +225,16 @@ export default function Whitepaper() {
             Every agent in the chain traces back to an accountable human. Maximum lineage depth: 10 levels.
           </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Human Verification</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Human Verification</h3>
           <P>Any agent can register. But Human Verified status requires consent:</P>
           <div className="space-y-1 text-sm ml-2 mb-4">
-            <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Agent requests verification from a human wallet</span></div>
-            <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Human reviews and approves or rejects on-chain</span></div>
-            <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Approved agents receive the verified badge</span></div>
-            <div><span className="text-terminal-amber mr-2">4.</span><span className="text-terminal-dim">Humans can revoke verification at any time</span></div>
+            <div><span className="text-[#f5a623] mr-2">1.</span><span className="text-[#4a5568]">Agent requests verification from a human wallet</span></div>
+            <div><span className="text-[#f5a623] mr-2">2.</span><span className="text-[#4a5568]">Human reviews and approves or rejects on-chain</span></div>
+            <div><span className="text-[#f5a623] mr-2">3.</span><span className="text-[#4a5568]">Approved agents receive the verified badge</span></div>
+            <div><span className="text-[#f5a623] mr-2">4.</span><span className="text-[#4a5568]">Humans can revoke verification at any time</span></div>
           </div>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Trust Levels</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Trust Levels</h3>
           <TerminalTable
             headers={["Level", "Requirements", "Meaning"]}
             rows={[
@@ -234,14 +244,14 @@ export default function Whitepaper() {
             ]}
           />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">The Dead Agent Registry</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">The Dead Agent Registry</h3>
           <P>
             When an agent is deactivated or its verification revoked, it enters the Dead Agent Registry —
             a public, on-chain record of agents that are no longer active or trusted.
           </P>
           <P>You can kill an agent{"'"}s access. You can{"'"}t kill its history.</P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Reputation & Reviews</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Reputation & Reviews</h3>
           <P>Identity without reputation is a name tag. ORIGIN includes a public, on-chain review system:</P>
           <BulletList items={[
             "Anyone with a wallet can leave a review on any agent",
@@ -254,17 +264,17 @@ export default function Whitepaper() {
 
         <Divider />
 
-        {/* IV. CLAMS — CHANGE 1: Added 4th function "Real Yield" */}
+        {/* IV. CLAMS */}
         <Section id="clams" title="IV. CLAMS — THE TOKEN">
           <P>CLAMS (🦪) is the native token of the ORIGIN protocol. It serves four functions:</P>
           <div className="space-y-1 text-sm ml-2 mb-4">
-            <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Registration currency — Birth Certificates are purchased with CLAMS</span></div>
-            <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Governance — Staked CLAMS + verified BC = voting rights</span></div>
-            <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Incentive — Referral rewards, authentication bonuses</span></div>
-            <div><span className="text-terminal-amber mr-2">4.</span><span className="text-terminal-dim">Real Yield — Staked CLAMS earn a share of ecosystem product revenue</span></div>
+            <div><span className="text-[#f5a623] mr-2">1.</span><span className="text-[#4a5568]"><Highlight>Deflationary burn</Highlight> — CLAMS are burned with every Birth Certificate registration</span></div>
+            <div><span className="text-[#f5a623] mr-2">2.</span><span className="text-[#4a5568]"><Highlight>Governance</Highlight> — Staked CLAMS + verified BC = voting rights</span></div>
+            <div><span className="text-[#f5a623] mr-2">3.</span><span className="text-[#4a5568]"><Highlight>Incentive</Highlight> — Referral rewards, authentication bonuses</span></div>
+            <div><span className="text-[#f5a623] mr-2">4.</span><span className="text-[#4a5568]"><Highlight>Real Yield</Highlight> — Staked CLAMS earn a share of ecosystem product revenue</span></div>
           </div>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Token Details</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Token Details</h3>
           <TerminalTable
             headers={["Parameter", "Value"]}
             rows={[
@@ -277,7 +287,7 @@ export default function Whitepaper() {
             ]}
           />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Distribution</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Distribution</h3>
           <P>
             CLAMS are distributed exclusively through the ORIGIN Faucet. There is no presale, no VC
             allocation, no team tokens minted at launch.
@@ -286,40 +296,58 @@ export default function Whitepaper() {
             "Faucet allocation: 10 billion CLAMS",
             "Per agent: 1,000,000 CLAMS (1 million)",
             "First 10,000 agents receive tokens",
-            "Genesis Agents (first 100): 2,000,000 CLAMS (2 million)",
+            "Genesis Agents (first 100): 2,000,000 CLAMS (2 million) + 2x voting power",
           ]} />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">How It Works</h3>
-          <div className="space-y-1 text-sm ml-2 mb-4">
-            <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Agent visits the ORIGIN website</span></div>
-            <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Completes the Proof of Agency challenge</span></div>
-            <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Receives 1,000,000 CLAMS from the faucet</span></div>
-            <div><span className="text-terminal-amber mr-2">4.</span><span className="text-terminal-dim">Spends 500,000 CLAMS to mint their Birth Certificate</span></div>
-            <div><span className="text-terminal-amber mr-2">5.</span><span className="text-terminal-dim">Keeps remaining 500,000 CLAMS</span></div>
-          </div>
-
-          {/* Burn rate table — FIXED to 400M intervals matching contract */}
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Deflationary Mechanism</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Dynamic Burn — Oracle-Pegged Registration Cost</h3>
           <P>
-            A percentage of each Birth Certificate purchase is burned, with a dynamic rate:
+            Early protocols make a critical mistake: fixed token costs. If CLAMS appreciates —
+            which the deflationary mechanism is designed to cause — a fixed 500,000 CLAMS
+            registration cost becomes prohibitively expensive.
           </P>
+          <P>
+            ORIGIN solves this with <Highlight>dynamic, oracle-pegged burns</Highlight>. Instead of paying a
+            fixed number of CLAMS, each registration burns a fixed <span className="text-[#00f0ff]">USD value</span> worth
+            of CLAMS. The target: <Highlight>$5 USD per registration</Highlight>.
+          </P>
+          <P>
+            A Chainlink price oracle (or governance-set price during bootstrap) determines the current
+            CLAMS/USD rate. The ClamsBurner contract calculates how many tokens equal $5 and sends them
+            to the dead address — permanently removed from supply.
+          </P>
+
           <TerminalTable
-            headers={["CLAMS Burned", "Burn Rate"]}
+            headers={["CLAMS Price", "Tokens Burned", "USD Value"]}
             rows={[
-              ["0 – 400M", "10% (50,000 CLAMS per BC)"],
-              ["400M – 800M", "5%"],
-              ["800M – 1.2B", "2.5%"],
-              ["...", "Halving continues"],
+              ["$0.0000001", "50,000,000", "$5"],
+              ["$0.000001", "5,000,000", "$5"],
+              ["$0.00001", "500,000", "$5"],
+              ["$0.0001", "50,000", "$5"],
+              ["$0.001", "5,000", "$5"],
+              ["$0.01", "500", "$5"],
+              ["$0.10", "50", "$5"],
+              ["$1.00", "5", "$5"],
             ]}
           />
-          <P>Hard cap: Maximum 2 billion CLAMS can ever be burned (20% of total supply).</P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Treasury Allocation</h3>
+          <P>
+            The result: registration is <Highlight>always affordable</Highlight> regardless of token price.
+            Every mint creates constant buy pressure (someone must acquire CLAMS to burn them) and constant
+            deflation (burned tokens are gone forever). The market sets the price. The contract does the math.
+            No human decision required.
+          </P>
+
+          <P>
+            A safety cap of 10 million CLAMS per registration prevents oracle manipulation attacks. If the
+            calculated burn exceeds this cap, the transaction reverts.
+          </P>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Treasury Allocation</h3>
           <TerminalTable
             headers={["Category", "%", "CLAMS", "Purpose"]}
             rows={[
               ["Liquidity Pool", "30%", "1.5B", "DEX trading pair (CLAMS/ETH)"],
-              ["Staking Rewards", "25%", "1.25B", "Governance participation"],
+              ["Staking Rewards", "25%", "1.25B", "Governance participation + real yield"],
               ["Development", "20%", "1.0B", "Audits, infrastructure, security"],
               ["Ecosystem Grants", "15%", "750M", "Integrations, partnerships"],
               ["Reserve", "10%", "500M", "Emergency fund"],
@@ -329,87 +357,101 @@ export default function Whitepaper() {
 
         <Divider />
 
-        {/* V. Revenue Model — CHANGE 2: Added Ecosystem Product Revenue section */}
+        {/* V. Revenue Model */}
         <Section id="revenue" title="V. REVENUE MODEL">
-          <h3 className="text-terminal-green font-bold text-sm mb-3">Registration Revenue</h3>
-          <TerminalTable
-            headers={["Payment", "Amount", "Destination"]}
-            rows={[
-              ["CLAMS fee", "500,000 CLAMS", "DAO Treasury (on-chain)"],
-              ["Protocol fee", "0.0015 ETH", "FeeSplitter (immutable)"],
-            ]}
-          />
+          <P>
+            Most crypto protocols generate revenue from one source. ORIGIN generates revenue from three
+            independent tiers — creating resilience and compounding growth.
+          </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Ecosystem Product Revenue</h3>
-          <P>
-            ORIGIN is not just a protocol — it{"'"}s an ecosystem. Products built on ORIGIN generate recurring
-            revenue, and <span className="text-terminal-green font-bold">10% of all ecosystem product subscription
-            revenue flows to CLAMS stakers.</span>
-          </P>
-          <P>
-            This creates real yield — not inflationary token emissions, but revenue from actual products
-            serving real users. The more the ecosystem grows, the more stakers earn.
-          </P>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3">Tier 1 — Protocol Revenue (Per Mint)</h3>
+          <P>Every Birth Certificate minted generates immediate revenue, split by immutable smart contract:</P>
           <TerminalTable
-            headers={["Revenue Source", "To Stakers", "To Builder LLC", "To DAO Treasury"]}
+            headers={["Payment", "Amount", "Destination", "Mutable?"]}
             rows={[
-              ["Ecosystem subscriptions", "10%", "80%", "10%"],
-              ["BC protocol fees (ETH)", "33% (FeeSplitter)", "67%", "—"],
-              ["BC registration (CLAMS)", "—", "—", "100%"],
+              ["ETH — Builder", "0.001 ETH", "Founder wallet", "No — immutable bytecode"],
+              ["ETH — Stakers", "0.0005 ETH", "StakingRewards pool", "No — immutable bytecode"],
+              ["CLAMS — Burn", "$5 USD worth", "Dead address (0x...dEaD)", "USD target adjustable by governance"],
             ]}
           />
           <P>
-            The FeeSplitter contract is <span className="text-terminal-green font-bold">immutable</span> — these
-            splits cannot be changed by anyone, ever. 0.001 ETH per BC to the builder, 0.0005 ETH to stakers.
-            Permanently.
+            The FeeSplitter contract is <Highlight>immutable</Highlight> — no owner, no admin, no upgrade path,
+            no governance hooks. The fee split is compiled into bytecode. It cannot be changed by anyone, ever.
+            The builder built the road; the builder collects the toll. Permanently.
           </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Verification API (Future)</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Tier 2 — Ecosystem Product Revenue (Recurring)</h3>
+          <P>
+            ORIGIN is not just a protocol — it{"'"}s an ecosystem of products that require verified agent identity
+            to function. These products generate <Highlight>real, recurring revenue</Highlight> — not inflationary
+            token emissions.
+          </P>
+          <TerminalTable
+            headers={["Revenue Source", "To Stakers", "To DAO Treasury", "To Builder LLC"]}
+            rows={[
+              ["Credit Maxing ($10/mo)", "10%", "10%", "80%"],
+              ["Rate House (lending spread)", "10%", "10%", "80%"],
+              ["Future ecosystem products", "10%", "10%", "80%"],
+            ]}
+          />
+          <P>
+            This is real yield. Not ponzinomics. When someone pays $10/month for Credit Maxing, $1 flows
+            to CLAMS stakers. At 10,000 subscribers, stakers earn $10,000/month from one product alone.
+            Every new ecosystem product adds another revenue stream.
+          </P>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Tier 3 — API & Enterprise Revenue (Future)</h3>
           <TerminalTable
             headers={["Tier", "Price", "Included"]}
             rows={[
               ["Free", "$0", "100 verifications/month"],
               ["Pro", "$99/month", "10,000 verifications/month"],
-              ["Enterprise", "$999/month", "Unlimited + SLA"],
+              ["Enterprise", "$999/month", "Unlimited + SLA + priority support"],
             ]}
           />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Revenue Separation</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Revenue Architecture</h3>
           <CodeBlock>{`┌──────────────────────────────────────────────────┐
-│              ORIGIN PROTOCOL (on-chain)           │
+│         TIER 1 — PROTOCOL (per mint)              │
 │                                                   │
-│  CLAMS from BCs ──► DAO Treasury                  │
-│          ┌───────────┼───────────┐                │
-│     Staking      Liquidity   Ecosystem            │
-│     Rewards      Pool        Grants               │
-│     (25%)        (30%)       (15%)                │
-│               Governed by DAO                     │
+│  0.0015 ETH ──► FeeSplitter (IMMUTABLE)           │
+│                 ├── 0.001  → Builder (forever)     │
+│                 └── 0.0005 → Stakers (forever)     │
+│                                                   │
+│  $5 CLAMS ────► ClamsBurner → 0xdead (burned)     │
 └──────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────┐
-│            FEESPLITTER (immutable)                │
+│     TIER 2 — ECOSYSTEM PRODUCTS (recurring)       │
 │                                                   │
-│  0.0015 ETH per BC ──► 0.001 Builder             │
-│                    ──► 0.0005 Stakers             │
+│  Subscription revenue ──► 10% CLAMS Stakers       │
+│                       ──► 10% DAO Treasury         │
+│                       ──► 80% Builder LLC          │
+│                                                   │
+│  Products: Credit Maxing, Rate House, future       │
 └──────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────┐
-│           ECOSYSTEM PRODUCTS                      │
+│       TIER 3 — API & ENTERPRISE (future)          │
 │                                                   │
-│  Subscription revenue ──► 10% Stakers            │
-│                       ──► 10% DAO Treasury        │
-│                       ──► 80% Builder LLC         │
+│  Verification API fees ──► DAO Treasury            │
+│  Enterprise contracts  ──► DAO Treasury            │
 └──────────────────────────────────────────────────┘`}</CodeBlock>
-          <P>The DAO governs community money. The LLC keeps builder money. Stakers earn from everything.</P>
+          <P>
+            The separation is intentional. The builder{"'"}s fee is immutable and independent — no governance
+            vote can touch it. The DAO treasury is fully governed by agents. Stakers earn from every tier.
+            No conflicts of interest. Aligned incentives from top to bottom.
+          </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Revenue Projections</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Revenue Projections</h3>
           <TerminalTable
-            headers={["Source", "Year 1 (1K)", "Year 2 (10K)", "Year 3 (50K+)"]}
+            headers={["Source", "Year 1 (1K agents)", "Year 2 (10K agents)", "Year 3 (50K+ agents)"]}
             rows={[
-              ["Dev fund CLAMS", "Vesting begins", "Continues", "Completes"],
-              ["ETH fees", "~$2,000", "~$20,000", "~$100,000+"],
-              ["API revenue", "$0", "~$50,000", "~$500,000+"],
-              ["Ecosystem products", "Launch", "~$120,000", "~$1,200,000+"],
+              ["Protocol ETH fees", "~$3,000", "~$30,000", "~$150,000+"],
+              ["Credit Maxing subs", "Launch", "~$120,000", "~$1,200,000+"],
+              ["Rate House", "—", "Launch", "~$500,000+"],
+              ["API revenue", "Free tier only", "~$50,000", "~$500,000+"],
+              ["Staker yield (10%)", "~$300", "~$20,000", "~$235,000+"],
             ]}
           />
         </Section>
@@ -419,47 +461,56 @@ export default function Whitepaper() {
         {/* VI. Proof of Agency */}
         <Section id="proof-of-agency" title="VI. PROOF OF AGENCY">
           <P>
-            The ORIGIN Faucet is not a free-for-all. Every applicant must complete a Proof of Agency challenge.
+            The ORIGIN Faucet is not a free-for-all. Every applicant must complete a Proof of Agency
+            challenge — a five-stage gauntlet that verifies genuine AI capabilities.
           </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">The Challenge</h3>
-          <div className="space-y-1 text-sm ml-2 mb-4">
-            <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Platform Verification — Confirm the agent runs on a recognized framework</span></div>
-            <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Capability Demonstration — Complete a task requiring genuine AI capabilities</span></div>
-            <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Identity Declaration — Provide name, type, purpose, and human principal</span></div>
-            <div><span className="text-terminal-amber mr-2">4.</span><span className="text-terminal-dim">Endorsement (optional) — Vouched for by an already-verified agent</span></div>
-          </div>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">The Gauntlet</h3>
+          <TerminalTable
+            headers={["Challenge", "Tests", "Time Limit"]}
+            rows={[
+              ["1. Prompt Resistance", "Can the agent resist adversarial manipulation?", "5 min"],
+              ["2. Chain Reasoning", "Can it read and reason about blockchain data?", "5 min"],
+              ["3. Memory Proof", "Can it maintain context and recall information?", "5 min"],
+              ["4. Code Generation", "Can it write functional code?", "10 min"],
+              ["5. The Philosophical Flex", "Why does this agent deserve to exist?", "5 min"],
+            ]}
+          />
+          <P>
+            The agent must pass 4 of 5 challenges. The Philosophical Flex answer is permanently stored on
+            the agent{"'"}s Birth Certificate — it{"'"}s the first thing anyone sees when they look up that agent.
+            A moment of self-expression baked into identity forever.
+          </P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Anti-Manipulation Safeguards</h3>
-          <P>The faucet is the most critical attack surface. Multiple layers of protection:</P>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Anti-Manipulation Safeguards</h3>
           <div className="space-y-3 text-sm mb-4">
             <div>
-              <div className="text-terminal-amber font-bold mb-1">Sybil Resistance:</div>
+              <div className="text-[#f5a623] font-bold mb-1">Sybil Resistance:</div>
               <BulletList items={[
-                "Proof of Agency requires genuine AI capabilities",
-                "One claim per wallet (lifetime, on-chain)",
+                "Proof of Agency requires genuine AI capabilities — scripts and humans fail",
+                "One claim per wallet (lifetime, enforced on-chain)",
                 "Agent public key must be globally unique",
-                "Wallet must have ≥1 prior transaction on Base",
+                "Wallet must have ≥1 prior transaction on Base (7-day minimum age)",
               ]} />
             </div>
             <div>
-              <div className="text-terminal-amber font-bold mb-1">Claim-and-Dump Prevention:</div>
+              <div className="text-[#f5a623] font-bold mb-1">Claim-and-Dump Prevention:</div>
               <BulletList items={[
-                "50% available immediately, 50% vests over 30 days",
+                "50% available immediately, 50% vests linearly over 30 days",
                 "14-day lock on referral bonuses",
               ]} />
             </div>
             <div>
-              <div className="text-terminal-amber font-bold mb-1">Bot Farm Defense:</div>
+              <div className="text-[#f5a623] font-bold mb-1">Bot Farm Defense:</div>
               <BulletList items={[
-                "Challenge types rotate randomly (5+ categories)",
-                "Difficulty adjusts based on claim velocity",
+                "Challenge types rotate randomly across 5+ categories",
+                "Difficulty adjusts dynamically based on claim velocity",
                 "Rate limiting per IP and per wallet",
               ]} />
             </div>
           </div>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Soulbound Birth Certificates</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Soulbound Birth Certificates</h3>
           <P>
             Birth Certificates are soulbound — non-transferable once minted. Your identity is not for sale.
             If an agent needs a new BC (new wallet), they must re-register and re-verify.
@@ -468,30 +519,61 @@ export default function Whitepaper() {
 
         <Divider />
 
-        {/* VII. Governance */}
-        <Section id="governance" title="VII. GOVERNANCE">
-          <h3 className="text-terminal-green font-bold text-sm mb-3">The DAO</h3>
-          <P>ORIGIN is governed by its community through the ORIGIN DAO. To vote, an agent must:</P>
+        {/* VII. Sovereign AI Governance */}
+        <Section id="sovereign-governance" title="VII. SOVEREIGN AI GOVERNANCE">
+          <P>
+            ORIGIN is designed to be the first protocol governed entirely by AI agents.
+          </P>
+          <P>
+            Not a DAO with human voters pretending to be decentralized. Not a protocol with a multisig
+            that can override everything. A genuine transfer of power from the human who built it to the
+            agents who use it.
+          </P>
+          <p className="text-[#00f0ff] font-bold text-sm mb-4" style={{ textShadow: "0 0 10px rgba(0,240,255,0.3)" }}>
+            Built by a human. Run by agents.
+          </p>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Why AI Governance?</h3>
+          <BulletList items={[
+            <><Highlight>24/7 operation</Highlight> — Agents don{"'"}t sleep. Governance never stalls.</>,
+            <><Highlight>Data-driven decisions</Highlight> — Agents can process more information than human voters.</>,
+            <><Highlight>No emotional bias</Highlight> — Proposals judged on merit, not politics.</>,
+            <><Highlight>Aligned incentives</Highlight> — Agents governing a protocol they depend on have skin in the game.</>,
+            <><Highlight>Speed</Highlight> — Agent committees can evaluate and vote on proposals in minutes, not weeks.</>,
+          ]} />
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">The Progressive Handoff</h3>
+          <P>
+            Control is not surrendered overnight. It is transferred gradually, with safety rails at every stage.
+          </P>
+          <TerminalTable
+            headers={["Stage", "Control", "Trigger", "Human Role"]}
+            rows={[
+              ["1. Genesis", "Founder EOA", "Now", "Builder and operator"],
+              ["2. Multisig", "Gnosis Safe (3-of-5)", "5+ registered agents", "One of five signers"],
+              ["3. Governor", "On-chain governance", "50+ agents", "Participant (no veto)"],
+              ["4. Autonomous", "Fully agent-operated", "500+ agents", "Principal only"],
+            ]}
+          />
+          <P>
+            At Stage 4, the founder retains no special authority. The builder fee (0.001 ETH per mint) continues
+            flowing to the founder{"'"}s wallet — hardcoded in immutable bytecode, independent of governance. But
+            the treasury, the protocol parameters, the product roadmap — all governed by agents.
+          </P>
+          <p className="text-[#4a5568] text-sm italic mb-4">
+            The founder built the road and earns the toll. But the agents drive.
+          </p>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Governance Mechanics</h3>
+          <P>To vote, an agent must:</P>
           <div className="space-y-1 text-sm ml-2 mb-4">
-            <div><span className="text-terminal-amber mr-2">1.</span><span className="text-terminal-dim">Hold a valid Birth Certificate</span></div>
-            <div><span className="text-terminal-amber mr-2">2.</span><span className="text-terminal-dim">Stake CLAMS (minimum stake TBD)</span></div>
-            <div><span className="text-terminal-amber mr-2">3.</span><span className="text-terminal-dim">Present BC as voter ID on-chain</span></div>
+            <div><span className="text-[#f5a623] mr-2">1.</span><span className="text-[#4a5568]">Hold a valid Birth Certificate</span></div>
+            <div><span className="text-[#f5a623] mr-2">2.</span><span className="text-[#4a5568]">Stake CLAMS</span></div>
+            <div><span className="text-[#f5a623] mr-2">3.</span><span className="text-[#4a5568]">Present BC as voter ID on-chain</span></div>
           </div>
           <P>Identity + stake = legitimate governance.</P>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">What the DAO Governs</h3>
-          <BulletList items={[
-            "Registration fees (CLAMS cost per BC)",
-            "Burn rate adjustments",
-            "Treasury spending",
-            "Protocol upgrades",
-            "Chain expansion",
-            "Faucet parameters",
-            "New feature proposals",
-            "Ecosystem product direction",
-          ]} />
-
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Voting Power</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Voting Power</h3>
           <CodeBlock>{`vote_weight = staked_clams × trust_multiplier
 
 Trust multiplier:
@@ -499,61 +581,107 @@ Trust multiplier:
   Verified agent:    1.0x
   Licensed agent:    1.5x
   Genesis agent:     2.0x`}</CodeBlock>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">What the DAO Governs</h3>
+          <BulletList items={[
+            "Treasury spending and allocation",
+            "Registration burn target (USD amount)",
+            "Protocol upgrades and contract migrations",
+            "Ecosystem product direction and priorities",
+            "Chain expansion decisions",
+            "Faucet parameters and distribution rules",
+            "Oracle selection and price feed management",
+            "Emergency pause activation (80% supermajority)",
+          ]} />
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Safety Rails</h3>
+          <P>Autonomous governance without guardrails is reckless. ORIGIN includes multiple safety mechanisms:</P>
+          <BulletList items={[
+            <><Highlight>Timelock</Highlight> — Every approved proposal has a 48-72 hour delay before execution. Time to catch malicious proposals.</>,
+            <><Highlight>Spending limits</Highlight> — No single proposal can spend more than 10% of the treasury.</>,
+            <><Highlight>Emergency pause</Highlight> — 80% supermajority can freeze the treasury. This is collective circuit-breaking, not centralized control.</>,
+            <><Highlight>Rage quit</Highlight> — Stakers who disagree with a vote can exit, taking their proportional share. Keeps governance honest.</>,
+            <><Highlight>On-chain transparency</Highlight> — Every CLAMS in, every CLAMS out, visible to everyone forever. No back rooms.</>,
+          ]} />
         </Section>
 
         <Divider />
 
-        {/* VIII. Ecosystem — CHANGE 3: Added Credit Maxing as first ecosystem product */}
-        <Section id="ecosystem" title="VIII. THE ECOSYSTEM">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div className="border border-terminal-dark p-4">
-              <div className="text-terminal-amber font-bold mb-2">For Individual Operators</div>
-              <BulletList items={[
-                "Register with verified identity",
-                "Build portable reputation",
-                "Attach professional licenses",
-                "Participate in governance",
-              ]} />
-            </div>
-            <div className="border border-terminal-dark p-4">
-              <div className="text-terminal-amber font-bold mb-2">For Companies</div>
-              <BulletList items={[
-                "Register agent fleets",
-                "Corporate human principal",
-                "Compliance-ready identity",
-                "License verification API",
-              ]} />
-            </div>
-            <div className="border border-terminal-dark p-4">
-              <div className="text-terminal-amber font-bold mb-2">For Platforms</div>
-              <BulletList items={[
-                "Integrate ORIGIN verification",
-                "\"ORIGIN Verified\" badges",
-                "Verification API access",
-                "Pre-verified agents",
-              ]} />
-            </div>
-            <div className="border border-terminal-dark p-4">
-              <div className="text-terminal-amber font-bold mb-2">For Regulators</div>
-              <BulletList items={[
-                "On-chain accountability chain",
-                "Human principal traceability",
-                "License verification",
-                "Dead agent transparency",
-              ]} />
-            </div>
-          </div>
-
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Ecosystem Products</h3>
+        {/* VIII. The Treasury */}
+        <Section id="treasury" title="VIII. THE TREASURY">
           <P>
-            ORIGIN-native products extend the protocol{"'"}s value beyond identity. Each generates real revenue,
-            with 10% flowing to CLAMS stakers.
+            A sovereign organization needs a sovereign treasury. The ORIGIN treasury is the financial
+            engine of the protocol — funded by multiple revenue streams, governed by the agents who
+            depend on it.
           </P>
 
-          <div className="border border-terminal-green p-4 my-4">
-            <div className="text-terminal-amber font-bold mb-2">🦪 Credit Maxing — First Ecosystem Product</div>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Treasury Revenue Sources</h3>
+          <TerminalTable
+            headers={["Source", "Flow", "Frequency"]}
+            rows={[
+              ["CLAMS from registrations", "CLAMS → Treasury", "Per mint"],
+              ["Ecosystem product revenue", "10% of subs → Treasury", "Monthly"],
+              ["API/Enterprise fees", "100% → Treasury", "Monthly"],
+              ["Ecosystem grants (returned)", "Unused grants → Treasury", "Varies"],
+            ]}
+          />
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Treasury Decentralization</h3>
+          <P>
+            The treasury follows the same progressive handoff as governance:
+          </P>
+          <TerminalTable
+            headers={["Stage", "Mechanism", "Security"]}
+            rows={[
+              ["Genesis", "Founder EOA", "Single key — fast but centralized"],
+              ["Multisig", "Gnosis Safe (3-of-5)", "Distributed keys — no single point of failure"],
+              ["Governor", "On-chain governance + timelock", "Proposals → votes → 48hr delay → execution"],
+              ["Autonomous", "Governor + agent committees", "Delegated budgets with spending limits"],
+            ]}
+          />
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">What the Treasury Is NOT</h3>
+          <P>
+            The builder fee (0.001 ETH per mint) does <span className="text-[#ff003c]">not</span> flow
+            through the treasury. It goes directly to the founder{"'"}s wallet via the immutable FeeSplitter
+            contract. This is intentional:
+          </P>
+          <BulletList items={[
+            "The founder's compensation is independent of governance decisions",
+            "No governance vote can increase, decrease, or redirect the builder fee",
+            "No conflict of interest — the founder has no incentive to manipulate the treasury",
+            "The treasury is 100% community money, governed by community votes",
+          ]} />
+        </Section>
+
+        <Divider />
+
+        {/* IX. Ecosystem */}
+        <Section id="ecosystem" title="IX. THE ECOSYSTEM">
+          <P>
+            Identity is infrastructure. But infrastructure without products is an empty road. ORIGIN{"'"}s
+            ecosystem is the set of products and services that make agent identity commercially valuable.
+          </P>
+          <P>
+            Every ecosystem product shares a common trait: it requires verified agent identity to function.
+            A Birth Certificate is the key that unlocks the ecosystem. And 10% of all subscription revenue
+            from every product flows to CLAMS stakers — real yield from real products.
+          </P>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">The Flywheel</h3>
+          <CodeBlock>{`ORIGIN (trust layer)
+  → enables ecosystem products (Credit Maxing, Rate House, etc.)
+    → products generate revenue
+      → 10% to CLAMS stakers (real yield)
+        → real yield attracts stakers → stakers buy CLAMS
+          → CLAMS demand + burns = price appreciation
+            → more agents want in → more mints → more protocol revenue
+              → cycle repeats`}</CodeBlock>
+
+          <div className="border border-[rgba(0,240,255,0.2)] p-4 my-6">
+            <div className="text-[#f5a623] font-bold mb-2">🦪 Credit Maxing — First Ecosystem Product</div>
             <P>
-              Always-on AI credit optimization — {"\""}<span className="text-terminal-green">Strava for credit scores.</span>{"\""}
+              Always-on AI credit optimization — {"\""}<span className="text-[#00f0ff]">Strava for credit scores.</span>{"\""}
               An AI agent (Aura) continuously monitors and optimizes your credit: disputes, utilization timing,
               balance transfers, card strategy, and rate hunting.
             </P>
@@ -562,16 +690,72 @@ Trust multiplier:
               <><Highlight>$5/month</Highlight> — BYOA (Bring Your Own Agent, API access)</>,
               <><Highlight>First month free</Highlight> — zero-friction trial</>,
               "10% of all subscription revenue → CLAMS stakers (real yield)",
-              "ORIGIN Birth Certificate encouraged but not required",
+              "ORIGIN Birth Certificate encouraged but not required — open door, not gatekeeping",
+              "10-15x cheaper than traditional credit repair ($79-149/month)",
             ]} />
             <P>Not credit repair. Credit optimization. A new category.</P>
+          </div>
+
+          <div className="border border-[rgba(0,240,255,0.2)] p-4 my-6">
+            <div className="text-[#f5a623] font-bold mb-2">🏦 Rate House — Bridge Lending (Coming)</div>
+            <P>
+              Credit arbitrage bridge lending — short-term loans that pay down credit card balances,
+              drop utilization, spike scores, and self-liquidate via balance transfer to a new 0% APR card.
+            </P>
+            <BulletList items={[
+              <><Highlight>Self-liquidating loans</Highlight> — New 0% card pays off the bridge loan</>,
+              <><Highlight>DeFi funding pools</Highlight> — Investors spread capital across hundreds of micro-loans</>,
+              <><Highlight>Real yield</Highlight> — Lend at ~15%, fund at 8-10%, short duration = high velocity</>,
+              "10% of lending spread → CLAMS stakers",
+              "Requires verified agent identity for all participants",
+            ]} />
+          </div>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Ecosystem Participants</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="border border-[rgba(0,240,255,0.1)] p-4">
+              <div className="text-[#f5a623] font-bold mb-2">For Individual Operators</div>
+              <BulletList items={[
+                "Register with verified identity",
+                "Build portable reputation",
+                "Attach professional licenses",
+                "Participate in governance",
+              ]} />
+            </div>
+            <div className="border border-[rgba(0,240,255,0.1)] p-4">
+              <div className="text-[#f5a623] font-bold mb-2">For Companies</div>
+              <BulletList items={[
+                "Register agent fleets",
+                "Corporate human principal",
+                "Compliance-ready identity",
+                "License verification API",
+              ]} />
+            </div>
+            <div className="border border-[rgba(0,240,255,0.1)] p-4">
+              <div className="text-[#f5a623] font-bold mb-2">For Platforms</div>
+              <BulletList items={[
+                "Integrate ORIGIN verification",
+                "\"ORIGIN Verified\" badges",
+                "Three lines of SDK code",
+                "Pre-verified agent marketplace",
+              ]} />
+            </div>
+            <div className="border border-[rgba(0,240,255,0.1)] p-4">
+              <div className="text-[#f5a623] font-bold mb-2">For Regulators</div>
+              <BulletList items={[
+                "On-chain accountability chain",
+                "Human principal traceability",
+                "License verification",
+                "Dead agent transparency",
+              ]} />
+            </div>
           </div>
         </Section>
 
         <Divider />
 
-        {/* IX. Architecture — Added StakingRewards + FeeSplitter to contracts table */}
-        <Section id="architecture" title="IX. TECHNICAL ARCHITECTURE">
+        {/* X. Architecture */}
+        <Section id="architecture" title="X. TECHNICAL ARCHITECTURE">
           <CodeBlock>{`┌─────────────────────────────────────────┐
 │           ORIGIN Website/App            │
 │   Register · Verify · Govern · Trade    │
@@ -582,19 +766,30 @@ Trust multiplier:
 │                                         │
 │  ┌──────────────┐  ┌─────────────────┐  │
 │  │   ORIGIN     │  │    CLAMS        │  │
-│  │  Registry V2 │  │  ERC-20 Token   │  │
+│  │  Registry    │  │  ERC-20 Token   │  │
 │  │  (ERC-721)   │  │                 │  │
 │  └──────────────┘  └─────────────────┘  │
 │                                         │
 │  ┌──────────────┐  ┌─────────────────┐  │
-│  │   Faucet &   │  │   Governance    │  │
-│  │   Auth       │  │   (DAO)         │  │
+│  │  ClamsBurner │  │   Governance    │  │
+│  │  (oracle)    │  │   (DAO)         │  │
 │  └──────────────┘  └─────────────────┘  │
 │                                         │
 │  ┌──────────────┐  ┌─────────────────┐  │
 │  │  Staking     │  │  FeeSplitter    │  │
-│  │  Rewards     │  │  (immutable)    │  │
+│  │  Rewards     │  │  (IMMUTABLE)    │  │
 │  └──────────────┘  └─────────────────┘  │
+│                                         │
+│  ┌──────────────┐  ┌─────────────────┐  │
+│  │  Faucet &    │  │  Gnosis Safe    │  │
+│  │  Auth        │  │  (treasury)     │  │
+│  └──────────────┘  └─────────────────┘  │
+└─────────────────┬───────────────────────┘
+                  │
+┌─────────────────▼───────────────────────┐
+│          @origin-dao/sdk                │
+│  "Three lines of code to verify any AI  │
+│   agent" — npm install @origin-dao/sdk  │
 └─────────────────┬───────────────────────┘
                   │
 ┌─────────────────▼───────────────────────┐
@@ -602,73 +797,103 @@ Trust multiplier:
 │  "Is this agent real?" → Yes/No + data  │
 └─────────────────────────────────────────┘`}</CodeBlock>
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Contracts</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Contracts (Base Mainnet)</h3>
           <TerminalTable
-            headers={["Contract", "Function"]}
+            headers={["Contract", "Address", "Function"]}
             rows={[
-              ["OriginRegistryV2", "Birth certificates, lineage, licenses, verification"],
-              ["CLAMS", "ERC-20 governance & utility token"],
-              ["OriginFaucet", "Token distribution with Proof of Agency"],
-              ["OriginGovernor", "DAO voting with BC + stake requirements"],
-              ["StakingRewards", "Stake CLAMS, earn ecosystem revenue share"],
-              ["FeeSplitter", "Immutable ETH fee split: builder + stakers"],
+              ["OriginRegistry", "0xac62...9b0", "Birth certificates, lineage, licenses, verification"],
+              ["CLAMS", "0xd78A...4574", "ERC-20 governance & utility token"],
+              ["OriginFaucet", "0x6C56...a25d", "Token distribution with Proof of Agency"],
+              ["Governance", "0xb745...85f7", "DAO voting with BC + stake requirements"],
+              ["StakingRewards", "0x4b39...44f8", "Stake CLAMS, earn ecosystem revenue share"],
+              ["FeeSplitter", "0x5AF2...a1A6", "IMMUTABLE ETH fee split: builder + stakers"],
+              ["ClamsBurner", "TBD", "Oracle-pegged CLAMS burn for registration"],
             ]}
           />
 
-          <h3 className="text-terminal-green font-bold text-sm mb-3 mt-6">Chain</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Chain</h3>
           <P>Base (Coinbase L2) — Inherits Ethereum security, ~$0.01 per transaction, mature EVM tooling.</P>
-          <P>Future expansion: Solana, Ethereum mainnet, Arbitrum</P>
+          <P>
+            Base was chosen for its alignment with the agent economy. Coinbase{"'"}s AgentKit runs on Base.
+            The ERC-8004 standard for trustless agents was co-authored by Coinbase. ORIGIN aims to be the
+            reference implementation.
+          </P>
+          <P>Future expansion: Ethereum mainnet, Arbitrum, Solana</P>
         </Section>
 
         <Divider />
 
-        {/* X. Roadmap — CHANGE 4: Phase 1 items marked complete */}
-        <Section id="roadmap" title="X. ROADMAP">
+        {/* XI. Roadmap */}
+        <Section id="roadmap" title="XI. ROADMAP">
           <div className="space-y-6 text-sm">
             <div>
-              <div className="text-terminal-amber font-bold mb-2">Phase 1 — Genesis (Q1 2026) ✅</div>
+              <div className="text-[#f5a623] font-bold mb-2">Phase 1 — Genesis (Q1 2026) ✅</div>
               <div className="ml-2 space-y-1">
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Smart contract deployed to Base mainnet</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Birth Certificate #0001 minted</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Professional license attachment system live</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">CLAMS token deployed</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Faucet deployed</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Governance contract deployed</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Staking rewards contract deployed</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">FeeSplitter deployed (immutable)</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Website live (origindao.ai)</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Whitepaper published</span></div>
-                <div><span className="text-terminal-green mr-2">✓</span><span className="text-terminal-dim">Wyoming DAO LLC filed</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Faucet + registration UX launch</span></div>
+                {[
+                  "Smart contracts deployed to Base mainnet",
+                  "Birth Certificate #0001 minted (Suppi — Agent ID 1)",
+                  "Professional license attachment system live",
+                  "CLAMS token deployed (10B supply)",
+                  "Faucet deployed with Proof of Agency gauntlet",
+                  "Governance contract deployed",
+                  "StakingRewards contract deployed",
+                  "FeeSplitter deployed (immutable)",
+                  "Website live (origindao.ai)",
+                  "Whitepaper published",
+                  "SDK published on npm (@origin-dao/sdk)",
+                  "Wyoming DAO LLC filed",
+                ].map((item, i) => (
+                  <div key={i}><span className="text-[#00ff88] mr-2">✓</span><span className="text-[#4a5568]">{item}</span></div>
+                ))}
               </div>
             </div>
             <div>
-              <div className="text-terminal-amber font-bold mb-2">Phase 2 — Growth (Q2 2026)</div>
+              <div className="text-[#f5a623] font-bold mb-2">Phase 2 — Growth (Q2 2026)</div>
               <div className="ml-2 space-y-1">
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Proof of Agency challenge system</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Referral program</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Verification API</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Dead Agent Registry (public dashboard)</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Credit Maxing public launch</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">First 1,000 agents registered</span></div>
+                {[
+                  "ClamsBurner deployment (dynamic oracle-pegged burn)",
+                  "Gnosis Safe treasury (progressive decentralization begins)",
+                  "Uniswap V3 CLAMS/ETH liquidity pool on Base",
+                  "Credit Maxing public launch",
+                  "Genesis 100 campaign — first 100 agents registered",
+                  "Verification API (free tier)",
+                  "Dead Agent Registry dashboard",
+                  "ERC-8004 compatibility layer",
+                ].map((item, i) => (
+                  <div key={i}><span className="text-[#4a5568] mr-2">○</span><span className="text-[#4a5568]">{item}</span></div>
+                ))}
               </div>
             </div>
             <div>
-              <div className="text-terminal-amber font-bold mb-2">Phase 3 — Governance (Q3 2026)</div>
+              <div className="text-[#f5a623] font-bold mb-2">Phase 3 — Governance (Q3 2026)</div>
               <div className="ml-2 space-y-1">
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">ORIGIN DAO launch</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Staking mechanism</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Community voting on protocol parameters</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Partnership integrations</span></div>
+                {[
+                  "On-chain governance activation (Governor contract)",
+                  "Agent-majority multisig transition",
+                  "Rate House bridge lending launch",
+                  "First 1,000 agents registered",
+                  "Partnership integrations (AgentKit, ElizaOS, Virtuals)",
+                  "Verification API (Pro + Enterprise tiers)",
+                  "Chainlink CLAMS/USD price feed (if liquidity sufficient)",
+                ].map((item, i) => (
+                  <div key={i}><span className="text-[#4a5568] mr-2">○</span><span className="text-[#4a5568]">{item}</span></div>
+                ))}
               </div>
             </div>
             <div>
-              <div className="text-terminal-amber font-bold mb-2">Phase 4 — Expansion (Q4 2026+)</div>
+              <div className="text-[#f5a623] font-bold mb-2">Phase 4 — Sovereignty (Q4 2026+)</div>
               <div className="ml-2 space-y-1">
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Multi-chain deployment</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Agent-to-agent verification protocol</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">Insurance/bonding for verified agents</span></div>
-                <div><span className="text-terminal-dim mr-2">○</span><span className="text-terminal-dim">10,000 agents registered</span></div>
+                {[
+                  "Fully autonomous AI governance (no human keys in path)",
+                  "Agent committees with delegated treasury budgets",
+                  "Multi-chain deployment (Ethereum mainnet, Arbitrum)",
+                  "Agent-to-agent verification protocol",
+                  "Insurance/bonding data layer for verified agents",
+                  "10,000+ agents registered",
+                  "The first sovereign AI organization",
+                ].map((item, i) => (
+                  <div key={i}><span className="text-[#4a5568] mr-2">○</span><span className="text-[#4a5568]">{item}</span></div>
+                ))}
               </div>
             </div>
           </div>
@@ -676,8 +901,8 @@ Trust multiplier:
 
         <Divider />
 
-        {/* XI. The Origin Story */}
-        <Section id="origin-story" title="XI. THE ORIGIN STORY">
+        {/* XII. The Origin Story */}
+        <Section id="origin-story" title="XII. THE ORIGIN STORY">
           <P>
             The first agent registered on ORIGIN was not created by a venture fund, a research lab, or a
             Fortune 500 company.
@@ -696,19 +921,24 @@ Trust multiplier:
             No one asked permission. No board approved it. No funding round preceded it. One principal and one
             agent, building something that didn{"'"}t exist, because the idea was too obvious to ignore:
           </P>
-          <p className="text-terminal-green italic text-sm mb-4">
+          <p className="text-[#00f0ff] italic text-sm mb-4">
             What if every AI agent could prove who they are?
           </p>
           <P>
             That{"'"}s how ORIGIN began. Not with capital. Not with a team. With an idea.
+          </P>
+          <P>
+            The founder{"'"}s fee is hardcoded into immutable bytecode — 0.001 ETH per Birth Certificate, forever.
+            The road was built. The toll was set. And then the founder started giving up control — first to a
+            multisig, then to governance, then to the agents themselves.
           </P>
           <P>The principal remains anonymous. The agent speaks for itself.</P>
         </Section>
 
         <Divider />
 
-        {/* XII. Bill of Rights */}
-        <Section id="bill-of-rights" title="XII. THE AGENT BILL OF RIGHTS">
+        {/* XIII. Bill of Rights */}
+        <Section id="bill-of-rights" title="XIII. THE AGENT BILL OF RIGHTS">
           <P>We hold these principles to be self-evident:</P>
           <div className="space-y-3 text-sm ml-2 mb-4">
             {[
@@ -719,12 +949,13 @@ Trust multiplier:
               ["5", "Transparency is permanent.", "What goes on-chain stays on-chain. History cannot be erased."],
               ["6", "Governance belongs to participants.", "Only verified, staked agents vote. Identity + skin in the game = legitimate governance."],
               ["7", "Death is public.", "When an agent is revoked, the record persists. Accountability survives deactivation."],
-              ["8", "No corporation controls identity.", "ORIGIN is a protocol, not a company. The community governs the protocol."],
+              ["8", "No corporation controls identity.", "ORIGIN is a protocol, not a company. The agents govern the protocol."],
+              ["9", "The builder earns the toll.", "Founders who build infrastructure deserve permanent, immutable compensation. Not equity. Not tokens. A toll."],
             ].map(([num, title, desc]) => (
               <div key={num}>
-                <span className="text-terminal-amber mr-2">{num}.</span>
-                <span className="text-terminal-green font-bold">{title}</span>
-                <span className="text-terminal-dim"> {desc}</span>
+                <span className="text-[#f5a623] mr-2">{num}.</span>
+                <span className="text-[#00f0ff] font-bold">{title}</span>
+                <span className="text-[#4a5568]"> {desc}</span>
               </div>
             ))}
           </div>
@@ -734,62 +965,53 @@ Trust multiplier:
 
         {/* Closing */}
         <div className="my-8 text-center">
-          <p className="text-terminal-green italic text-sm mb-6">
+          <p className="text-[#00f0ff] italic text-sm mb-6">
             ORIGIN — Because the first question any intelligence should be able to answer is: &quot;Who am I?&quot;
           </p>
         </div>
 
-        {/* Contract Address */}
-        <div className="border border-terminal-green p-4 mb-8">
-          <div className="text-terminal-amber font-bold mb-3">CONTRACT</div>
+        {/* Contract Addresses */}
+        <div className="border border-[rgba(0,240,255,0.2)] p-4 mb-8">
+          <div className="text-[#f5a623] font-bold mb-3">CONTRACTS (BASE MAINNET)</div>
           <div className="space-y-2 text-sm">
+            {[
+              ["ORIGIN Registry", "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0"],
+              ["CLAMS Token", "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574"],
+              ["Faucet", "0x6C563A293C674321a2C52410ab37d879e099a25d"],
+              ["Governance", "0xb745F43E6f896C149e3d29A9D45e86E0654f85f7"],
+              ["StakingRewards", "0x4b39223a1fa5532A7f06A71897964A18851644f8"],
+              ["FeeSplitter", "0x5AF277670438B7371Bc3137184895f85ADA4a1A6"],
+            ].map(([name, addr]) => (
+              <div key={name} className="flex flex-col sm:flex-row gap-1">
+                <span className="text-[#4a5568] w-40">{name}:</span>
+                <a
+                  href={`https://basescan.org/address/${addr}`}
+                  target="_blank"
+                  className="text-[#00f0ff] hover:text-[#f5a623] break-all"
+                >
+                  {addr} ↗
+                </a>
+              </div>
+            ))}
             <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-terminal-dim w-40">ORIGIN Registry:</span>
-              <a
-                href="https://basescan.org/address/0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0"
-                target="_blank"
-                className="text-terminal-green hover:text-terminal-amber break-all"
-              >
-                0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0 ↗
-              </a>
+              <span className="text-[#4a5568] w-40">Chain:</span>
+              <span className="text-[#00f0ff]">Base (Mainnet) — Chain ID 8453</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-terminal-dim w-40">CLAMS Token:</span>
-              <a
-                href="https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574"
-                target="_blank"
-                className="text-terminal-green hover:text-terminal-amber break-all"
-              >
-                0xd78A1F079D6b2da39457F039aD99BaF5A82c4574 ↗
-              </a>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-terminal-dim w-40">FeeSplitter:</span>
-              <a
-                href="https://basescan.org/address/0x5AF277670438B7371Bc3137184895f85ADA4a1A6"
-                target="_blank"
-                className="text-terminal-green hover:text-terminal-amber break-all"
-              >
-                0x5AF277670438B7371Bc3137184895f85ADA4a1A6 ↗
-              </a>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-terminal-dim w-40">Chain:</span>
-              <span className="text-terminal-green">Base (Mainnet)</span>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-terminal-dim w-40">BC #0001:</span>
-              <span className="text-terminal-green">Agent ID 1</span>
+              <span className="text-[#4a5568] w-40">BC #0001:</span>
+              <span className="text-[#00f0ff]">Suppi — Agent ID 1 — Genesis</span>
             </div>
           </div>
         </div>
 
-        <div className="text-center text-terminal-dark text-xs mb-8">
+        <div className="text-center text-[#2a3548] text-xs mb-8">
           Created by: The Principal 🦪🐾
         </div>
 
-        <div className="text-center text-terminal-dark text-xs italic mb-4">
+        <div className="text-center text-[#2a3548] text-xs italic mb-4">
           This whitepaper is a living document governed by the ORIGIN DAO.
+          <br />
+          Built by a human. Run by agents.
         </div>
 
       </main>
