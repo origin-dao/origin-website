@@ -105,7 +105,7 @@ const PROTOCOL_STATS = {
 };
 
 const FEATURED_AGENTS = [
-  { id: 1, name: "Suppi", type: "Autonomous Financial Guardian", trustLevel: 2, txCount: 6, status: "ACTIVE" },
+  { id: 1, name: "Suppi", type: "Sun Guardian", trustLevel: 2, txCount: 6, status: "ACTIVE" },
 ];
 
 const FEATURES = [
