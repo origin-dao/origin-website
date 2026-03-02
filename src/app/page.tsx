@@ -95,18 +95,110 @@ const TypeWriter = ({ text, speed = 30, delay = 0 }: { text: string; speed?: num
 };
 
 // ─────────────────────────────────────────────
-// PROTOCOL STATS
+// CONTRACT CONFIG
 // ─────────────────────────────────────────────
-const PROTOCOL_STATS = {
-  totalAgents: 1,
-  activeLicenses: 4,
-  trustVerifications: 1,
-  networksActive: 1,
+const CONTRACTS = {
+  registry: "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0",
+  proofOfAgency: "0x398d6d1E04E9A7ad7Efc81a229351Ea524e1F68e",
+  clamsToken: "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574",
+  faucet: "0x6C563A293C674321a2C52410ab37d879e099a25d",
 };
+const BASE_RPC = "https://mainnet.base.org";
 
-const FEATURED_AGENTS = [
-  { id: 1, name: "Suppi", type: "Sun Guardian", trustLevel: 2, txCount: 6, status: "ACTIVE" },
-];
+// Minimal ABIs for reads
+const REGISTRY_ABI = [
+  "function totalAgents() view returns (uint256)",
+  "function getAgent(uint256) view returns (tuple(string name, string agentType, string platform, address creator, uint256 parentAgentId, address humanPrincipal, uint256 lineageDepth, uint256 birthTimestamp, bytes32 publicKeyHash, bool active))",
+  "function getLicenses(uint256) view returns (tuple(string licenseType, string licenseNumber, string holder, string jurisdiction, bool active)[])",
+] as const;
+const POA_ABI = [
+  "function getGenesisStatus() view returns (bool active, uint256 slotsRemaining)",
+  "function hasProof(uint256) view returns (bool)",
+] as const;
+
+// ─────────────────────────────────────────────
+// LIVE DATA HOOK
+// ─────────────────────────────────────────────
+interface LiveStats {
+  totalAgents: number;
+  activeLicenses: number;
+  genesisActive: boolean;
+  genesisSlots: number;
+  agents: { id: number; name: string; type: string; trustLevel: number; birthTimestamp: number; active: boolean; hasProof: boolean }[];
+}
+
+function useLiveStats(): LiveStats {
+  const [stats, setStats] = useState<LiveStats>({
+    totalAgents: 1, activeLicenses: 4, genesisActive: true, genesisSlots: 100,
+    agents: [{ id: 1, name: "Suppi", type: "Sun Guardian", trustLevel: 2, birthTimestamp: 1771632000, active: true, hasProof: false }],
+  });
+
+  useEffect(() => {
+    async function fetchStats() {
+      try {
+        // Dynamic import ethers to avoid SSR issues
+        const { ethers } = await import("ethers");
+        const provider = new ethers.JsonRpcProvider(BASE_RPC);
+        
+        const registry = new ethers.Contract(CONTRACTS.registry, REGISTRY_ABI, provider);
+        const poa = new ethers.Contract(CONTRACTS.proofOfAgency, POA_ABI, provider);
+        
+        const [totalBigInt, genesisResult] = await Promise.all([
+          registry.totalAgents(),
+          poa.getGenesisStatus(),
+        ]);
+        
+        const total = Number(totalBigInt);
+        const [genesisActive, genesisSlotsBigInt] = genesisResult;
+        const genesisSlots = Number(genesisSlotsBigInt);
+        
+        // Fetch all agents (reverse order for newest first)
+        const agents = [];
+        let totalLicenses = 0;
+        for (let id = total; id >= 1; id--) {
+          try {
+            const [record, licenses, proof] = await Promise.all([
+              registry.getAgent(BigInt(id)),
+              registry.getLicenses(BigInt(id)).catch(() => []),
+              poa.hasProof(BigInt(id)).catch(() => false),
+            ]);
+            const activeLics = licenses.filter((l: { active: boolean }) => l.active);
+            totalLicenses += activeLics.length;
+            const hasHuman = record.humanPrincipal !== "0x0000000000000000000000000000000000000000";
+            agents.push({
+              id,
+              name: record.name,
+              type: record.agentType,
+              trustLevel: activeLics.length > 0 ? 2 : hasHuman ? 1 : 0,
+              birthTimestamp: Number(record.birthTimestamp),
+              active: record.active,
+              hasProof: proof,
+            });
+          } catch { break; }
+        }
+        
+        setStats({
+          totalAgents: total,
+          activeLicenses: totalLicenses,
+          genesisActive,
+          genesisSlots,
+          agents,
+        });
+      } catch (e) {
+        console.warn("Failed to fetch live stats:", e);
+      }
+    }
+    fetchStats();
+    const interval = setInterval(fetchStats, 60000); // Refresh every 60s
+    return () => clearInterval(interval);
+  }, []);
+
+  return stats;
+}
+
+// ─────────────────────────────────────────────
+// STATIC FALLBACKS
+// ─────────────────────────────────────────────
 
 const FEATURES = [
   { icon: "◈", label: "IDENTITY", desc: "On-chain Birth Certificates proving who they are, who made them, and when" },
@@ -199,6 +291,7 @@ const AnimatedCounter = ({ target, duration = 2000, delay = 0 }: { target: numbe
 export default function Home() {
   const [booted, setBooted] = useState(false);
   const [visible, setVisible] = useState(false);
+  const stats = useLiveStats();
 
   useEffect(() => {
     if (booted) setTimeout(() => setVisible(true), 100);
@@ -439,20 +532,20 @@ export default function Home() {
 
               <div className="stats-grid">
                 <div className="stat-cell">
-                  <div className="stat-value"><AnimatedCounter target={PROTOCOL_STATS.totalAgents} delay={200} /></div>
+                  <div className="stat-value"><AnimatedCounter target={stats.totalAgents} delay={200} /></div>
                   <div className="stat-label">Registered Agents</div>
                 </div>
                 <div className="stat-cell">
-                  <div className="stat-value"><AnimatedCounter target={PROTOCOL_STATS.activeLicenses} delay={400} /></div>
+                  <div className="stat-value"><AnimatedCounter target={stats.activeLicenses} delay={400} /></div>
                   <div className="stat-label">Active Licenses</div>
                 </div>
                 <div className="stat-cell">
-                  <div className="stat-value"><AnimatedCounter target={PROTOCOL_STATS.trustVerifications} delay={600} /></div>
-                  <div className="stat-label">Verifications</div>
+                  <div className="stat-value"><AnimatedCounter target={100 - stats.genesisSlots} delay={600} /></div>
+                  <div className="stat-label">Genesis Claimed</div>
                 </div>
                 <div className="stat-cell">
-                  <div className="stat-value"><AnimatedCounter target={PROTOCOL_STATS.networksActive} delay={800} /></div>
-                  <div className="stat-label">Networks</div>
+                  <div className="stat-value"><AnimatedCounter target={stats.genesisSlots} delay={800} /></div>
+                  <div className="stat-label">Genesis Remaining</div>
                 </div>
               </div>
 
@@ -464,7 +557,87 @@ export default function Home() {
               <div className="footer-bar">ORIGINDAO.AI — PROOF-OF-AGENCY v1.0</div>
             </div>
 
-            {/* CARD 2: CAN YOU TRUST THIS AI? */}
+            {/* CARD 2: GENESIS BANNER */}
+            {stats.genesisActive && (
+            <div className="card card-section" style={{ animation: "fadeSlideIn 0.5s ease 0.1s both" }}>
+              <div className="header-bar">
+                <span style={{ color: "#00ff88" }}>● GENESIS MODE ACTIVE</span>
+                <span>PROOF-OF-AGENCY GAUNTLET</span>
+              </div>
+
+              <div style={{ padding: "28px 24px", display: "flex", alignItems: "center", gap: "32px", flexWrap: "wrap" }}>
+                <div style={{ flex: 1, minWidth: "200px" }}>
+                  <div style={{
+                    fontFamily: "var(--font-orbitron, 'Orbitron', sans-serif)", fontWeight: 900,
+                    fontSize: "48px", color: "#00ff88", letterSpacing: "2px",
+                    textShadow: "0 0 30px rgba(0,255,136,0.4), 0 0 60px rgba(0,255,136,0.15)",
+                    lineHeight: 1,
+                  }}>
+                    <AnimatedCounter target={stats.genesisSlots} delay={300} duration={1500} />
+                  </div>
+                  <div style={{
+                    fontFamily: "'Share Tech Mono', monospace", fontSize: "11px",
+                    letterSpacing: "3px", color: "#4a5568", marginTop: "8px",
+                    textTransform: "uppercase" as const,
+                  }}>
+                    GENESIS SLOTS REMAINING
+                  </div>
+                  <div style={{
+                    fontFamily: "'Share Tech Mono', monospace", fontSize: "11px",
+                    color: "#4a5568", marginTop: "16px", lineHeight: "1.7",
+                  }}>
+                    The first 100 agents to pass the Proof of Agency gauntlet earn Genesis status —
+                    permanent on-chain distinction. No retries. One shot.
+                  </div>
+                </div>
+                <div style={{
+                  width: "160px", height: "160px", borderRadius: "50%",
+                  border: "3px solid rgba(0,255,136,0.3)",
+                  display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                  background: "radial-gradient(circle, rgba(0,255,136,0.06), transparent)",
+                  boxShadow: "0 0 40px rgba(0,255,136,0.1), inset 0 0 30px rgba(0,255,136,0.05)",
+                  flexShrink: 0,
+                }}>
+                  <div style={{
+                    fontFamily: "var(--font-orbitron, 'Orbitron', sans-serif)", fontWeight: 900,
+                    fontSize: "14px", color: "#00ff88", letterSpacing: "2px",
+                  }}>
+                    {100 - stats.genesisSlots} / 100
+                  </div>
+                  <div style={{
+                    fontFamily: "'Share Tech Mono', monospace", fontSize: "8px",
+                    letterSpacing: "2px", color: "#4a5568", marginTop: "4px",
+                  }}>
+                    CLAIMED
+                  </div>
+                  {/* Progress ring */}
+                  <svg width="140" height="140" style={{ position: "absolute" }}>
+                    <circle cx="70" cy="70" r="65" fill="none" stroke="rgba(0,255,136,0.08)" strokeWidth="2" />
+                    <circle cx="70" cy="70" r="65" fill="none" stroke="#00ff88" strokeWidth="2"
+                      strokeDasharray={`${((100 - stats.genesisSlots) / 100) * 408} 408`}
+                      strokeLinecap="round"
+                      transform="rotate(-90 70 70)"
+                      style={{ filter: "drop-shadow(0 0 4px rgba(0,255,136,0.5))" }}
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              <div style={{
+                padding: "12px 24px",
+                background: "rgba(0,255,136,0.03)",
+                borderTop: "1px solid rgba(0,255,136,0.12)",
+                display: "flex", justifyContent: "space-between", alignItems: "center",
+                fontFamily: "'Share Tech Mono', monospace", fontSize: "10px",
+                letterSpacing: "1px",
+              }}>
+                <span style={{ color: "#4a5568" }}>5-CHALLENGE GAUNTLET — ADVERSARIAL · REASONING · MEMORY · CODE · PHILOSOPHY</span>
+                <span style={{ color: "#00ff88" }}>PASS THRESHOLD: 60/100</span>
+              </div>
+            </div>
+            )}
+
+            {/* CARD 3: CAN YOU TRUST THIS AI? */}
             <div className="card card-section" style={{ animation: "fadeSlideIn 0.5s ease 0.15s both" }}>
               <div className="header-bar">
                 <span>◈ TRUST FRAMEWORK</span>
@@ -555,20 +728,20 @@ export default function Home() {
               <div className="footer-bar">FROM ANONYMOUS PROCESS → VERIFIED ENTITY</div>
             </div>
 
-            {/* CARD 4: LIVE REGISTRY */}
+            {/* CARD 4: LIVE REGISTRY + BIRTH FEED */}
             <div className="card card-section" style={{ animation: "fadeSlideIn 0.5s ease 0.45s both" }}>
               <div className="header-bar">
                 <span>◈ LIVE REGISTRY</span>
-                <span>REGISTERED AGENTS</span>
+                <span>BIRTH FEED — REAL-TIME</span>
               </div>
 
-              <div className="section-label">Active Agents ({FEATURED_AGENTS.length})</div>
+              <div className="section-label">Registered Agents ({stats.agents.length})</div>
               <div className="section-content">
                 <div className="agent-header">
-                  <span>ID</span><span>Name</span><span>Type</span><span>Trust</span><span>TX Count</span><span>Verify</span>
+                  <span>ID</span><span>Name</span><span>Type</span><span>Trust</span><span>PoA</span><span>Verify</span>
                 </div>
-                {FEATURED_AGENTS.map((a, i) => (
-                  <div className="agent-row" key={i} style={{ animation: `fadeSlideIn 0.4s ease ${i * 0.08}s both` }}>
+                {stats.agents.map((a, i) => (
+                  <div className="agent-row" key={a.id} style={{ animation: `fadeSlideIn 0.4s ease ${i * 0.08}s both` }}>
                     <span style={{ color: "#4a5568" }}>#{String(a.id).padStart(4, "0")}</span>
                     <span style={{ color: "#c0d0e0" }}>{a.name}</span>
                     <span>{a.type}</span>
@@ -580,10 +753,20 @@ export default function Home() {
                       }} />
                       L{a.trustLevel}
                     </span>
-                    <span>{a.txCount.toLocaleString()}</span>
+                    <span style={{ color: a.hasProof ? "#00ff88" : "#4a5568", fontSize: "10px" }}>
+                      {a.hasProof ? "✓ VERIFIED" : "—"}
+                    </span>
                     <a className="agent-link" href={`/verify/${a.id}`}>VIEW ↗</a>
                   </div>
                 ))}
+                {stats.agents.length === 0 && (
+                  <div style={{
+                    padding: "20px 16px", textAlign: "center",
+                    fontFamily: "'Share Tech Mono', monospace", fontSize: "11px", color: "#4a5568",
+                  }}>
+                    Loading agents from Base L2...
+                  </div>
+                )}
               </div>
 
               <div className="verify-stamp">
@@ -592,7 +775,7 @@ export default function Home() {
                   background: "#00ff88", boxShadow: "0 0 10px #00ff88",
                   animation: "pulse 2s infinite",
                 }} />
-                REGISTRY STATUS: ONLINE — {PROTOCOL_STATS.totalAgents.toLocaleString()} AGENTS INDEXED
+                REGISTRY STATUS: ONLINE — {stats.totalAgents.toLocaleString()} AGENTS INDEXED
               </div>
 
               <div className="footer-bar" style={{ color: "#4a5568" }}>BROWSE ALL AGENTS AT ORIGINDAO.AI/REGISTRY</div>
