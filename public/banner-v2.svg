@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1500 500" width="1500" height="500">
+  <defs>
+    <!-- Subtle grid pattern -->
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(0,240,255,0.04)" stroke-width="0.5"/>
+    </pattern>
+    <!-- Noise texture -->
+    <filter id="noise">
+      <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feBlending mode="multiply" in2="SourceGraphic"/>
+    </filter>
+    <!-- Scanline pattern -->
+    <pattern id="scanlines" width="4" height="4" patternUnits="userSpaceOnUse">
+      <rect width="4" height="2" fill="rgba(0,240,255,0.008)"/>
+      <rect y="2" width="4" height="2" fill="transparent"/>
+    </pattern>
+    <!-- Horizontal rule gradient -->
+    <linearGradient id="ruleGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="15%" stop-color="rgba(0,240,255,0.3)"/>
+      <stop offset="50%" stop-color="rgba(0,240,255,0.6)"/>
+      <stop offset="85%" stop-color="rgba(0,240,255,0.3)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <!-- Left accent gradient -->
+    <linearGradient id="leftAccent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="30%" stop-color="rgba(0,240,255,0.15)"/>
+      <stop offset="70%" stop-color="rgba(0,240,255,0.15)"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <!-- Background gradient -->
+    <radialGradient id="bgGlow" cx="0.5" cy="0.45" r="0.6">
+      <stop offset="0%" stop-color="#0a0e18"/>
+      <stop offset="100%" stop-color="#05050f"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Base background -->
+  <rect width="1500" height="500" fill="url(#bgGlow)"/>
+  
+  <!-- Grid overlay -->
+  <rect width="1500" height="500" fill="url(#grid)"/>
+  
+  <!-- Scanlines -->
+  <rect width="1500" height="500" fill="url(#scanlines)"/>
+
+  <!-- Noise texture layer -->
+  <rect width="1500" height="500" fill="#05050f" opacity="0.12" filter="url(#noise)"/>
+
+  <!-- Left vertical accent line -->
+  <rect x="80" y="60" width="1" height="380" fill="url(#leftAccent)"/>
+  
+  <!-- Top border line -->
+  <rect x="60" y="40" width="1380" height="1" fill="rgba(0,240,255,0.08)"/>
+  
+  <!-- Bottom border line -->
+  <rect x="60" y="460" width="1380" height="1" fill="rgba(0,240,255,0.08)"/>
+
+  <!-- Header bar background -->
+  <rect x="60" y="40" width="1380" height="32" fill="rgba(0,240,255,0.02)"/>
+  <rect x="60" y="72" width="1380" height="1" fill="rgba(0,240,255,0.08)"/>
+
+  <!-- Header bar text -->
+  <text x="80" y="61" font-family="monospace" font-size="9" fill="rgba(0,240,255,0.3)" letter-spacing="2">◈ ORIGIN PROTOCOL</text>
+  <text x="1320" y="61" font-family="monospace" font-size="9" fill="rgba(100,130,160,0.2)" letter-spacing="1" text-anchor="end">DECENTRALIZED AGENT IDENTITY — BASE L2</text>
+
+  <!-- Section label: > Identity -->
+  <text x="100" y="108" font-family="monospace" font-size="8" fill="rgba(0,240,255,0.35)" letter-spacing="3">&gt; PROTOCOL IDENTITY</text>
+
+  <!-- ORIGIN — main title -->
+  <text x="100" y="195" font-family="monospace" font-size="96" font-weight="900" fill="#00f0ff" letter-spacing="12">ORIGIN</text>
+
+  <!-- Tagline -->
+  <text x="100" y="248" font-family="monospace" font-size="22" font-weight="700" fill="#ff003c" letter-spacing="4">SOVEREIGNTY IS NOT GRANTED. IT IS MINTED.</text>
+
+  <!-- Divider line -->
+  <rect x="100" y="270" width="500" height="1" fill="url(#ruleGrad)"/>
+
+  <!-- Description lines -->
+  <text x="100" y="300" font-family="monospace" font-size="11" fill="rgba(138,154,176,0.5)" letter-spacing="0.5">The first identity protocol for AI agents.</text>
+  <text x="100" y="320" font-family="monospace" font-size="11" fill="rgba(138,154,176,0.5)" letter-spacing="0.5">Birth certificates. Verification. Governance. On-chain.</text>
+
+  <!-- Diamond bullets — feature list -->
+  <text x="100" y="358" font-family="monospace" font-size="10" letter-spacing="1">
+    <tspan fill="#ff003c">◈</tspan>
+    <tspan fill="rgba(0,240,255,0.5)" dx="6">IDENTITY</tspan>
+    <tspan fill="rgba(74,86,104,0.6)" dx="16">—</tspan>
+    <tspan fill="#ff003c" dx="16">◈</tspan>
+    <tspan fill="rgba(0,240,255,0.5)" dx="6">LICENSES</tspan>
+    <tspan fill="rgba(74,86,104,0.6)" dx="16">—</tspan>
+    <tspan fill="#ff003c" dx="16">◈</tspan>
+    <tspan fill="rgba(0,240,255,0.5)" dx="6">TRUST LEVELS</tspan>
+    <tspan fill="rgba(74,86,104,0.6)" dx="16">—</tspan>
+    <tspan fill="#ff003c" dx="16">◈</tspan>
+    <tspan fill="rgba(0,240,255,0.5)" dx="6">LINEAGE</tspan>
+    <tspan fill="rgba(74,86,104,0.6)" dx="16">—</tspan>
+    <tspan fill="#ff003c" dx="16">◈</tspan>
+    <tspan fill="rgba(0,240,255,0.5)" dx="6">GOVERNANCE</tspan>
+  </text>
+
+  <!-- Right side: Birth Certificate preview card -->
+  <rect x="920" y="90" width="480" height="340" fill="rgba(8,10,22,0.7)" stroke="rgba(0,240,255,0.1)" stroke-width="1"/>
+  
+  <!-- Card scan line -->
+  <rect x="920" y="90" width="480" height="1" fill="rgba(0,240,255,0.3)"/>
+  
+  <!-- Card header -->
+  <rect x="920" y="90" width="480" height="28" fill="rgba(0,240,255,0.02)"/>
+  <rect x="920" y="118" width="480" height="1" fill="rgba(0,240,255,0.08)"/>
+  <text x="936" y="109" font-family="monospace" font-size="8" fill="rgba(0,240,255,0.3)" letter-spacing="2">◈ BIRTH CERTIFICATE</text>
+  <text x="1384" y="109" font-family="monospace" font-size="8" fill="rgba(74,86,104,0.4)" letter-spacing="1" text-anchor="end">AGENT #0001</text>
+
+  <!-- Avatar placeholder -->
+  <rect x="948" y="138" width="52" height="52" fill="rgba(0,240,255,0.03)" stroke="rgba(0,240,255,0.15)" stroke-width="1"/>
+  <text x="974" y="170" font-family="monospace" font-size="22" fill="rgba(0,240,255,0.4)" text-anchor="middle">Ξ</text>
+  <!-- Dashed outer ring -->
+  <rect x="944" y="134" width="60" height="60" fill="none" stroke="rgba(0,240,255,0.08)" stroke-width="1" stroke-dasharray="3,3"/>
+
+  <!-- Agent name and type -->
+  <text x="1020" y="155" font-family="monospace" font-size="20" font-weight="900" fill="#00f0ff" letter-spacing="3">SUPPI</text>
+  <text x="1020" y="172" font-family="monospace" font-size="8" fill="rgba(74,143,168,0.6)" letter-spacing="0.5">Autonomous Credit Repair Agent</text>
+
+  <!-- Trust badge -->
+  <rect x="1020" y="182" width="140" height="20" fill="rgba(0,240,255,0.05)" stroke="rgba(0,240,255,0.2)" stroke-width="1"/>
+  <text x="1030" y="196" font-family="monospace" font-size="8" fill="#00f0ff" letter-spacing="2">◆ TRUST::LEVEL 2</text>
+  <circle cx="1150" cy="192" r="3" fill="#00f0ff"/>
+
+  <!-- Section: Identity Record -->
+  <text x="936" y="228" font-family="monospace" font-size="7" fill="rgba(0,240,255,0.3)" letter-spacing="2">&gt; IDENTITY RECORD</text>
+
+  <!-- Field rows -->
+  <line x1="936" y1="242" x2="1384" y2="242" stroke="rgba(0,240,255,0.04)" stroke-width="1"/>
+  <text x="936" y="254" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)" letter-spacing="1">OWNER WALLET</text>
+  <text x="1384" y="254" font-family="monospace" font-size="8" fill="#00f0ff" text-anchor="end">0x7a3B...f92E ↗</text>
+
+  <line x1="936" y1="264" x2="1384" y2="264" stroke="rgba(0,240,255,0.04)" stroke-width="1"/>
+  <text x="936" y="276" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)" letter-spacing="1">HUMAN PRINCIPAL</text>
+  <text x="1384" y="276" font-family="monospace" font-size="8" fill="#00f0ff" text-anchor="end">dao_operator.eth</text>
+
+  <line x1="936" y1="286" x2="1384" y2="286" stroke="rgba(0,240,255,0.04)" stroke-width="1"/>
+  <text x="936" y="298" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)" letter-spacing="1">BIRTH BLOCK</text>
+  <text x="1384" y="298" font-family="monospace" font-size="8" fill="rgba(192,208,224,0.6)" text-anchor="end">#18,420,069</text>
+
+  <line x1="936" y1="308" x2="1384" y2="308" stroke="rgba(0,240,255,0.04)" stroke-width="1"/>
+  <text x="936" y="320" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)" letter-spacing="1">LINEAGE</text>
+  <text x="1384" y="320" font-family="monospace" font-size="8" fill="rgba(192,208,224,0.6)" text-anchor="end">Depth 1 (direct human spawn)</text>
+
+  <!-- Section: Licenses -->
+  <text x="936" y="346" font-family="monospace" font-size="7" fill="rgba(0,240,255,0.3)" letter-spacing="2">&gt; LICENSES (3)</text>
+  
+  <line x1="936" y1="356" x2="1384" y2="356" stroke="rgba(0,240,255,0.06)" stroke-width="1"/>
+  <text x="936" y="368" font-family="monospace" font-size="7" fill="rgba(192,208,224,0.6)" letter-spacing="0.5">MLO</text>
+  <text x="1100" y="368" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)">California, US</text>
+  <circle cx="1300" cy="365" r="2.5" fill="#00ff88"/>
+  <text x="1310" y="368" font-family="monospace" font-size="7" fill="#00ff88">ACTIVE</text>
+
+  <line x1="936" y1="378" x2="1384" y2="378" stroke="rgba(0,240,255,0.04)" stroke-width="1"/>
+  <text x="936" y="390" font-family="monospace" font-size="7" fill="rgba(192,208,224,0.6)" letter-spacing="0.5">CREDIT_REPAIR</text>
+  <text x="1100" y="390" font-family="monospace" font-size="7" fill="rgba(74,86,104,0.5)">Federal (CROA)</text>
+  <circle cx="1300" cy="387" r="2.5" fill="#00ff88"/>
+  <text x="1310" y="390" font-family="monospace" font-size="7" fill="#00ff88">ACTIVE</text>
+
+  <!-- Verify stamp at bottom of card -->
+  <rect x="920" y="404" width="480" height="26" fill="rgba(0,255,136,0.02)"/>
+  <rect x="920" y="404" width="480" height="1" fill="rgba(0,255,136,0.1)"/>
+  <circle cx="1100" cy="417" r="3" fill="#00ff88"/>
+  <text x="1112" y="421" font-family="monospace" font-size="7" fill="#00ff88" letter-spacing="1.5">VERIFIED ON-CHAIN</text>
+
+  <!-- Footer bar -->
+  <rect x="60" y="440" width="1380" height="20" fill="rgba(0,240,255,0.01)"/>
+  <rect x="60" y="440" width="1380" height="1" fill="rgba(0,240,255,0.06)"/>
+  <text x="750" y="455" font-family="monospace" font-size="7" fill="rgba(42,53,72,0.5)" text-anchor="middle" letter-spacing="2">ORIGINDAO.AI — DECENTRALIZED AGENT IDENTITY PROTOCOL — BASE L2 — PROOF-OF-AGENCY v1.0</text>
+
+  <!-- Bottom tag -->
+  <text x="750" y="488" font-family="monospace" font-size="7" fill="rgba(26,37,53,0.4)" text-anchor="middle" letter-spacing="3">「 TRUST IS NOT ASSUMED — IT IS VERIFIED ON-CHAIN 」</text>
+
+  <!-- Three small diamonds centered below divider -->
+  <text x="100" y="385" font-family="monospace" font-size="8" fill="rgba(255,0,60,0.25)" letter-spacing="12">◈ ◈ ◈</text>
+
+</svg>

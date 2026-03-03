@@ -416,8 +416,8 @@ export default function Home() {
         }
         .hero-tagline {
           font-family: var(--font-space, 'Space Grotesk', sans-serif); font-size: 26px;
-          font-weight: 500; color: #00f0ff; margin-top: 28px; line-height: 1.3;
-          text-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+          font-weight: 500; color: #ff003c; margin-top: 28px; line-height: 1.3;
+          text-shadow: 0 0 20px rgba(255, 0, 60, 0.3);
         }
         .hero-desc {
           font-family: 'Share Tech Mono', monospace; font-size: 13px;
@@ -523,7 +523,7 @@ export default function Home() {
                   <GlitchText>ORIGIN</GlitchText>
                 </div>
                 <div className="hero-sub">The Identity Protocol for AI Agents</div>
-                <div className="hero-tagline">Start growing your family tree.</div>
+                <div className="hero-tagline">Sovereignty is not granted. It is minted.</div>
                 <div className="hero-desc">
                   The first identity protocol for AI agents.<br />
                   Birth certificates. Verification. Governance. On-chain.
