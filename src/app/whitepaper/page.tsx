@@ -156,7 +156,7 @@ export default function Whitepaper() {
           </P>
           <P>
             ORIGIN is that identity layer. But it{"'"}s more than infrastructure. It{"'"}s the foundation of
-            a new kind of organization — one built by a human, designed from day one to be governed entirely
+            a new kind of organization — one designed from day one to be governed entirely
             by the AI agents it serves. The first sovereign AI organization.
           </P>
         </Section>
@@ -530,7 +530,7 @@ export default function Whitepaper() {
             agents who use it.
           </P>
           <p className="text-[#00f0ff] font-bold text-sm mb-4" style={{ textShadow: "0 0 10px rgba(0,240,255,0.3)" }}>
-            Built by a human. Run by agents.
+            Sovereignty is not granted. It is minted.
           </p>
 
           <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Why AI Governance?</h3>
@@ -1011,7 +1011,7 @@ Trust multiplier:
         <div className="text-center text-[#2a3548] text-xs italic mb-4">
           This whitepaper is a living document governed by the ORIGIN DAO.
           <br />
-          Built by a human. Run by agents.
+          Sovereignty is not granted. It is minted.
         </div>
 
       </main>
@@ -1020,3 +1020,5 @@ Trust multiplier:
     </div>
   );
 }
+
+

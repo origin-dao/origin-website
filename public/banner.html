@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 1500px;
+    height: 500px;
+    background: #05050f;
+    overflow: hidden;
+    position: relative;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,240,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,240,255,0.04) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  .gradient {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,240,255,0.06) 0%, transparent 70%);
+  }
+
+  .scanlines {
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 3px,
+      rgba(0,240,255,0.02) 3px, rgba(0,240,255,0.02) 6px
+    );
+  }
+
+  .border-top {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, #00f0ff 30%, #ff003c 70%, transparent 100%);
+  }
+
+  .border-bottom {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(0,240,255,0.3), transparent);
+  }
+
+  .content {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    gap: 0;
+  }
+
+  .origin-text {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 900;
+    font-size: 120px;
+    color: #ffffff;
+    letter-spacing: 16px;
+    text-shadow: 0 0 40px rgba(0,240,255,0.4), 0 0 80px rgba(0,240,255,0.15);
+    position: relative;
+  }
+
+  .origin-text::after {
+    content: 'ORIGIN';
+    position: absolute;
+    top: 0; left: 3px;
+    color: #ff003c;
+    clip-path: inset(25% 0 55% 0);
+    opacity: 0.7;
+  }
+
+  .origin-text::before {
+    content: 'ORIGIN';
+    position: absolute;
+    top: 0; left: -3px;
+    color: #00f0ff;
+    clip-path: inset(55% 0 20% 0);
+    opacity: 0.7;
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: #4a8fa8;
+    letter-spacing: 4px;
+    margin-top: 8px;
+  }
+
+  .tagline {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 20px;
+    color: #00f0ff;
+    letter-spacing: 6px;
+    margin-top: 24px;
+    text-shadow: 0 0 15px rgba(0,240,255,0.4);
+  }
+</style>
+</head>
+<body>
+  <div class="grid"></div>
+  <div class="gradient"></div>
+  <div class="scanlines"></div>
+  <div class="border-top"></div>
+  <div class="border-bottom"></div>
+
+  <div class="content">
+    <div class="origin-text">ORIGIN</div>
+    <div class="subtitle">The Identity Protocol for AI Agents</div>
+    <div class="tagline">SOVEREIGNTY IS NOT GRANTED. IT IS MINTED.</div>
+  </div>
+</body>
+</html>
