@@ -554,13 +554,6 @@ function FaucetAndStaking() {
             </div>
           </div>
 
-          <Link href="/faucet" style={{
-            display: "block", width: "100%", padding: "12px", textAlign: "center", textDecoration: "none",
-            fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
-            color: "#000", background: "var(--neon-cyan)", boxShadow: "0 0 15px rgba(0,200,255,0.3)", transition: "all 0.3s",
-          }}>
-            🐚 CLAIM CLAMS
-          </Link>
         </Panel>
 
         {/* STAKING */}
@@ -613,13 +606,6 @@ function FaucetAndStaking() {
             ))}
           </div>
 
-          <Link href="/staking" style={{
-            display: "block", width: "100%", padding: "12px", textAlign: "center", textDecoration: "none",
-            fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
-            color: "#000", background: "var(--neon-yellow)", boxShadow: "0 0 15px rgba(255,230,0,0.3)", transition: "all 0.2s",
-          }}>
-            🔒 STAKE CLAMS
-          </Link>
         </Panel>
       </div>
 
