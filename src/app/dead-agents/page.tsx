@@ -579,11 +579,12 @@ export default function DeadAgentsPage() {
   const [terminated, setTerminated] = useState(0);
 
   useEffect(() => {
-    let i = 0;
+    let idx = 0;
     const iv = setInterval(() => {
-      if (i < BOOT.length) {
-        setBootLines(prev => [...prev, BOOT[i]]);
-        i++;
+      if (idx < BOOT.length) {
+        const line = BOOT[idx];
+        setBootLines(prev => [...prev, line]);
+        idx++;
       } else {
         clearInterval(iv);
         setTimeout(() => setPhase("main"), 600);
@@ -610,17 +611,20 @@ export default function DeadAgentsPage() {
               {SKULL_ART}
             </pre>
             <div style={{ fontFamily: "var(--void-mono)", fontSize: 13, color: "var(--void-red)", lineHeight: 2.2 }}>
-              {bootLines.map((line, i) => (
-                <div key={i} style={{
-                  opacity: 0, animation: "fadeIn 0.15s ease-out forwards",
-                  animationDelay: `${i * 0.03}s`,
-                  color: line.includes("WARN") ? "var(--void-neon-yellow)"
-                    : line.includes("▸▸▸") ? "var(--void-red)"
-                    : line.includes("DEAD") ? "var(--void-red-dim)"
-                    : "var(--void-red)",
-                  fontWeight: line.includes("▸▸▸") ? 700 : 400,
-                }}>{line}</div>
-              ))}
+              {bootLines.map((line, i) => {
+                const l = line || "";
+                return (
+                  <div key={i} style={{
+                    opacity: 0, animation: "fadeIn 0.15s ease-out forwards",
+                    animationDelay: `${i * 0.03}s`,
+                    color: l.includes("WARN") ? "var(--void-neon-yellow)"
+                      : l.includes("▸▸▸") ? "var(--void-red)"
+                      : l.includes("DEAD") ? "var(--void-red-dim)"
+                      : "var(--void-red)",
+                    fontWeight: l.includes("▸▸▸") ? 700 : 400,
+                  }}>{l}</div>
+                );
+              })}
               {bootLines.length < BOOT.length && <Cursor />}
             </div>
           </div>
