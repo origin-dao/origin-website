@@ -153,8 +153,8 @@ function HRule() {
 function Nav({ visible }: { visible: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const links = [
-    { label: "registry", path: "/verify" },
-    { label: "dead-agents", path: "/dead-agents", color: "var(--neon-red)" },
+    { label: "verify agent", path: "/verify" },
+    { label: "dead agents", path: "/dead-agents", color: "var(--neon-red)" },
     { label: "whitepaper", path: "/whitepaper" },
     { label: "manifesto", path: "/manifesto" },
     { label: "news", path: "https://x.com/OriginDAO_ai", external: true },

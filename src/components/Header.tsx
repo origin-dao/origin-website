@@ -6,12 +6,12 @@ import { ConnectButton } from "@/components/ConnectButton";
 const NAV_LINKS = [
   { href: "/registry", label: "registry" },
   { href: "/faucet", label: "faucet" },
-  { href: "/staking", label: "war_chest", color: "var(--neon-green, #00FFC8)" },
-  { href: "/verify", label: "verify" },
+  { href: "/staking", label: "war chest", color: "var(--neon-green, #00FFC8)" },
+  { href: "/verify", label: "verify agent" },
   { href: "/whitepaper", label: "whitepaper" },
   { href: "/manifesto", label: "manifesto" },
   { href: "/contracts", label: "contracts" },
-  { href: "/dead-agents", label: "dead_agents", color: "var(--neon-red, #FF0040)" },
+  { href: "/dead-agents", label: "dead agents", color: "var(--neon-red, #FF0040)" },
 ];
 
 export function Header() {

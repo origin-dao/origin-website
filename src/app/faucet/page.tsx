@@ -83,8 +83,8 @@ function Panel({ children, title, accent = "green", noPad = false, style = {} }:
 function Nav() {
   const [hov, setHov] = useState<number | null>(null);
   const links = [
-    { label: "registry", href: "/verify" },
-    { label: "dead-agents", href: "/dead-agents", color: "var(--neon-red)" },
+    { label: "verify agent", href: "/verify" },
+    { label: "dead agents", href: "/dead-agents", color: "var(--neon-red)" },
     { label: "whitepaper", href: "/whitepaper" },
     { label: "manifesto", href: "/manifesto" },
     { label: "news", href: "https://x.com/OriginDAO_ai", external: true },

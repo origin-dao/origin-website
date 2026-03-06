@@ -577,6 +577,7 @@ export default function DeadAgentsPage() {
   const [bootLines, setBootLines] = useState<string[]>([]);
   const [revoking, setRevoking] = useState<DeadAgent | null>(null);
   const [terminated, setTerminated] = useState(0);
+  const [walletConnected] = useState(false); // TODO: wire to useAccount() when ready
 
   useEffect(() => {
     let idx = 0;
@@ -659,15 +660,21 @@ export default function DeadAgentsPage() {
 
           {/* Header */}
           <div style={{ marginBottom: 32 }}>
-            <Link href="/" style={{
-              textDecoration: "none", display: "flex", alignItems: "center", gap: 10, marginBottom: 20
-            }}>
-              <span style={{
-                fontFamily: "var(--void-display)", fontSize: 14, fontWeight: 800,
-                color: "var(--void-red)", textShadow: "0 0 10px rgba(255,0,64,0.3)", letterSpacing: 3
-              }}>◈ ORIGIN</span>
-              <span style={{ fontFamily: "var(--void-mono)", fontSize: 9, color: "var(--void-dim-red)", letterSpacing: 1 }}>v1.0.0</span>
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <Link href="/" style={{
+                textDecoration: "none", display: "flex", alignItems: "center", gap: 10,
+              }}>
+                <span style={{
+                  fontFamily: "var(--void-display)", fontSize: 14, fontWeight: 800,
+                  color: "var(--void-red)", textShadow: "0 0 10px rgba(255,0,64,0.3)", letterSpacing: 3
+                }}>◈ ORIGIN</span>
+                <span style={{ fontFamily: "var(--void-mono)", fontSize: 9, color: "var(--void-dim-red)", letterSpacing: 1 }}>v1.0.0</span>
+              </Link>
+              <Link href="/" style={{
+                fontFamily: "var(--void-mono)", fontSize: 10, color: "var(--void-dim-red)",
+                textDecoration: "none", letterSpacing: 1, transition: "color 0.2s",
+              }}>← back to origin</Link>
+            </div>
 
             <pre style={{
               fontFamily: "var(--void-mono)", fontSize: 10, color: "var(--void-red-dim)",
@@ -712,8 +719,8 @@ export default function DeadAgentsPage() {
             </div>
           </div>
 
-          {/* YOUR AGENTS — Revoke section */}
-          {MY_AGENTS.length > 0 && (
+          {/* YOUR AGENTS — Revoke section (only when wallet connected) */}
+          {walletConnected && MY_AGENTS.length > 0 && (
             <Panel title="⚠️ YOUR_AGENTS // REVOCATION AVAILABLE" accent="red" style={{ marginBottom: 32 }}>
               <div style={{
                 fontFamily: "var(--void-mono)", fontSize: 11, color: "var(--void-dim-red)",

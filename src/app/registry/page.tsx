@@ -714,10 +714,13 @@ export default function RegistryPage() {
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
           {/* Header */}
           <div style={{ marginBottom: 32 }}>
-            <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10, marginBottom: 20 }}>
-              <span style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>◈ ORIGIN</span>
-              <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>v1.0.0</span>
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>◈ ORIGIN</span>
+                <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>v1.0.0</span>
+              </Link>
+              <Link href="/" style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", textDecoration: "none", letterSpacing: 1, transition: "color 0.2s" }}>← back to origin</Link>
+            </div>
             <h1 style={{
               fontFamily: "var(--display)", fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 900,
               letterSpacing: 4, color: "var(--neon-green)", textShadow: "0 0 30px rgba(0,255,200,0.2)", marginBottom: 6,

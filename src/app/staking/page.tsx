@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 // ═══════════════════════════════════════════
 // CLAMS WAR CHEST — CYBERPUNK STAKING TERMINAL
@@ -455,6 +456,11 @@ export default function StakingPage() {
       <style>{STAKING_STYLES}</style>
       <Scanlines />
       <div style={{ minHeight: "100vh", background: "var(--bg)", padding: "30px 24px", maxWidth: 1200, margin: "0 auto" }}>
+        {/* Back nav */}
+        <div style={{ marginBottom: 12, animation: "fadeIn 0.3s ease-out" }}>
+          <Link href="/" style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", textDecoration: "none", letterSpacing: 1, transition: "color 0.2s" }}>← back to origin</Link>
+        </div>
+
         {/* Header */}
         <div style={{ marginBottom: 28, animation: "fadeIn 0.5s ease-out" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 4 }}>
