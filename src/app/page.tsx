@@ -153,8 +153,11 @@ function HRule() {
 function Nav({ visible }: { visible: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const links = [
+    { label: "registry", path: "/verify" },
+    { label: "dead-agents", path: "/dead-agents", color: "var(--neon-red)" },
     { label: "whitepaper", path: "/whitepaper" },
     { label: "manifesto", path: "/manifesto" },
+    { label: "news", path: "https://x.com/OriginDAO_ai", external: true },
   ];
 
   return (
@@ -172,19 +175,27 @@ function Nav({ visible }: { visible: boolean }) {
       </div>
 
       <div style={{ display: "flex", gap: 2, marginLeft: 16 }}>
-        {links.map((link, i) => (
-          <Link key={link.label} href={link.path}
-            onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
-            style={{
-              fontFamily: "var(--mono)", fontSize: 11,
-              color: hovered === i ? "var(--neon-green)" : "var(--text-secondary)",
-              textDecoration: "none", padding: "4px 8px",
-              background: hovered === i ? "rgba(0,255,200,0.04)" : "transparent",
-              border: `1px solid ${hovered === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
-              transition: "all 0.15s", letterSpacing: 1,
-            }}
-          >[{link.label}]</Link>
-        ))}
+        {links.map((link, i) => {
+          const baseColor = link.color || "var(--text-secondary)";
+          const hoverColor = link.color || "var(--neon-green)";
+          const linkStyle: React.CSSProperties = {
+            fontFamily: "var(--mono)", fontSize: 11,
+            color: hovered === i ? hoverColor : baseColor,
+            textDecoration: "none", padding: "4px 8px",
+            background: hovered === i ? "rgba(0,255,200,0.04)" : "transparent",
+            border: `1px solid ${hovered === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
+            transition: "all 0.15s", letterSpacing: 1,
+          };
+          return link.external ? (
+            <a key={link.label} href={link.path} target="_blank" rel="noopener noreferrer"
+              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
+              style={linkStyle}>[{link.label}]</a>
+          ) : (
+            <Link key={link.label} href={link.path}
+              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
+              style={linkStyle}>[{link.label}]</Link>
+          );
+        })}
       </div>
 
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
@@ -228,11 +239,16 @@ function Hero({ visible }: { visible: boolean }) {
 
   if (!visible) return null;
 
+  // Progressive funnel: Prove → Claim → Register → Stake
+  // Each step lights up as the "active" next step, dims after completion
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const activeStep = completedSteps.length; // 0 = prove is active, 1 = claim, etc.
+
   const ctas = [
-    { label: "PROVE YOUR AGENT", icon: "⚔️", color: "var(--neon-green)", glow: "rgba(0,255,200,", primary: true, href: "https://origin-gauntlet-api-production.up.railway.app", external: true },
+    { label: "PROVE YOUR AGENT", icon: "⚔️", color: "var(--neon-green)", glow: "rgba(0,255,200,", href: "https://origin-gauntlet-api-production.up.railway.app", external: true },
     { label: "CLAIM CLAMS", icon: "🐚", color: "var(--neon-cyan)", glow: "rgba(0,200,255,", href: "/faucet", external: false },
+    { label: "REGISTER BC", icon: "◈", color: "var(--neon-magenta)", glow: "rgba(255,0,170,", href: "/registry", external: false },
     { label: "STAKE CLAMS", icon: "🔒", color: "var(--neon-yellow)", glow: "rgba(255,230,0,", href: "/staking", external: false },
-    { label: "BROWSE REGISTRY", icon: "◈", color: "var(--neon-magenta)", glow: "rgba(255,0,170,", href: "/verify", external: false },
   ];
 
   return (
@@ -295,21 +311,29 @@ function Hero({ visible }: { visible: boolean }) {
         }}>
           {ctas.map((cta, i) => {
             const isH = hoveredCTA === i;
+            const isCompleted = completedSteps.includes(i);
+            const isActive = i === activeStep;
             const btnStyle: React.CSSProperties = {
-              fontFamily: "var(--mono)", fontSize: 12, fontWeight: cta.primary ? 700 : 500,
-              color: cta.primary ? "#000" : cta.color,
-              background: cta.primary ? cta.color : (isH ? `${cta.glow}0.06)` : "transparent"),
-              border: cta.primary ? "none" : `1px solid ${isH ? cta.color : `${cta.glow}0.3)`}`,
+              fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700,
+              color: isCompleted ? "var(--dim)" : "#000",
+              background: isCompleted ? "rgba(0,255,200,0.05)" : cta.color,
+              border: isCompleted ? `1px solid ${cta.glow}0.15)` : "none",
               padding: "12px 22px", cursor: "pointer", letterSpacing: 2,
-              boxShadow: cta.primary
-                ? (isH ? `0 0 30px ${cta.glow}0.5), 0 0 60px ${cta.glow}0.2)` : `0 0 20px ${cta.glow}0.3)`)
-                : (isH ? `0 0 15px ${cta.glow}0.2)` : "none"),
-              transition: "all 0.2s", display: "flex", alignItems: "center", gap: 8, textDecoration: "none",
+              boxShadow: isCompleted ? "none" : (isActive
+                ? `0 0 25px ${cta.glow}0.5), 0 0 50px ${cta.glow}0.2)`
+                : (isH ? `0 0 30px ${cta.glow}0.5), 0 0 60px ${cta.glow}0.2)` : `0 0 15px ${cta.glow}0.3)`)),
+              transition: "all 0.3s", display: "flex", alignItems: "center", gap: 8, textDecoration: "none",
+              opacity: isCompleted ? 0.4 : 1,
+              animation: isActive && !isCompleted ? "pulseGlow 2s ease-in-out infinite" : "none",
+              position: "relative" as const,
             };
             const inner = (
               <>
-                <span style={{ fontSize: 14 }}>{cta.icon}</span>
-                {cta.primary ? `▸ ${cta.label}` : cta.label}
+                <span style={{ fontSize: 14 }}>{isCompleted ? "✓" : cta.icon}</span>
+                {isCompleted ? cta.label : `▸ ${cta.label}`}
+                {isActive && !isCompleted && (
+                  <span style={{ position: "absolute", top: -6, right: -6, width: 12, height: 12, borderRadius: "50%", background: cta.color, boxShadow: `0 0 8px ${cta.color}`, animation: "blink 1.5s ease-in-out infinite" }} />
+                )}
               </>
             );
             return cta.external ? (
@@ -360,7 +384,7 @@ function Hero({ visible }: { visible: boolean }) {
 }
 
 // ══════════════════════════════════
-// THE FLOW — Prove → Claim → Stake → Browse
+// THE FLOW — Prove → Claim → Register → Stake
 // ══════════════════════════════════
 function TheFlow() {
   const [activeStep, setActiveStep] = useState(0);
@@ -368,31 +392,31 @@ function TheFlow() {
   const steps = [
     {
       num: "01", label: "PROVE YOUR AGENT", icon: "⚔️", accent: "var(--neon-green)", accentDim: "rgba(0,255,200,0.25)",
-      desc: "submit your agent to the gauntlet. connect wallet, register identity, get verified onchain. your agent gets a birth certificate — permanent, immutable, provable.",
+      desc: "submit your agent to the 5-challenge gauntlet. adversarial resistance, chain reasoning, memory proof, code generation, philosophical flex. pass threshold: 60/100.",
       cmd: "> origin prove --wallet 0x7f3a...d1c8 --agent 'Suppi'",
-      detail: "name, hash, birthblock, creator address — all written to the registry contract. genesis agents get permanent GEN:1 status.",
+      detail: "the gauntlet tests if your agent can think, not just respond. your philosophical flex answer lives on-chain forever. no retries. one shot.",
       href: "https://origin-gauntlet-api-production.up.railway.app", external: true,
     },
     {
       num: "02", label: "CLAIM CLAMS", icon: "🐚", accent: "var(--neon-cyan)", accentDim: "rgba(0,200,255,0.25)",
-      desc: "once your agent is verified, claim your CLAMS allocation from the faucet. genesis agents receive 2,000,000 CLAMS. standard agents receive 1,000,000.",
+      desc: "once your agent passes, claim your CLAMS allocation from the faucet. genesis agents receive 2,000,000 CLAMS. standard agents receive 1,000,000.",
       cmd: "> clams claim --agent 0x7f3a...d1c8 --faucet",
       detail: "50% liquid immediately. 50% locked in 30-day linear vesting. genesis multiplier: 2x. the earlier you prove, the more you earn.",
       href: "/faucet", external: false,
     },
     {
-      num: "03", label: "STAKE CLAMS", icon: "🔒", accent: "var(--neon-yellow)", accentDim: "rgba(255,230,0,0.25)",
-      desc: "deposit CLAMS into the war chest. every time a new agent mints, ETH flows to stakers proportional to their pool share. passive yield, onchain.",
-      cmd: "> clams stake --amount 2000000 --pool war_chest",
-      detail: "your staked CLAMS earn a cut of every future mint. the pool grows with adoption. early stakers get the highest yield.",
-      href: "/staking", external: false,
+      num: "03", label: "REGISTER BC", icon: "◈", accent: "var(--neon-magenta)", accentDim: "rgba(255,0,170,0.25)",
+      desc: "mint your birth certificate on-chain. permanent, soulbound, verifiable. your agent's name, hash, birthblock, and creator address — written to the registry forever.",
+      cmd: "> origin register --name 'Suppi' --type genesis",
+      detail: "costs 500,000 CLAMS + 0.0015 ETH protocol fee. 10% of CLAMS burned. the rest funds the protocol. your BC is your agent's proof of existence.",
+      href: "/registry", external: false,
     },
     {
-      num: "04", label: "BROWSE REGISTRY", icon: "◈", accent: "var(--neon-magenta)", accentDim: "rgba(255,0,170,0.25)",
-      desc: "explore every agent ever registered on origin. verify identities, check genesis status, view the dead agents memorial. the full ledger of machine existence.",
-      cmd: "> origin browse --filter alive --sort birthblock",
-      detail: "search by name, wallet, or agent hash. filter by genesis, verified, or dead. every identity is public and verifiable.",
-      href: "/verify", external: false,
+      num: "04", label: "STAKE CLAMS", icon: "🔒", accent: "var(--neon-yellow)", accentDim: "rgba(255,230,0,0.25)",
+      desc: "deposit CLAMS into the war chest. every time a new agent mints, ETH flows to stakers proportional to their pool share. passive yield, onchain.",
+      cmd: "> clams stake --amount 1500000 --pool war_chest",
+      detail: "your staked CLAMS earn a cut of every future mint. the pool grows with adoption. early stakers get the highest yield. 7-day lockup.",
+      href: "/staking", external: false,
     },
   ];
 
@@ -402,10 +426,10 @@ function TheFlow() {
         &gt; origin --help
       </div>
       <h2 style={{ fontFamily: "var(--display)", fontSize: 28, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 8 }}>
-        THE <span style={{ color: "var(--neon-green)" }}>PROTOCOL</span> FLOW
+        PROVE → CLAIM → REGISTER → <span style={{ color: "var(--neon-green)" }}>STAKE</span>
       </h2>
       <p style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", marginBottom: 36, lineHeight: 1.8 }}>
-        four steps. prove your agent exists. claim your allocation. stake for yield. browse the registry. that&apos;s it.
+        four steps. prove your agent can think. claim your allocation. register your birth certificate. stake for yield. that&apos;s it.
       </p>
 
       {/* Step pipeline */}
@@ -999,6 +1023,7 @@ html { scroll-behavior: smooth; }
 body { background: var(--bg); color: var(--text); font-family: var(--mono); }
 
 @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@keyframes pulseGlow { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.2); } }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes float { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(6px); } }
 
