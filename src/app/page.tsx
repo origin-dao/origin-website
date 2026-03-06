@@ -332,9 +332,7 @@ function Hero({ visible }: { visible: boolean }) {
               <>
                 <span style={{ fontSize: 14 }}>{isCompleted ? "✓" : cta.icon}</span>
                 {isCompleted ? cta.label : `▸ ${cta.label}`}
-                {isActive && !isCompleted && (
-                  <span style={{ position: "absolute", top: -6, right: -6, width: 12, height: 12, borderRadius: "50%", background: cta.color, boxShadow: `0 0 8px ${cta.color}`, animation: "blink 1.5s ease-in-out infinite" }} />
-                )}
+
               </>
             );
             return cta.external ? (
