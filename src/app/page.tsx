@@ -315,9 +315,10 @@ function Hero({ visible }: { visible: boolean }) {
             const isActive = i === activeStep;
             const btnStyle: React.CSSProperties = {
               fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700,
-              color: isCompleted ? "var(--dim)" : "#000",
-              background: isCompleted ? "rgba(0,255,200,0.05)" : cta.color,
-              border: isCompleted ? `1px solid ${cta.glow}0.15)` : "none",
+              color: isCompleted ? "var(--dim)" : cta.color,
+              background: isCompleted ? "rgba(0,255,200,0.05)" : `${cta.glow}0.08)`,
+              border: `1px solid ${isCompleted ? `${cta.glow}0.15)` : `${cta.glow}0.4)`}`,
+              backdropFilter: "blur(4px)",
               padding: "12px 22px", cursor: "pointer", letterSpacing: 2,
               boxShadow: isCompleted ? "none" : (isActive
                 ? `0 0 25px ${cta.glow}0.5), 0 0 50px ${cta.glow}0.2)`
