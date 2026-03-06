@@ -153,13 +153,8 @@ function HRule() {
 function Nav({ visible }: { visible: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null);
   const links = [
-    { label: "registry", path: "/registry" },
-    { label: "faucet", path: "/faucet" },
-    { label: "staking", path: "/staking" },
-    { label: "verify", path: "/verify" },
     { label: "whitepaper", path: "/whitepaper" },
     { label: "manifesto", path: "/manifesto" },
-    { label: "dead-agents", path: "/dead-agents", accent: "red" as const },
   ];
 
   return (
@@ -182,7 +177,7 @@ function Nav({ visible }: { visible: boolean }) {
             onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
             style={{
               fontFamily: "var(--mono)", fontSize: 11,
-              color: link.accent === "red" ? (hovered === i ? "var(--neon-red)" : "rgba(255,0,64,0.5)") : (hovered === i ? "var(--neon-green)" : "var(--text-secondary)"),
+              color: hovered === i ? "var(--neon-green)" : "var(--text-secondary)",
               textDecoration: "none", padding: "4px 8px",
               background: hovered === i ? "rgba(0,255,200,0.04)" : "transparent",
               border: `1px solid ${hovered === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
