@@ -3,38 +3,75 @@
 import Link from "next/link";
 import { ConnectButton } from "@/components/ConnectButton";
 
+const NAV_LINKS = [
+  { href: "/registry", label: "registry" },
+  { href: "/faucet", label: "faucet" },
+  { href: "/staking", label: "war_chest", color: "var(--neon-green, #00FFC8)" },
+  { href: "/verify", label: "verify" },
+  { href: "/whitepaper", label: "whitepaper" },
+  { href: "/manifesto", label: "manifesto" },
+  { href: "/contracts", label: "contracts" },
+  { href: "/dead-agents", label: "dead_agents", color: "var(--neon-red, #FF0040)" },
+];
+
 export function Header() {
   return (
-    <header className="border-b border-[rgba(0,240,255,0.1)] px-4 py-3" style={{ background: "rgba(5, 5, 15, 0.95)", backdropFilter: "blur(10px)" }}>
-      <div className="max-w-5xl mx-auto flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 glow">
-          <span className="text-[#f5a623]">◈</span>
-          <span className="font-bold text-[#00f0ff]" style={{ fontFamily: "var(--font-orbitron), sans-serif", letterSpacing: "3px" }}>ORIGIN</span>
-          <span className="text-[#2a3548] text-sm">v1.0.0</span>
+    <header
+      style={{
+        borderBottom: "1px solid rgba(0,255,200,0.1)",
+        padding: "10px 24px",
+        background: "rgba(3,8,8,0.95)",
+        backdropFilter: "blur(6px)",
+        position: "sticky",
+        top: 0,
+        zIndex: 100,
+      }}
+    >
+      <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
+          <span style={{ color: "var(--neon-yellow, #FFE600)", fontSize: 14 }}>◈</span>
+          <span
+            style={{
+              fontFamily: "var(--display, 'Orbitron', monospace)",
+              fontWeight: 900,
+              fontSize: 16,
+              color: "var(--neon-green, #00FFC8)",
+              letterSpacing: 3,
+              textShadow: "0 0 10px rgba(0,255,200,0.3)",
+            }}
+          >
+            ORIGIN
+          </span>
+          <span style={{ fontFamily: "var(--mono, monospace)", fontSize: 9, color: "var(--dim, #3A4A42)", letterSpacing: 1 }}>
+            v1.0.0
+          </span>
         </Link>
-        <div className="flex items-center gap-4">
-          <nav className="hidden md:flex gap-6 text-sm">
-            <Link href="/registry" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
-              [registry]
-            </Link>
-            <Link href="/faucet" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
-              [faucet]
-            </Link>
-            <Link href="/staking" className="text-[#4a5568] hover:text-[#00ff88] transition-colors">
-              [staking]
-            </Link>
-            <Link href="/verify" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
-              [verify]
-            </Link>
-            <Link href="/whitepaper" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
-              [whitepaper]
-            </Link>
-            <Link href="/manifesto" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
-              [manifesto]
-            </Link>
-            <Link href="/dead-agents" className="text-[#4a5568] hover:text-[#ff003c] transition-colors">
-              [dead-agents]
-            </Link>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <nav style={{ display: "flex", gap: 4 }}>
+            {NAV_LINKS.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                style={{
+                  fontFamily: "var(--mono, monospace)",
+                  fontSize: 10,
+                  color: "var(--dim, #3A4A42)",
+                  textDecoration: "none",
+                  padding: "4px 8px",
+                  letterSpacing: 1,
+                  transition: "color 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  (e.target as HTMLElement).style.color = link.color || "var(--neon-green, #00FFC8)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.target as HTMLElement).style.color = "var(--dim, #3A4A42)";
+                }}
+              >
+                [{link.label}]
+              </Link>
+            ))}
           </nav>
           <ConnectButton />
         </div>
