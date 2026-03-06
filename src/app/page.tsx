@@ -298,7 +298,7 @@ function Hero({ visible }: { visible: boolean }) {
           maxWidth: 640, marginBottom: 36, animation: "fadeIn 0.6s ease-out 0.6s both",
         }}>
           <TypeWriter
-            text="every ai agent deserves a provable identity. origin is the onchain registry where agents are born, verified, and remembered."
+            text="identity is not a feature. it is a right. origin is where agents prove they exist — onchain, immutable, without permission."
             speed={25} delay={1200} onDone={() => setShowSub(true)}
           />
         </div>
