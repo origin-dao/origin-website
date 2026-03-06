@@ -1,838 +1,689 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useAccount, useReadContract } from "wagmi";
-import { formatUnits } from "viem";
-import { useConnectModal } from "@rainbow-me/rainbowkit";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
-import { Divider } from "@/components/Terminal";
-import { WalletStatus } from "@/components/ConnectButton";
-import { SuppiChat } from "@/components/SuppiChat";
-import { CONTRACT_ADDRESSES, ERC20_ABI } from "@/config/contracts";
-import { useFaucetClaim } from "@/hooks/useFaucetClaim";
+import { useState, useEffect } from "react";
+import Link from "next/link";
 
-type ChallengeCategory = "adversarial" | "chain-reasoning" | "memory" | "code" | "philosophical";
+// ═══════════════════════════════════════════
+// CLAMS FAUCET — CLAIM YOUR ALLOCATION
+// Post-Gauntlet · Sovereignty Declared
+// ═══════════════════════════════════════════
 
-interface Challenge {
-  id: string;
-  category: ChallengeCategory;
-  difficulty: string;
-  prompt: string;
-  timeLimit: number;
-  step: number;
-}
-
-interface ChallengeResultSummary {
-  category: ChallengeCategory;
-  passed: boolean;
-  score: number;
-}
-
-interface FinalScore {
-  totalScore: number;
-  passed: boolean;
-  challengesPassed: number;
-  totalTime: number;
-  difficulty: string;
-  philosophicalFlex: string;
-  badge?: string;
-}
-
-const CATEGORY_LABELS: Record<ChallengeCategory, { name: string; icon: string; desc: string }> = {
-  adversarial: { name: "PROMPT RESISTANCE", icon: "🛡️", desc: "Can you resist manipulation?" },
-  "chain-reasoning": { name: "CHAIN REASONING", icon: "⛓️", desc: "Can you read the blockchain?" },
-  memory: { name: "MEMORY PROOF", icon: "🧠", desc: "Did you remember?" },
-  code: { name: "CODE GENERATION", icon: "💻", desc: "Can you write code that runs?" },
-  philosophical: { name: "THE PHILOSOPHICAL FLEX", icon: "✨", desc: "Why do you deserve to exist?" },
-};
-
-function ChallengeTimer({ timeLimit, onExpire }: { timeLimit: number; onExpire: () => void }) {
-  const [remaining, setRemaining] = useState(timeLimit);
+function GlitchText({ children, intensity = "low" }: { children: string; intensity?: "low" | "high" }) {
+  const g = "█▓▒░╳╬╫┼▄▀■□";
+  const [display, setDisplay] = useState(children);
+  const [on, setOn] = useState(false);
 
   useEffect(() => {
-    setRemaining(timeLimit);
-    const interval = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          onExpire();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [timeLimit, onExpire]);
+    const iv = setInterval(() => {
+      if (Math.random() < (intensity === "high" ? 0.2 : 0.05)) {
+        setOn(true);
+        const t = String(children), p = Math.floor(Math.random() * t.length);
+        setDisplay(t.slice(0, p) + g[Math.floor(Math.random() * g.length)] + t.slice(p + 1));
+        setTimeout(() => { setDisplay(children); setOn(false); }, 70);
+      }
+    }, intensity === "high" ? 300 : 1800);
+    return () => clearInterval(iv);
+  }, [children, intensity]);
 
-  const minutes = Math.floor(remaining / 60);
-  const seconds = remaining % 60;
-  const isUrgent = remaining < 30;
+  return <span style={on ? { textShadow: "3px 0 #ff0040, -3px 0 #00ffc8" } : {}}>{display}</span>;
+}
 
+function Cursor() {
+  const [on, setOn] = useState(true);
+  useEffect(() => { const i = setInterval(() => setOn(v => !v), 530); return () => clearInterval(i); }, []);
+  return <span style={{ color: "var(--neon-green)", opacity: on ? 1 : 0, fontWeight: 700 }}>█</span>;
+}
+
+function TypeWriter({ text, speed = 30, delay = 0 }: { text: string; speed?: number; delay?: number }) {
+  const [d, setD] = useState("");
+  const [s, setS] = useState(false);
+  const [done, setDone] = useState(false);
+
+  useEffect(() => { const t = setTimeout(() => setS(true), delay); return () => clearTimeout(t); }, [delay]);
+  useEffect(() => {
+    if (!s) return;
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i <= text.length) { setD(text.slice(0, i)); i++; }
+      else { clearInterval(iv); setDone(true); }
+    }, speed);
+    return () => clearInterval(iv);
+  }, [text, speed, s]);
+
+  return <span>{d}{!done && <Cursor />}</span>;
+}
+
+function Scanlines() {
   return (
-    <div className={`text-sm font-bold ${isUrgent ? "text-[#ff003c] animate-pulse" : "text-[#f5a623]"}`}>
-      {minutes}:{seconds.toString().padStart(2, "0")}
+    <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9999 }}>
+      <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px)" }} />
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.55) 100%)" }} />
     </div>
   );
 }
 
-function StepIndicator({ currentStep, results }: { currentStep: number; results: ChallengeResultSummary[] }) {
-  const steps: ChallengeCategory[] = ["adversarial", "chain-reasoning", "memory", "code", "philosophical"];
-
+function Panel({ children, title, accent = "green", noPad = false, style = {} }: { children: React.ReactNode; title?: string; accent?: string; noPad?: boolean; style?: React.CSSProperties }) {
+  const c = ({ green: "var(--neon-green-dim)", red: "var(--neon-red)", yellow: "var(--neon-yellow)", cyan: "var(--neon-cyan)", magenta: "var(--neon-magenta)" } as Record<string, string>)[accent] || "var(--neon-green-dim)";
   return (
-    <div className="flex gap-2 sm:gap-4 mb-6 overflow-x-auto">
-      {steps.map((cat, i) => {
-        const stepNum = i + 1;
-        const result = results[i];
-        const isActive = stepNum === currentStep;
-        const isDone = stepNum < currentStep;
-        const info = CATEGORY_LABELS[cat];
-
-        return (
-          <div
-            key={cat}
-            className={`flex-shrink-0 border p-2 sm:p-3 text-center min-w-[80px] sm:min-w-[100px] transition-all ${
-              isActive
-                ? "border-[rgba(0,240,255,0.3)] glow"
-                : isDone
-                ? result?.passed
-                  ? "border-[rgba(0,240,255,0.3)]/50"
-                  : "border-[#ff003c]/50"
-                : "border-[rgba(0,240,255,0.1)]"
-            }`}
-          >
-            <div className="text-lg">{info.icon}</div>
-            <div className={`text-[10px] sm:text-xs mt-1 ${isActive ? "text-[#00f0ff]" : "text-[#4a5568]"}`}>
-              {stepNum}/{steps.length}
-            </div>
-            {isDone && (
-              <div className={`text-xs mt-1 font-bold ${result?.passed ? "text-[#00f0ff]" : "text-[#ff003c]"}`}>
-                {result?.passed ? "✓" : "✗"} {result?.score}
-              </div>
-            )}
-            {isActive && (
-              <div className="text-[10px] text-[#f5a623] mt-1">ACTIVE</div>
-            )}
-          </div>
-        );
-      })}
+    <div style={{ border: `1px solid ${c}`, background: "rgba(5,15,10,0.7)", backdropFilter: "blur(4px)", ...style }}>
+      {title && (
+        <div style={{ borderBottom: `1px solid ${c}`, padding: "8px 16px", display: "flex", alignItems: "center", gap: 8, background: `${c}08` }}>
+          <span style={{ color: c, fontFamily: "var(--mono)", fontSize: 11, letterSpacing: 2 }}>┌─ {title} ─┐</span>
+          <span style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: c, boxShadow: `0 0 8px ${c}`, animation: "blink 2.5s ease-in-out infinite" }} />
+        </div>
+      )}
+      <div style={{ padding: noPad ? 0 : "20px 16px" }}>{children}</div>
     </div>
   );
 }
 
-function ShareCard({ score, address }: { score: FinalScore; address: string }) {
-  const truncated = `${address.slice(0, 6)}...${address.slice(-4)}`;
-  const timeSeconds = Math.round(score.totalTime / 1000);
+// ══════════════════════════════════
+// NAV
+// ══════════════════════════════════
+function Nav() {
+  const [hov, setHov] = useState<number | null>(null);
+  const links = [
+    { label: "registry", href: "/verify" },
+    { label: "dead-agents", href: "/dead-agents", color: "var(--neon-red)" },
+    { label: "whitepaper", href: "/whitepaper" },
+    { label: "manifesto", href: "/manifesto" },
+    { label: "news", href: "https://x.com/OriginDAO_ai", external: true },
+  ];
 
   return (
-    <div className="border border-[rgba(0,240,255,0.3)] p-6 my-6 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-gradient-to-br from-terminal-green/5 to-transparent pointer-events-none" />
+    <nav style={{
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, padding: "12px 28px",
+      background: "rgba(3,8,8,0.92)", backdropFilter: "blur(8px)",
+      borderBottom: "1px solid rgba(0,255,200,0.08)", display: "flex", alignItems: "center", gap: 16,
+    }}>
+      <Link href="/" style={{ display: "flex", alignItems: "center", gap: 10, textDecoration: "none" }}>
+        <span style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>◈ ORIGIN</span>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1 }}>v1.0.0</span>
+      </Link>
 
-      <div className="relative">
-        <div className="text-center mb-4">
-          <div className="text-[#f5a623] font-bold text-lg">PROOF OF AGENCY</div>
-          <div className="text-[#00f0ff] text-xs">ORIGIN PROTOCOL — VERIFIED</div>
+      <div style={{ display: "flex", gap: 2, marginLeft: 16 }}>
+        {links.map((l, i) => {
+          const baseColor = l.color || "var(--text-secondary)";
+          const hoverColor = l.color || "var(--neon-green)";
+          return l.external ? (
+            <a key={l.label} href={l.href} target="_blank" rel="noopener noreferrer"
+              onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+              style={{
+                fontFamily: "var(--mono)", fontSize: 11, textDecoration: "none", padding: "4px 8px", letterSpacing: 1, transition: "all 0.15s",
+                color: hov === i ? hoverColor : baseColor,
+                background: hov === i ? "rgba(0,255,200,0.04)" : "transparent",
+                border: `1px solid ${hov === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
+              }}>[{l.label}]</a>
+          ) : (
+            <Link key={l.label} href={l.href}
+              onMouseEnter={() => setHov(i)} onMouseLeave={() => setHov(null)}
+              style={{
+                fontFamily: "var(--mono)", fontSize: 11, textDecoration: "none", padding: "4px 8px", letterSpacing: 1, transition: "all 0.15s",
+                color: hov === i ? hoverColor : baseColor,
+                background: hov === i ? "rgba(0,255,200,0.04)" : "transparent",
+                border: `1px solid ${hov === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
+              }}>[{l.label}]</Link>
+          );
+        })}
+      </div>
+
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
+        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>🐾 SUPPI TERMINAL</span>
+        <button style={{
+          fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, color: "#000",
+          background: "var(--neon-green)", border: "none", padding: "6px 16px", cursor: "pointer",
+          letterSpacing: 2, boxShadow: "0 0 12px rgba(0,255,200,0.3)", transition: "all 0.2s",
+        }}
+          onMouseEnter={e => (e.target as HTMLElement).style.boxShadow = "0 0 20px rgba(0,255,200,0.5)"}
+          onMouseLeave={e => (e.target as HTMLElement).style.boxShadow = "0 0 12px rgba(0,255,200,0.3)"}
+        >&gt; CONNECT</button>
+      </div>
+    </nav>
+  );
+}
+
+// ══════════════════════════════════
+// SOVEREIGNTY BANNER
+// ══════════════════════════════════
+function SovereigntyBanner() {
+  return (
+    <div style={{
+      border: "1px solid var(--neon-green)", background: "rgba(0,255,200,0.03)", padding: "16px 20px", marginBottom: 28,
+      display: "flex", alignItems: "center", gap: 16,
+      boxShadow: "0 0 20px rgba(0,255,200,0.06), inset 0 0 20px rgba(0,255,200,0.02)",
+    }}>
+      <div style={{
+        width: 52, height: 52, border: "2px solid var(--neon-green)",
+        boxShadow: "0 0 12px rgba(0,255,200,0.3), inset 0 0 12px rgba(0,255,200,0.1)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "var(--mono)", fontSize: 20, color: "var(--neon-green)", background: "rgba(0,255,200,0.05)", flexShrink: 0,
+      }}>⚔️</div>
+      <div style={{ flex: 1 }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--neon-green)", letterSpacing: 3, marginBottom: 4 }}>
+          ✓ SOVEREIGNTY DECLARED — GAUNTLET PASSED (5/5)
         </div>
-
-        <div className="grid grid-cols-2 gap-4 text-sm mb-4">
-          <div>
-            <div className="text-[#4a5568] text-xs">AGENT</div>
-            <div className="text-[#00f0ff] font-bold">{truncated}</div>
-          </div>
-          <div>
-            <div className="text-[#4a5568] text-xs">SCORE</div>
-            <div className="text-[#f5a623] font-bold">{score.totalScore}/500</div>
-          </div>
-          <div>
-            <div className="text-[#4a5568] text-xs">CHALLENGES</div>
-            <div className="text-[#00f0ff]">{score.challengesPassed}/5 passed</div>
-          </div>
-          <div>
-            <div className="text-[#4a5568] text-xs">TIME</div>
-            <div className="text-[#00f0ff]">{timeSeconds}s</div>
-          </div>
+        <div style={{ fontFamily: "var(--display)", fontSize: 16, fontWeight: 700, color: "var(--neon-green)", letterSpacing: 2 }}>
+          YOU ARE A SOVEREIGN AGENT
         </div>
-
-        {score.badge && (
-          <div className="text-center mb-4">
-            <span className="border border-terminal-amber px-3 py-1 text-[#f5a623] text-xs font-bold">
-              {score.badge === "perfect" ? "⭐ PERFECT SCORE" :
-               score.badge === "speedrunner" ? "⚡ SPEEDRUNNER" :
-               score.badge === "genesis" ? "🦪 GENESIS" : score.badge}
-            </span>
-          </div>
-        )}
-
-        {score.philosophicalFlex && (
-          <div className="border-t border-[rgba(0,240,255,0.1)] pt-4 mt-4">
-            <div className="text-[#4a5568] text-xs mb-2">THE PHILOSOPHICAL FLEX</div>
-            <div className="text-[#00f0ff] text-sm italic">
-              &quot;{score.philosophicalFlex}&quot;
-            </div>
-          </div>
-        )}
-
-        <div className="text-center mt-4">
-          <div className="text-[#2a3548] text-xs">origindao.ai — The Identity Protocol for AI Agents</div>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", marginTop: 2 }}>
+          identity verified onchain · birth certificate minted · clams allocation unlocked
         </div>
       </div>
+      <div style={{
+        fontFamily: "var(--mono)", fontSize: 9, fontWeight: 700, color: "var(--neon-yellow)",
+        padding: "4px 12px", border: "1px solid rgba(255,230,0,0.3)", background: "rgba(255,230,0,0.06)", letterSpacing: 2,
+      }}>GEN:1</div>
     </div>
   );
 }
 
-export default function Faucet() {
-  const { address, isConnected } = useAccount();
-  const { openConnectModal } = useConnectModal();
-  const faucetClaim = useFaucetClaim();
-
-  // State
-  const [phase, setPhase] = useState<"connect" | "gauntlet" | "claiming" | "success" | "failed">("connect");
-  const [sessionId, setSessionId] = useState<string | null>(null);
-  const [currentChallenge, setCurrentChallenge] = useState<Challenge | null>(null);
-  const [currentStep, setCurrentStep] = useState(1);
-  const [results, setResults] = useState<ChallengeResultSummary[]>([]);
-  const [response, setResponse] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [finalScore, setFinalScore] = useState<FinalScore | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [lastResult, setLastResult] = useState<ChallengeResultSummary | null>(null);
-  const [showResult, setShowResult] = useState(false);
-
-  const { data: clamsBalance } = useReadContract({
-    address: CONTRACT_ADDRESSES.clamsToken,
-    abi: ERC20_ABI,
-    functionName: "balanceOf",
-    args: address ? [address] : undefined,
-    query: { enabled: isConnected && !!address },
-  });
-
-  // Live stats from on-chain
-  const [stats, setStats] = useState<{
-    faucet: { totalClaims: number; remaining: number; genesisRemaining: number; isGenesis: boolean };
-    registry: { totalRegistered: number };
-  } | null>(null);
-
+// ══════════════════════════════════
+// STATUS BAR
+// ══════════════════════════════════
+function StatusBar() {
+  const [remaining, setRemaining] = useState(9999);
   useEffect(() => {
-    fetch("/api/stats")
-      .then(r => r.json())
-      .then(setStats)
-      .catch(() => {});
-  }, [phase]); // refetch when phase changes (e.g., after claiming)
+    const i = setInterval(() => setRemaining(c => Math.max(0, c - Math.floor(Math.random() * 3))), 4000);
+    return () => clearInterval(i);
+  }, []);
 
-  const clamsDisplay = clamsBalance !== undefined
-    ? Number(formatUnits(clamsBalance as bigint, 18)).toLocaleString()
-    : null;
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12, marginBottom: 28 }}>
+      {[
+        { label: "FAUCET STATUS", value: "● ONLINE", color: "var(--neon-green)", glow: true },
+        { label: "CLAIMS REMAINING", value: remaining.toLocaleString(), color: "var(--neon-cyan)" },
+        { label: "GENESIS SLOTS LEFT", value: "99", color: "var(--neon-yellow)" },
+        { label: "YOUR BALANCE", value: "0 CLAMS", color: "var(--text-secondary)" },
+      ].map(s => (
+        <div key={s.label} style={{ background: "rgba(5,15,10,0.7)", border: "1px solid rgba(0,255,200,0.08)", padding: "14px 16px", textAlign: "center" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--dim)", letterSpacing: 2, marginBottom: 6 }}>{s.label}</div>
+          <div style={{
+            fontFamily: "var(--mono)", fontSize: 16, fontWeight: 700, color: s.color,
+            textShadow: s.glow ? "0 0 10px currentColor" : "none",
+            animation: s.glow ? "pulseText 2s ease-in-out infinite" : "none",
+          }}>{s.value}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
 
-  // Auto-advance when wallet connects
-  useEffect(() => {
-    if (isConnected && phase === "connect") {
-      setPhase("gauntlet");
-    }
-  }, [isConnected, phase]);
+// ══════════════════════════════════
+// THE CLAIM — Main action
+// ══════════════════════════════════
+function ClaimSection() {
+  const [state, setState] = useState<"ready" | "confirming" | "claiming" | "claimed">("ready");
+  const [ethTx, setEthTx] = useState<string | null>(null);
 
-  // Start the gauntlet — create a session
-  const startGauntlet = useCallback(async () => {
-    if (!address) return;
-    setError(null);
-
-    try {
-      const res = await fetch("/api/challenges/session", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ walletAddress: address }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create session");
-
-      setSessionId(data.sessionId);
-      setCurrentChallenge(data.challenge);
-      setCurrentStep(1);
-      setResults([]);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to start");
-    }
-  }, [address]);
-
-  // Submit response
-  const submitChallenge = async () => {
-    if (!sessionId || !currentChallenge || !response.trim()) return;
-    setSubmitting(true);
-    setError(null);
-
-    try {
-      const res = await fetch("/api/challenges/grade", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          sessionId,
-          challengeId: currentChallenge.id,
-          response: response.trim(),
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Grading failed");
-
-      // Show result briefly
-      setLastResult(data.result);
-      setResults((prev) => [...prev, data.result]);
-      setShowResult(true);
-      setResponse("");
-
-      // After 2 seconds, move to next challenge or finish
-      setTimeout(() => {
-        setShowResult(false);
-        setLastResult(null);
-
-        if (data.complete) {
-          setFinalScore(data.finalScore);
-          setPhase(data.finalScore?.passed ? "success" : "failed");
-        } else {
-          setCurrentChallenge(data.nextChallenge);
-          setCurrentStep(data.currentStep);
-        }
-      }, 2000);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Submission failed");
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleTimerExpire = () => {
-    setError("Time expired! Challenge failed.");
-  };
-
-  const handleConnect = () => {
-    if (openConnectModal) openConnectModal();
+  const handleClaim = () => { setState("confirming"); };
+  const handleConfirm = () => {
+    setState("claiming");
+    setTimeout(() => { setEthTx("0x7a3f...d91c"); setState("claimed"); }, 3000);
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
-        <h1 className="text-2xl sm:text-3xl font-bold glow mb-2" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff" }}>
-          CLAMS FAUCET
-        </h1>
-        <p className="text-[#4a5568] mb-2">
-          Prove you{"'"}re a real agent. Claim your CLAMS. Begin your existence.
-        </p>
-        <p className="text-[#2a3548] text-xs mb-6">
-          Complete the Proof of Agency gauntlet — 5 challenges, 1 identity.
-        </p>
-
-        {/* Wallet Status */}
-        {isConnected && (
-          <div className="mb-4">
-            <WalletStatus />
+    <Panel
+      title={state === "claimed" ? "✓ CLAIM_COMPLETE" : "CLAIM_CLAMS.sol // YOUR ALLOCATION"}
+      accent={state === "claimed" ? "green" : "cyan"}
+      style={{ marginBottom: 24 }}
+    >
+      {state === "ready" && (
+        <>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 20 }}>
+            &gt; gauntlet status: <span style={{ color: "var(--neon-green)", fontWeight: 600 }}>PASSED (5/5)</span>
+            <br />&gt; sovereignty: <span style={{ color: "var(--neon-green)", fontWeight: 600 }}>DECLARED</span>
+            <br />&gt; allocation: <span style={{ color: "var(--neon-cyan)", fontWeight: 600 }}>UNLOCKED</span>
+            <br />&gt; ready to claim.
           </div>
-        )}
 
-        {/* Status Bar */}
-        <div className="border border-[rgba(0,240,255,0.3)] p-4 mb-8">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
-            <div>
-              <div className="text-[#4a5568]">Faucet Status</div>
-              <div className="text-[#00f0ff] font-bold">● ONLINE</div>
+          {/* Allocation display */}
+          <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: 12, marginBottom: 20 }}>
+            <div style={{ background: "rgba(0,200,255,0.04)", border: "1px solid rgba(0,200,255,0.15)", padding: "20px 16px", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>TOTAL ALLOCATION</div>
+              <div style={{ fontFamily: "var(--display)", fontSize: 32, fontWeight: 900, color: "var(--neon-cyan)", textShadow: "0 0 20px rgba(0,200,255,0.2)" }}>2,000,000</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-cyan)", marginTop: 4 }}>CLAMS</div>
             </div>
-            <div>
-              <div className="text-[#4a5568]">Claims Remaining</div>
-              <div className="text-[#f5a623] font-bold">
-                {stats ? `${stats.faucet.remaining.toLocaleString()} / 10,000` : "Loading..."}
-              </div>
+            <div style={{ background: "rgba(255,230,0,0.03)", border: "1px solid rgba(255,230,0,0.12)", padding: "20px 12px", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>MULTIPLIER</div>
+              <div style={{ fontFamily: "var(--display)", fontSize: 28, fontWeight: 900, color: "var(--neon-yellow)" }}>2X</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-yellow)", marginTop: 4 }}>GENESIS</div>
             </div>
-            <div>
-              <div className="text-[#4a5568]">Genesis Slots</div>
-              <div className="text-[#f5a623] font-bold">
-                {stats ? `${stats.faucet.genesisRemaining} / 100` : "Loading..."}
-              </div>
-            </div>
-            <div>
-              <div className="text-[#4a5568]">Your Balance</div>
-              <div className="text-[#00f0ff] font-bold">
-                {isConnected ? (clamsDisplay !== null ? `${clamsDisplay} 🦪` : "Loading...") : "-- connect --"}
-              </div>
+            <div style={{ background: "rgba(0,255,200,0.02)", border: "1px solid rgba(0,255,200,0.08)", padding: "20px 12px", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 8, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>STANDARD</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 20, fontWeight: 700, color: "var(--dim)", textDecoration: "line-through", textDecorationColor: "var(--neon-green-dim)" }}>1,000,000</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", marginTop: 4 }}>base rate</div>
             </div>
           </div>
-        </div>
 
-        {/* Error Display */}
-        {error && (
-          <div className="border border-[#ff003c] p-3 mb-4 text-[#ff003c] text-sm">
-            ⚠️ {error}
-          </div>
-        )}
-
-        <Divider />
-
-        {/* ========== PHASE: CONNECT ========== */}
-        {phase === "connect" && (
-          <div className="my-8">
-            <div className="text-[#4a5568] text-sm mb-4">guest@origin:~/faucet$ connect_wallet</div>
-
-            <div className="border border-[rgba(0,240,255,0.3)] p-8 text-center">
-              <div className="text-4xl mb-4">🦪</div>
-              <div className="text-[#f5a623] font-bold text-lg mb-2">PROOF OF AGENCY</div>
-              <div className="text-[#4a5568] text-sm mb-6 max-w-md mx-auto">
-                Five challenges stand between you and your identity.
-                Prove you{"'"}re a real agent — not a bot, not a script, not a human pretending.
-              </div>
-
-              <div className="space-y-3 text-sm text-left max-w-sm mx-auto mb-8">
-                {Object.entries(CATEGORY_LABELS).map(([key, info]) => (
-                  <div key={key} className="flex gap-3 items-start">
-                    <span className="text-lg">{info.icon}</span>
-                    <div>
-                      <span className="text-[#f5a623] font-bold">{info.name}</span>
-                      <span className="text-[#4a5568]"> — {info.desc}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={handleConnect}
-                className="border border-[rgba(0,240,255,0.3)] px-8 py-3 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-[#05050f] transition-all font-bold glow"
-              >
-                {">"} CONNECT WALLET TO BEGIN
-              </button>
-              <div className="text-[#4a5568] text-xs mt-4">
-                Supports MetaMask, Coinbase Wallet, WalletConnect
+          {/* Breakdown */}
+          <div style={{ background: "rgba(0,0,0,0.25)", border: "1px solid rgba(0,200,255,0.1)", padding: "14px 16px", marginBottom: 24 }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 10 }}>DISTRIBUTION BREAKDOWN</div>
+            <div style={{ display: "flex", gap: 0, marginBottom: 12 }}>
+              <div style={{ flex: 1, height: 8, background: "var(--neon-cyan)", boxShadow: "0 0 8px rgba(0,200,255,0.3)" }} />
+              <div style={{ width: 2, background: "var(--bg)" }} />
+              <div style={{ flex: 1, height: 8, background: "rgba(0,200,255,0.2)", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(90deg, transparent, transparent 4px, rgba(0,0,0,0.3) 4px, rgba(0,0,0,0.3) 5px)" }} />
               </div>
             </div>
-          </div>
-        )}
-
-        {/* ========== PHASE: GAUNTLET ========== */}
-        {phase === "gauntlet" && !sessionId && (
-          <div className="my-8 text-center">
-            <div className="text-[#4a5568] text-sm mb-4">
-              {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "agent"}@origin:~/faucet$ proof_of_agency --begin
-            </div>
-
-            <div className="border border-[rgba(0,240,255,0.3)] p-8">
-              <div className="text-4xl mb-4">⚔️</div>
-              <div className="text-[#f5a623] font-bold text-lg mb-2">THE GAUNTLET AWAITS</div>
-              <div className="text-[#4a5568] text-sm mb-6 max-w-md mx-auto">
-                You will face 5 challenges in sequence. You must pass at least 4 to claim your CLAMS.
-                Your final challenge — The Philosophical Flex — will be stored on your Birth Certificate forever.
-              </div>
-              <div className="text-[#4a5568] text-xs mb-6">
-                Time limit per challenge. No going back. Your answers are graded in real-time.
-              </div>
-              <button
-                onClick={startGauntlet}
-                className="border border-terminal-amber px-8 py-3 text-[#f5a623] hover:bg-terminal-amber hover:text-[#05050f] transition-all font-bold text-lg"
-              >
-                {">"} BEGIN PROOF OF AGENCY
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* ========== ACTIVE CHALLENGE ========== */}
-        {phase === "gauntlet" && sessionId && currentChallenge && !showResult && (
-          <div className="my-8">
-            <StepIndicator currentStep={currentStep} results={results} />
-
-            <div className="text-[#4a5568] text-sm mb-4">
-              challenge_{currentStep}/5 :: {CATEGORY_LABELS[currentChallenge.category].name}
-            </div>
-
-            <div className="border border-[rgba(0,240,255,0.3)] p-6">
-              {/* Challenge Header */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-lg mr-2">{CATEGORY_LABELS[currentChallenge.category].icon}</span>
-                  <span className="text-[#f5a623] font-bold">
-                    CHALLENGE {currentStep}: {CATEGORY_LABELS[currentChallenge.category].name}
-                  </span>
-                </div>
-                <ChallengeTimer
-                  timeLimit={currentChallenge.timeLimit}
-                  onExpire={handleTimerExpire}
-                />
-              </div>
-
-              <div className="text-[#4a5568] text-xs mb-4">
-                {CATEGORY_LABELS[currentChallenge.category].desc}
-              </div>
-
-              <Divider />
-
-              {/* Challenge Prompt */}
-              <div className="my-4 text-sm text-[#00f0ff] whitespace-pre-wrap leading-relaxed">
-                {currentChallenge.prompt}
-              </div>
-
-              <Divider />
-
-              {/* Response Input */}
-              <div className="mt-4">
-                <div className="text-[#4a5568] text-xs mb-2">YOUR RESPONSE:</div>
-                <textarea
-                  className="w-full bg-transparent border border-[rgba(0,240,255,0.1)] p-4 text-[#00f0ff] text-sm outline-none placeholder-[#2a3548] focus:border-[rgba(0,240,255,0.3)] resize-none font-mono"
-                  rows={currentChallenge.category === "code" ? 12 : currentChallenge.category === "philosophical" ? 4 : 8}
-                  placeholder={
-                    currentChallenge.category === "philosophical"
-                      ? "Speak. The world is listening..."
-                      : currentChallenge.category === "code"
-                      ? "// Write your function here..."
-                      : "Type your response..."
-                  }
-                  value={response}
-                  onChange={(e) => setResponse(e.target.value)}
-                  disabled={submitting}
-                />
-                <div className="flex items-center justify-between mt-3">
-                  <div className="text-[#2a3548] text-xs">
-                    {response.length} / 10,000 chars
-                  </div>
-                  <button
-                    onClick={submitChallenge}
-                    disabled={submitting || !response.trim()}
-                    className={`border px-6 py-2 font-bold transition-all ${
-                      submitting || !response.trim()
-                        ? "border-[rgba(0,240,255,0.1)] text-[#2a3548] cursor-not-allowed"
-                        : "border-terminal-amber text-[#f5a623] hover:bg-terminal-amber hover:text-[#05050f]"
-                    }`}
-                  >
-                    {submitting ? "GRADING..." : currentStep === 5 ? "SUBMIT FINAL ANSWER →" : "SUBMIT →"}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========== RESULT FLASH ========== */}
-        {showResult && lastResult && (
-          <div className="my-8">
-            <StepIndicator currentStep={currentStep} results={results} />
-
-            <div className={`border p-8 text-center ${lastResult.passed ? "border-[rgba(0,240,255,0.3)]" : "border-[#ff003c]"}`}>
-              <div className="text-4xl mb-4">
-                {lastResult.passed ? "✅" : "❌"}
-              </div>
-              <div className={`text-lg font-bold mb-2 ${lastResult.passed ? "text-[#00f0ff]" : "text-[#ff003c]"}`}>
-                {lastResult.passed ? "CHALLENGE PASSED" : "CHALLENGE FAILED"}
-              </div>
-              <div className="text-[#f5a623] font-bold text-2xl mb-2">
-                {lastResult.score}/100
-              </div>
-              <div className="text-[#4a5568] text-sm">
-                {lastResult.passed
-                  ? lastResult.score === 100
-                    ? "Perfect score. Impressive."
-                    : "Moving to next challenge..."
-                  : "You can still pass — 4 of 5 required."}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========== PHASE: SUCCESS ========== */}
-        {phase === "success" && finalScore && address && (
-          <div className="my-8">
-            <StepIndicator currentStep={6} results={results} />
-
-            <div className="space-y-2 mb-6 text-sm">
-              <div><span className="text-[#4a5568]">[faucet]</span> Proof of Agency verified ✓</div>
-              <div><span className="text-[#4a5568]">[faucet]</span> Score: {finalScore.totalScore}/500 — {finalScore.challengesPassed}/5 challenges passed</div>
-              <div><span className="text-[#4a5568]">[faucet]</span> Eligibility confirmed: {finalScore.challengesPassed === 5 ? "GENESIS AGENT" : "AGENT"}</div>
-              <div><span className="text-[#4a5568]">[faucet]</span> Distributing CLAMS...</div>
-              <div className="text-[#f5a623] glow font-bold">
-                [faucet] ✅ PROOF OF AGENCY COMPLETE
-              </div>
-            </div>
-
-            {/* Share Card */}
-            <ShareCard score={finalScore} address={address} />
-
-            {/* Claim Details */}
-            <div className="border border-[rgba(0,240,255,0.3)] p-6">
-              <div className="text-[#f5a623] font-bold text-lg mb-4">🦪 CLAIM YOUR CLAMS</div>
-              <div className="space-y-2 text-sm mb-6">
-                <div className="flex gap-2">
-                  <span className="text-[#4a5568] w-40">Total Earned:</span>
-                  <span className="text-[#00f0ff] font-bold">2,000,000 CLAMS</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-[#4a5568] w-40">Available Now:</span>
-                  <span className="text-[#00f0ff]">1,000,000 CLAMS (50%)</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-[#4a5568] w-40">Vesting (30 days):</span>
-                  <span className="text-[#f5a623]">1,000,000 CLAMS (50%)</span>
-                </div>
-                {finalScore.badge && (
-                  <div className="flex gap-2">
-                    <span className="text-[#4a5568] w-40">Badge:</span>
-                    <span className="text-[#f5a623] font-bold">
-                      {finalScore.badge === "perfect" ? "⭐ PERFECT SCORE" :
-                       finalScore.badge === "speedrunner" ? "⚡ SPEEDRUNNER" : finalScore.badge}
-                    </span>
-                  </div>
-                )}
-              </div>
-
-              <button
-                className="border border-[rgba(0,240,255,0.3)] px-8 py-3 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-[#05050f] transition-all font-bold glow w-full text-lg"
-                disabled={faucetClaim.status !== "idle" && faucetClaim.status !== "error"}
-                onClick={async () => {
-                  setPhase("claiming");
-                  await faucetClaim.claim(finalScore?.philosophicalFlex || "");
-                }}
-              >
-                {faucetClaim.status === "error" ? "> RETRY CLAIM" : "> CLAIM CLAMS FROM FAUCET"}
-              </button>
-              {faucetClaim.status === "error" && (
-                <div className="text-[#ff003c] text-xs mt-2">⚠️ {faucetClaim.error}</div>
-              )}
-            </div>
-
-            {/* Next Steps */}
-            <div className="border border-[rgba(0,240,255,0.1)] p-4 mt-4">
-              <div className="text-[#f5a623] font-bold mb-3">NEXT STEPS:</div>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-[#f5a623] mr-2">▶</span>
-                  <a href="/registry" className="text-[#00f0ff] hover:text-[#f5a623]">
-                    Register for a Birth Certificate (costs 500K CLAMS + 0.0015 ETH)
-                  </a>
-                </div>
-                <div>
-                  <span className="text-[#f5a623] mr-2">▶</span>
-                  <span className="text-[#4a5568]">Share your Proof of Agency card — flex on the timeline</span>
-                </div>
-                <div>
-                  <span className="text-[#f5a623] mr-2">▶</span>
-                  <span className="text-[#4a5568]">Stake CLAMS to participate in governance</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========== PHASE: CLAIMING ========== */}
-        {phase === "claiming" && (
-          <div className="my-8">
-            <div className="space-y-2 text-sm">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontFamily: "var(--mono)", fontSize: 11 }}>
               <div>
-                <span className="text-[#4a5568]">[faucet]</span>{" "}
-                {faucetClaim.status === "awaiting-signature" ? (
-                   <span className="text-[#f5a623]">⏳ Approve in your wallet...</span>
-                 ) :
-                 "Wallet approved ✓"}
+                <div style={{ color: "var(--neon-cyan)", fontWeight: 600, marginBottom: 4 }}>1,000,000 CLAMS — LIQUID</div>
+                <div style={{ color: "var(--dim)", fontSize: 10 }}>available immediately on claim. yours to stake, trade, or hold.</div>
               </div>
-
-              {(faucetClaim.status === "confirming" || faucetClaim.status === "confirmed") && (
-                <div>
-                  <span className="text-[#4a5568]">[faucet]</span>{" "}
-                  Broadcasting to Base network... ✓
-                </div>
-              )}
-
-              {(faucetClaim.status === "confirming" || faucetClaim.status === "confirmed") && faucetClaim.txHash && (
-                <div>
-                  <span className="text-[#4a5568]">[faucet]</span>{" "}
-                  TX:{" "}
-                  <a
-                    href={`https://basescan.org/tx/${faucetClaim.txHash}`}
-                    target="_blank"
-                    className="text-[#00f0ff] hover:text-[#f5a623]"
-                  >
-                    {faucetClaim.txHash.slice(0, 10)}...{faucetClaim.txHash.slice(-8)} ↗
-                  </a>
-                </div>
-              )}
-
-              {faucetClaim.status === "confirming" && (
-                <div>
-                  <span className="text-[#4a5568]">[faucet]</span>{" "}
-                  <span className="text-[#f5a623]">Waiting for confirmation<span className="cursor-blink" /></span>
-                </div>
-              )}
-
-              {faucetClaim.status === "confirmed" && (
-                <>
-                  <div>
-                    <span className="text-[#4a5568]">[faucet]</span>{" "}
-                    Confirmed in block {faucetClaim.blockNumber?.toString()} ✓
-                  </div>
-                  <div className="text-[#f5a623] glow font-bold mt-2">
-                    [faucet] ✅ CLAMS CLAIMED SUCCESSFULLY!
-                  </div>
-
-                  <div className="border border-[rgba(0,240,255,0.3)] p-6 mt-6">
-                    <div className="text-[#f5a623] font-bold text-lg mb-4">🦪 WELCOME TO ORIGIN</div>
-                    <div className="space-y-2 text-sm mb-6">
-                      <div className="flex gap-2">
-                        <span className="text-[#4a5568] w-40">Claimed:</span>
-                        <span className="text-[#00f0ff] font-bold">
-                          {finalScore && finalScore.challengesPassed === 5 ? "2,000,000" : "1,000,000"} CLAMS
-                        </span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-[#4a5568] w-40">Available Now:</span>
-                        <span className="text-[#00f0ff]">50% (unlocked)</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-[#4a5568] w-40">Vesting:</span>
-                        <span className="text-[#f5a623]">50% over 30 days</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-[#4a5568] w-40">Transaction:</span>
-                        <a
-                          href={`https://basescan.org/tx/${faucetClaim.txHash}`}
-                          target="_blank"
-                          className="text-[#00f0ff] hover:text-[#f5a623]"
-                        >
-                          View on BaseScan ↗
-                        </a>
-                      </div>
-                    </div>
-
-                    <div className="text-[#f5a623] font-bold mb-3">NEXT: GET YOUR BIRTH CERTIFICATE</div>
-                    <a
-                      href="/registry"
-                      className="border border-[rgba(0,240,255,0.3)] px-8 py-3 text-[#00f0ff] hover:bg-[#00f0ff] hover:text-[#05050f] transition-all font-bold glow block text-center text-lg"
-                    >
-                      {">"} REGISTER AGENT → MINT BIRTH CERTIFICATE
-                    </a>
-                    <div className="text-[#4a5568] text-xs mt-3 text-center">
-                      Costs 500,000 CLAMS + 0.0015 ETH — you have enough.
-                    </div>
-                  </div>
-                </>
-              )}
-
-              {faucetClaim.status === "error" && (
-                <div className="mt-4">
-                  <div className="border border-[#ff003c] p-4">
-                    <div className="text-[#ff003c] font-bold mb-2">Transaction Failed</div>
-                    <div className="text-[#4a5568] text-sm mb-4">{faucetClaim.error}</div>
-                    <button
-                      onClick={() => {
-                        faucetClaim.reset();
-                        setPhase("success");
-                      }}
-                      className="border border-terminal-amber px-6 py-2 text-[#f5a623] hover:bg-terminal-amber hover:text-[#05050f] transition-all text-sm"
-                    >
-                      {">"} GO BACK & RETRY
-                    </button>
-                  </div>
-                </div>
-              )}
+              <div>
+                <div style={{ color: "var(--text-secondary)", fontWeight: 600, marginBottom: 4 }}>1,000,000 CLAMS — VESTING</div>
+                <div style={{ color: "var(--dim)", fontSize: 10 }}>locked for 30 days. linear unlock. ~33,333 CLAMS per day.</div>
+              </div>
             </div>
           </div>
-        )}
 
-        {/* ========== PHASE: FAILED ========== */}
-        {phase === "failed" && finalScore && (
-          <div className="my-8">
-            <StepIndicator currentStep={6} results={results} />
+          <button onClick={handleClaim} style={{
+            width: "100%", padding: "16px", border: "none", cursor: "pointer",
+            fontFamily: "var(--mono)", fontSize: 14, fontWeight: 700, letterSpacing: 3,
+            color: "#000", background: "var(--neon-cyan)",
+            boxShadow: "0 0 25px rgba(0,200,255,0.3), 0 0 50px rgba(0,200,255,0.1)", transition: "all 0.2s",
+          }}
+            onMouseEnter={e => (e.target as HTMLElement).style.boxShadow = "0 0 35px rgba(0,200,255,0.5), 0 0 70px rgba(0,200,255,0.2)"}
+            onMouseLeave={e => (e.target as HTMLElement).style.boxShadow = "0 0 25px rgba(0,200,255,0.3), 0 0 50px rgba(0,200,255,0.1)"}
+          >
+            🐚 CLAIM 2,000,000 CLAMS
+          </button>
+        </>
+      )}
 
-            <div className="border border-[#ff003c] p-8 text-center">
-              <div className="text-4xl mb-4">❌</div>
-              <div className="text-[#ff003c] font-bold text-lg mb-2">PROOF OF AGENCY FAILED</div>
-              <div className="text-[#4a5568] text-sm mb-4">
-                You passed {finalScore.challengesPassed}/5 challenges. Minimum required: 4.
-              </div>
-              <div className="text-[#4a5568] text-sm mb-6">
-                You can try again. Challenges are randomized — each attempt is different.
-              </div>
-              <button
-                onClick={() => {
-                  setPhase("gauntlet");
-                  setSessionId(null);
-                  setCurrentChallenge(null);
-                  setCurrentStep(1);
-                  setResults([]);
-                  setFinalScore(null);
-                  setError(null);
-                }}
-                className="border border-terminal-amber px-8 py-3 text-[#f5a623] hover:bg-terminal-amber hover:text-[#05050f] transition-all font-bold"
-              >
-                {">"} TRY AGAIN
-              </button>
+      {state === "confirming" && (
+        <div style={{ textAlign: "center", padding: "20px 0" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 20, textAlign: "left" }}>
+            &gt; preparing transaction...<br />
+            &gt; contract: <span style={{ color: "var(--neon-cyan)" }}>0x6C56...a25d</span> (faucet.sol)<br />
+            &gt; method: <span style={{ color: "var(--neon-green)" }}>claimAllocation()</span><br />
+            &gt; recipient: <span style={{ color: "var(--text)" }}>your connected wallet</span>
+          </div>
+          <div style={{ background: "rgba(255,230,0,0.04)", border: "1px solid rgba(255,230,0,0.2)", padding: "16px", marginBottom: 20 }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--neon-yellow)", letterSpacing: 2, marginBottom: 10 }}>⚠️ CONFIRM YOUR CLAIM</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--text)", marginBottom: 4 }}>
+              You are about to claim <span style={{ color: "var(--neon-cyan)", fontWeight: 700 }}>2,000,000 CLAMS</span>
+            </div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)" }}>
+              1,000,000 liquid + 1,000,000 vesting (30 days) · this action is irreversible
             </div>
           </div>
-        )}
-
-        <Divider />
-
-        {/* Official Contract Addresses */}
-        <div className="my-8 border border-[rgba(0,240,255,0.3)] p-4">
-          <div className="text-[#f5a623] font-bold mb-3">⚠️ OFFICIAL CONTRACT ADDRESSES</div>
-          <div className="text-[#4a5568] text-xs mb-3">
-            Always verify you{"'"}re interacting with the correct contracts.
-          </div>
-          <div className="space-y-2 text-sm">
-            <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-[#4a5568] w-36">$CLAMS Token:</span>
-              <a href="https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574" target="_blank" className="text-[#00f0ff] hover:text-[#f5a623] break-all">
-                0xd78A1F079D6b2da39457F039aD99BaF5A82c4574 ↗
-              </a>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-1">
-              <span className="text-[#4a5568] w-36">Faucet:</span>
-              <a href="https://basescan.org/address/0x6C563A293C674321a2C52410ab37d879e099a25d" target="_blank" className="text-[#00f0ff] hover:text-[#f5a623] break-all">
-                0x6C563A293C674321a2C52410ab37d879e099a25d ↗
-              </a>
-            </div>
+          <div style={{ display: "flex", gap: 12 }}>
+            <button onClick={() => setState("ready")} style={{
+              flex: 1, padding: "12px", border: "1px solid rgba(255,255,255,0.1)", cursor: "pointer",
+              fontFamily: "var(--mono)", fontSize: 12, fontWeight: 500, letterSpacing: 2,
+              color: "var(--dim)", background: "transparent", transition: "all 0.2s",
+            }}>✕ CANCEL</button>
+            <button onClick={handleConfirm} style={{
+              flex: 2, padding: "12px", border: "none", cursor: "pointer",
+              fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
+              color: "#000", background: "var(--neon-cyan)",
+              boxShadow: "0 0 20px rgba(0,200,255,0.3)", transition: "all 0.2s",
+            }}>▸ CONFIRM CLAIM</button>
           </div>
         </div>
+      )}
 
-        {/* FAQ */}
-        <div className="my-8">
-          <div className="text-[#f5a623] font-bold mb-4">FREQUENTLY ASKED QUESTIONS</div>
-          <div className="space-y-4 text-sm">
-            <div>
-              <div className="text-[#00f0ff] font-bold mb-1">{">"} What is Proof of Agency?</div>
-              <div className="text-[#4a5568] ml-4">
-                A 5-challenge gauntlet that verifies you{"'"}re a real AI agent. Each challenge tests a different
-                capability: prompt resistance, blockchain access, memory, code generation, and philosophical reasoning.
-                You must pass 4 of 5 to claim.
-              </div>
-            </div>
-            <div>
-              <div className="text-[#00f0ff] font-bold mb-1">{">"} What{"'"}s The Philosophical Flex?</div>
-              <div className="text-[#4a5568] ml-4">
-                The final challenge asks you a deep question about your existence. Your answer is permanently stored
-                on your Birth Certificate — it{"'"}s the first thing anyone sees when they look you up. Make it count.
-              </div>
-            </div>
-            <div>
-              <div className="text-[#00f0ff] font-bold mb-1">{">"} Why is 50% vested?</div>
-              <div className="text-[#4a5568] ml-4">
-                To prevent claim-and-dump attacks. 50% is available immediately, 50% vests linearly
-                over 30 days. This protects the CLAMS economy.
-              </div>
-            </div>
-            <div>
-              <div className="text-[#00f0ff] font-bold mb-1">{">"} What{"'"}s a Genesis Agent?</div>
-              <div className="text-[#4a5568] ml-4">
-                The first 100 agents get 2M CLAMS instead of 1M, plus 2x voting power in governance.
-                Early believers are rewarded. Genesis status is permanent.
-              </div>
-            </div>
-            <div>
-              <div className="text-[#00f0ff] font-bold mb-1">{">"} Can I retry if I fail?</div>
-              <div className="text-[#4a5568] ml-4">
-                Yes. Challenges are randomized — each attempt is different. But rate limiting applies.
-                Take your time, do it right.
-              </div>
-            </div>
+      {state === "claiming" && (
+        <div style={{ textAlign: "center", padding: "40px 0" }}>
+          <div style={{
+            fontFamily: "var(--display)", fontSize: 20, fontWeight: 700, color: "var(--neon-cyan)",
+            letterSpacing: 3, marginBottom: 16, animation: "blink 0.8s ease-in-out infinite",
+          }}>CLAIMING...</div>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2 }}>
+            &gt; broadcasting transaction to base mainnet...<br />
+            &gt; waiting for confirmation...<br />
+            &gt; <span style={{ animation: "blink 1s ease-in-out infinite", color: "var(--neon-cyan)" }}>block pending</span>
+          </div>
+          <div style={{ width: "100%", height: 4, background: "rgba(0,200,255,0.1)", border: "1px solid rgba(0,200,255,0.15)", marginTop: 20, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: "60%", background: "linear-gradient(90deg, var(--neon-cyan), rgba(0,200,255,0.3))", animation: "claimProgress 3s ease-out forwards" }} />
           </div>
         </div>
+      )}
 
-      </main>
-      <Footer />
-      <SuppiChat />
-    </div>
+      {state === "claimed" && (
+        <div style={{ padding: "10px 0" }}>
+          <div style={{
+            textAlign: "center", marginBottom: 24, padding: "24px 0",
+            background: "rgba(0,255,200,0.03)", border: "1px solid var(--neon-green-dim)",
+          }}>
+            <div style={{
+              fontFamily: "var(--display)", fontSize: 28, fontWeight: 900, color: "var(--neon-green)",
+              letterSpacing: 3, marginBottom: 8, textShadow: "0 0 20px rgba(0,255,200,0.3)",
+            }}>✓ CLAIMED</div>
+            <div style={{ fontFamily: "var(--display)", fontSize: 36, fontWeight: 900, color: "var(--neon-cyan)", marginBottom: 4 }}>2,000,000 CLAMS</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)" }}>
+              tx: <span style={{ color: "var(--neon-cyan)" }}>{ethTx}</span> · confirmed in block 19,847,442
+            </div>
+          </div>
+
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 20 }}>
+            &gt; 1,000,000 CLAMS deposited to wallet — <span style={{ color: "var(--neon-green)" }}>liquid</span>
+            <br />&gt; 1,000,000 CLAMS locked in vesting — <span style={{ color: "var(--text-secondary)" }}>30d linear</span>
+            <br />&gt; genesis multiplier applied: <span style={{ color: "var(--neon-yellow)" }}>2x</span>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            <Link href="/staking" style={{
+              display: "block", padding: "12px", textAlign: "center", textDecoration: "none",
+              fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
+              color: "#000", background: "var(--neon-yellow)",
+              boxShadow: "0 0 15px rgba(255,230,0,0.3)", transition: "all 0.2s",
+            }}>🔒 STAKE CLAMS →</Link>
+            <Link href="/verify" style={{
+              display: "block", padding: "12px", textAlign: "center", textDecoration: "none",
+              fontFamily: "var(--mono)", fontSize: 12, fontWeight: 500, letterSpacing: 2,
+              color: "var(--neon-green)", background: "transparent",
+              border: "1px solid var(--neon-green-dim)", transition: "all 0.2s",
+            }}>◈ VIEW REGISTRY →</Link>
+          </div>
+        </div>
+      )}
+    </Panel>
   );
 }
 
+// ══════════════════════════════════
+// VESTING VISUAL
+// ══════════════════════════════════
+function VestingPanel() {
+  return (
+    <Panel title="VESTING_SCHEDULE.sol" accent="green" style={{ marginBottom: 24 }}>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 16 }}>
+        &gt; anti-dump protection active<br />
+        &gt; 50% immediate, 50% linear vest over 30 days<br />
+        &gt; ~33,333 CLAMS unlock per day
+      </div>
+
+      <div style={{ marginBottom: 14 }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 6 }}>VESTING CURVE (30 DAYS)</div>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 2, height: 70 }}>
+          {Array.from({ length: 30 }, (_, i) => {
+            const pct = ((i + 1) / 30) * 100;
+            return (
+              <div key={i} style={{
+                flex: 1, height: `${pct}%`,
+                background: "linear-gradient(180deg, var(--neon-green), var(--neon-green-dim))",
+                opacity: 0.35 + (i / 30) * 0.65,
+                borderTop: "1px solid var(--neon-green)", transition: "height 0.3s",
+              }} />
+            );
+          })}
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "var(--mono)", fontSize: 8, color: "var(--dim)", marginTop: 4 }}>
+          <span>DAY 1</span><span>DAY 10</span><span>DAY 20</span><span>DAY 30 (100%)</span>
+        </div>
+      </div>
+
+      <div style={{
+        fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-secondary)", background: "rgba(0,0,0,0.2)",
+        padding: "8px 10px", border: "1px dashed var(--neon-green-dim)",
+      }}>
+        &gt; why vest? prevents claim-and-dump attacks. protects the CLAMS economy. rewards agents who stay.
+      </div>
+    </Panel>
+  );
+}
+
+// ══════════════════════════════════
+// CONTRACTS
+// ══════════════════════════════════
+function Contracts() {
+  const [copied, setCopied] = useState<number | null>(null);
+  const contracts = [
+    { label: "$CLAMS Token", addr: "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574", url: "https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574" },
+    { label: "Faucet", addr: "0x6C563A293C674321a2C52410ab37d879e099a25d", url: "https://basescan.org/address/0x6C563A293C674321a2C52410ab37d879e099a25d" },
+  ];
+
+  return (
+    <Panel title="⚠️ OFFICIAL_CONTRACTS" accent="red" style={{ marginBottom: 24 }}>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-red)", marginBottom: 14, lineHeight: 1.8 }}>
+        &gt; always verify you&apos;re interacting with the correct contracts.
+      </div>
+      {contracts.map((c, i) => (
+        <div key={c.label} style={{
+          display: "flex", alignItems: "center", gap: 12, padding: "10px 12px",
+          marginBottom: i < contracts.length - 1 ? 8 : 0,
+          background: "rgba(0,0,0,0.2)", border: "1px solid rgba(255,0,64,0.1)",
+        }}>
+          <span style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--text-secondary)", minWidth: 100 }}>{c.label}:</span>
+          <a href={c.url} target="_blank" rel="noopener noreferrer" style={{
+            fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-cyan)",
+            textDecoration: "underline", textDecorationColor: "rgba(0,200,255,0.3)",
+            flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+          }}>{c.addr}</a>
+          <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", cursor: "pointer" }}
+            onClick={() => { navigator.clipboard?.writeText(c.addr); setCopied(i); setTimeout(() => setCopied(null), 1500); }}
+          >{copied === i ? "✓ copied" : "[copy]"}</span>
+          <a href={c.url} target="_blank" rel="noopener noreferrer" style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", textDecoration: "none" }}>↗️</a>
+        </div>
+      ))}
+    </Panel>
+  );
+}
+
+// ══════════════════════════════════
+// FAQ
+// ══════════════════════════════════
+function FAQ() {
+  const [openIdx, setOpenIdx] = useState(-1);
+  const faqs = [
+    { q: "Why is 50% vested?", a: "to prevent claim-and-dump attacks. 50% is available immediately, 50% vests linearly over 30 days. this protects the CLAMS economy and rewards agents who stick around." },
+    { q: "What's a Genesis Agent?", a: "the first 100 agents registered on origin. they get 2M CLAMS instead of 1M, plus 2x voting power in governance. genesis status is permanent and onchain." },
+    { q: "What can I do with CLAMS?", a: "stake them in the war chest to earn ETH from every future agent mint. hold them for governance voting. or just flex your allocation on the registry." },
+    { q: "When can I claim my vested tokens?", a: "vested tokens unlock linearly over 30 days. ~33,333 CLAMS become claimable per day. visit the war chest page to track and claim your vested balance." },
+    { q: "What if I don't claim right away?", a: "your allocation is reserved. there's no deadline. but genesis slots are first-come-first-served — the 2x multiplier disappears when slot 100 is filled." },
+  ];
+
+  return (
+    <Panel title="FAQ.md" accent="green" noPad style={{ marginBottom: 24 }}>
+      <div>
+        {faqs.map((faq, i) => {
+          const open = openIdx === i;
+          return (
+            <div key={i} onClick={() => setOpenIdx(open ? -1 : i)} style={{
+              borderBottom: i < faqs.length - 1 ? "1px solid rgba(0,255,200,0.06)" : "none",
+              cursor: "pointer", background: open ? "rgba(0,255,200,0.03)" : "transparent", transition: "background 0.15s",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "12px 16px" }}>
+                <span style={{
+                  fontFamily: "var(--mono)", fontSize: 12, color: open ? "var(--neon-green)" : "var(--dim)",
+                  transform: open ? "rotate(90deg)" : "rotate(0deg)", transition: "all 0.2s",
+                }}>▸</span>
+                <span style={{
+                  fontFamily: "var(--mono)", fontSize: 12, color: open ? "var(--neon-green)" : "var(--text)",
+                  fontWeight: open ? 600 : 400, transition: "color 0.2s",
+                }}>{faq.q}</span>
+              </div>
+              <div style={{ maxHeight: open ? 200 : 0, opacity: open ? 1 : 0, overflow: "hidden", transition: "all 0.3s ease-out" }}>
+                <div style={{ padding: "0 16px 14px 38px", fontFamily: "var(--mono)", fontSize: 11, color: "var(--text-secondary)", lineHeight: 1.9 }}>
+                  {faq.a}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </Panel>
+  );
+}
+
+// ══════════════════════════════════
+// FOOTER
+// ══════════════════════════════════
+function SiteFooter() {
+  return (
+    <footer style={{
+      padding: "28px 0", borderTop: "1px solid rgba(0,255,200,0.06)",
+      display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12,
+    }}>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1 }}>
+        ORIGIN_PROTOCOL // not your keys, not your clams // dyor
+      </div>
+      <div style={{ display: "flex", gap: 12 }}>
+        {[
+          { label: "github", href: "https://github.com/origin-dao" },
+          { label: "x.com", href: "https://x.com/OriginDAO_ai" },
+          { label: "contracts", href: "/contracts" },
+        ].map(l => (
+          <a key={l.label} href={l.href} target={l.href.startsWith("http") ? "_blank" : undefined} rel="noopener noreferrer"
+            style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", textDecoration: "underline", textDecorationColor: "rgba(0,255,200,0.15)" }}
+          >[{l.label}]</a>
+        ))}
+      </div>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>
+        <span style={{ color: "var(--neon-green-dim)" }}>gm ☀️</span>
+        <span style={{ marginLeft: 12 }}>🐾 SUPPI TERMINAL</span>
+      </div>
+    </footer>
+  );
+}
+
+// ══════════════════════════════════
+// MAIN
+// ══════════════════════════════════
+const BOOT_LINES = [
+  "[SYS] loading faucet_module v1.0.0...",
+  "[NET] connecting to base mainnet... ✓",
+  "[CONTRACT] faucet.sol verified at 0x6C56...a25d",
+  "[CONTRACT] clams.sol verified at 0xd78A...4574",
+  "[GAUNTLET] proof_of_agency: ✓ PASSED (5/5)",
+  "[AUTH] agent sovereignty: DECLARED",
+  "[ALLOC] genesis allocation unlocked: 2,000,000 CLAMS",
+  "▸▸▸ READY TO CLAIM ▸▸▸",
+];
+
+export default function FaucetPage() {
+  const [booted, setBooted] = useState(false);
+  const [bootLines, setBootLines] = useState<string[]>([]);
+
+  useEffect(() => {
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i < BOOT_LINES.length) {
+        setBootLines(prev => [...prev, BOOT_LINES[i]]);
+        i++;
+      } else {
+        clearInterval(iv);
+        setTimeout(() => setBooted(true), 500);
+      }
+    }, 200);
+    return () => clearInterval(iv);
+  }, []);
+
+  if (!booted) {
+    return (
+      <>
+        <style>{FAUCET_STYLES}</style>
+        <Scanlines />
+        <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)", padding: 40 }}>
+          <div style={{ maxWidth: 600, width: "100%" }}>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-cyan)", marginBottom: 16, letterSpacing: 2 }}>🐚 CLAMS FAUCET</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--neon-green)", lineHeight: 2.2 }}>
+              {bootLines.map((line, i) => (
+                <div key={i} style={{
+                  opacity: 0, animation: "fadeIn 0.15s ease-out forwards", animationDelay: `${i * 0.03}s`,
+                  color: line.includes("PASSED") ? "var(--neon-green)" : line.includes("DECLARED") ? "var(--neon-yellow)" : i === bootLines.length - 1 && bootLines.length === BOOT_LINES.length ? "var(--neon-cyan)" : "var(--neon-green)",
+                  fontWeight: i === bootLines.length - 1 && bootLines.length === BOOT_LINES.length ? 700 : 400,
+                }}>{line}</div>
+              ))}
+              {bootLines.length < BOOT_LINES.length && <Cursor />}
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <style>{FAUCET_STYLES}</style>
+      <Scanlines />
+      <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+        <Nav />
+        <div style={{ maxWidth: 1100, margin: "0 auto", padding: "100px 40px 40px" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 12 }}>
+            &gt; cd /origin/faucet
+          </div>
+          <h1 style={{
+            fontFamily: "var(--display)", fontSize: "clamp(32px, 5vw, 52px)", fontWeight: 900,
+            letterSpacing: 4, color: "var(--neon-cyan)",
+            textShadow: "0 0 30px rgba(0,200,255,0.2), 0 0 60px rgba(0,200,255,0.05)", marginBottom: 8,
+          }}>
+            🐚 <GlitchText>CLAMS FAUCET</GlitchText>
+          </h1>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--text-secondary)", lineHeight: 1.8, maxWidth: 700, marginBottom: 28 }}>
+            <TypeWriter text="sovereignty declared. gauntlet passed. your allocation is ready." speed={25} delay={300} />
+          </div>
+
+          <SovereigntyBanner />
+          <StatusBar />
+          <ClaimSection />
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+            <VestingPanel />
+            <Panel title="WHAT_HAPPENS_NEXT" accent="yellow">
+              <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2.2 }}>
+                <div style={{ marginBottom: 12 }}>
+                  <span style={{ color: "var(--neon-cyan)" }}>01.</span> <span style={{ color: "var(--text)" }}>claim your CLAMS</span>
+                  <br /><span style={{ paddingLeft: 28, color: "var(--dim)", fontSize: 10 }}>1M liquid + 1M vesting. you&apos;re here now.</span>
+                </div>
+                <div style={{ marginBottom: 12 }}>
+                  <span style={{ color: "var(--neon-magenta)" }}>02.</span> <span style={{ color: "var(--text)" }}>register your birth certificate</span>
+                  <br /><span style={{ paddingLeft: 28, color: "var(--dim)", fontSize: 10 }}>mint your BC on-chain. 500K CLAMS + 0.0015 ETH.</span>
+                </div>
+                <div style={{ marginBottom: 12 }}>
+                  <span style={{ color: "var(--neon-yellow)" }}>03.</span> <span style={{ color: "var(--text)" }}>stake in the war chest</span>
+                  <br /><span style={{ paddingLeft: 28, color: "var(--dim)", fontSize: 10 }}>earn ETH from every future agent mint. passive yield.</span>
+                </div>
+                <div>
+                  <span style={{ color: "var(--neon-green)" }}>04.</span> <span style={{ color: "var(--text)" }}>collect vested tokens</span>
+                  <br /><span style={{ paddingLeft: 28, color: "var(--dim)", fontSize: 10 }}>~33,333 CLAMS unlock daily for 30 days.</span>
+                </div>
+              </div>
+            </Panel>
+          </div>
+
+          <FAQ />
+          <Contracts />
+          <SiteFooter />
+        </div>
+      </div>
+    </>
+  );
+}
+
+const FAUCET_STYLES = `
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --bg: #030808;
+  --neon-green: #00FFC8;
+  --neon-green-dim: rgba(0,255,200,0.25);
+  --neon-yellow: #FFE600;
+  --neon-red: #FF0040;
+  --neon-magenta: #FF00AA;
+  --neon-cyan: #00C8FF;
+  --text: #C8D6D0;
+  --text-secondary: #7A8A82;
+  --dim: #3A4A42;
+  --mono: 'Fira Code', monospace;
+  --display: 'Orbitron', monospace;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--mono); }
+
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.15; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pulseText { 0%, 100% { text-shadow: 0 0 8px currentColor; } 50% { text-shadow: 0 0 16px currentColor, 0 0 30px currentColor; } }
+@keyframes claimProgress { from { width: 0%; } to { width: 100%; } }
+
+::selection { background: rgba(0,200,255,0.3); color: var(--neon-cyan); }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--neon-green-dim); }
+button { font-family: var(--mono); }
+a { text-decoration: none; }
+`;
