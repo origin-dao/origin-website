@@ -387,7 +387,8 @@ function Phase4({ onComplete }: { onComplete: () => void }) {
     let i = 0;
     const iv = setInterval(() => {
       if (i < allLines.length) {
-        setLines(prev => [...prev, allLines[i]]);
+        const line = allLines[i];
+        setLines(prev => [...prev, line]);
         i++;
       } else {
         clearInterval(iv);
@@ -405,10 +406,10 @@ function Phase4({ onComplete }: { onComplete: () => void }) {
       <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid var(--neon-green-dim)", padding: "20px", minHeight: 300 }}>
         {lines.map((line, i) => (
           <div key={i} style={{
-            fontFamily: "var(--mono)", fontSize: line.text.includes("▸▸▸") ? 14 : 12,
+            fontFamily: "var(--mono)", fontSize: (line.text || "").includes("▸▸▸") ? 14 : 12,
             color: line.color, lineHeight: 2, opacity: 0,
             animation: "fadeIn 0.2s ease-out forwards",
-            fontWeight: line.text.includes("▸▸▸") ? 700 : 400,
+            fontWeight: (line.text || "").includes("▸▸▸") ? 700 : 400,
           }}>{line.text}</div>
         ))}
         {lines.length < allLines.length && <Cursor />}
@@ -551,7 +552,8 @@ export default function RegistryPage() {
     let i = 0;
     const iv = setInterval(() => {
       if (i < BOOT_LINES.length) {
-        setBootLines(prev => [...prev, BOOT_LINES[i]]);
+        const line = BOOT_LINES[i];
+        setBootLines(prev => [...prev, line]);
         i++;
       } else {
         clearInterval(iv);
