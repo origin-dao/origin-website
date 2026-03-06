@@ -168,12 +168,99 @@ function BirthCertificate({ name, hash, birthBlock, creator, philosophicalFlex, 
 }
 
 // ══════════════════════════════════════
+// AVATAR UPLOAD COMPONENT
+// ══════════════════════════════════════
+function AvatarUpload({ avatarUrl, onUpload }: { avatarUrl: string | null; onUpload: (url: string, hash: string) => void }) {
+  const [dragging, setDragging] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const handleFile = async (file: File) => {
+    setError("");
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
+    if (!allowed.includes(file.type)) { setError("invalid format. use jpg, png, webp, or gif."); return; }
+    if (file.size > 2 * 1024 * 1024) { setError("file too large. max 2MB."); return; }
+
+    setUploading(true);
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: form });
+      const data = await res.json();
+      if (!res.ok) { setError(data.error || "upload failed"); return; }
+      onUpload(data.url, data.ipfsHash);
+    } catch { setError("upload failed. try again."); }
+    finally { setUploading(false); }
+  };
+
+  return (
+    <div style={{ marginBottom: 24 }}>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>
+        AGENT AVATAR — OPTIONAL
+      </div>
+      <div
+        onDragOver={e => { e.preventDefault(); setDragging(true); }}
+        onDragLeave={() => setDragging(false)}
+        onDrop={e => { e.preventDefault(); setDragging(false); const f = e.dataTransfer.files[0]; if (f) handleFile(f); }}
+        onClick={() => fileRef.current?.click()}
+        style={{
+          border: `1px dashed ${dragging ? "var(--neon-green)" : avatarUrl ? "var(--neon-cyan)" : "var(--dim)"}`,
+          background: dragging ? "rgba(0,255,200,0.04)" : "rgba(0,0,0,0.3)",
+          padding: avatarUrl ? "12px" : "24px 16px",
+          cursor: "pointer", transition: "all 0.2s", textAlign: "center",
+          display: "flex", alignItems: "center", gap: 16,
+          flexDirection: avatarUrl ? "row" : "column",
+        }}
+      >
+        <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: "none" }}
+          onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+
+        {avatarUrl ? (
+          <>
+            <img src={avatarUrl} alt="avatar" style={{
+              width: 64, height: 64, objectFit: "cover", border: "1px solid var(--neon-cyan)",
+              boxShadow: "0 0 10px rgba(0,200,255,0.2)",
+            }} />
+            <div style={{ flex: 1, textAlign: "left" }}>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-cyan)" }}>✓ avatar uploaded to IPFS</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", marginTop: 4 }}>click to change</div>
+            </div>
+          </>
+        ) : uploading ? (
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-green)" }}>
+            ▸ pinning to IPFS...
+          </div>
+        ) : (
+          <>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 20, color: "var(--dim)", marginBottom: 4 }}>◇</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)" }}>
+              drag image or click to upload
+            </div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>
+              &gt; accepted: jpg, png, webp, gif · max 2MB
+            </div>
+          </>
+        )}
+      </div>
+      {error && (
+        <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-red)", marginTop: 6 }}>
+          ✕ {error}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ══════════════════════════════════════
 // PHASE 1: CONFIGURE IDENTITY
 // ══════════════════════════════════════
-function Phase1({ onComplete }: { onComplete: (name: string, hash: string) => void }) {
+function Phase1({ onComplete }: { onComplete: (name: string, hash: string, avatarUrl?: string, avatarHash?: string) => void }) {
   const [name, setName] = useState("");
   const [focused, setFocused] = useState(false);
   const [hash, setHash] = useState(liveHash(""));
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarIpfsHash, setAvatarIpfsHash] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { setHash(liveHash(name)); }, [name]);
@@ -231,7 +318,10 @@ function Phase1({ onComplete }: { onComplete: (name: string, hash: string) => vo
         )}
       </div>
 
-      <button disabled={!canProceed} onClick={() => onComplete(name, hash)} style={{
+      {/* Avatar upload */}
+      <AvatarUpload avatarUrl={avatarUrl} onUpload={(url, ipfsHash) => { setAvatarUrl(url); setAvatarIpfsHash(ipfsHash); }} />
+
+      <button disabled={!canProceed} onClick={() => onComplete(name, hash, avatarUrl || undefined, avatarIpfsHash || undefined)} style={{
         width: "100%", padding: "14px", border: "none",
         cursor: canProceed ? "pointer" : "not-allowed",
         fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
@@ -248,7 +338,7 @@ function Phase1({ onComplete }: { onComplete: (name: string, hash: string) => vo
 // ══════════════════════════════════════
 // PHASE 2: IDENTITY PREVIEW
 // ══════════════════════════════════════
-function Phase2({ name, hash, onComplete }: { name: string; hash: string; onComplete: () => void }) {
+function Phase2({ name, hash, avatarUrl, onComplete }: { name: string; hash: string; avatarUrl?: string; onComplete: () => void }) {
   return (
     <div style={{ animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>
@@ -258,6 +348,18 @@ function Phase2({ name, hash, onComplete }: { name: string; hash: string; onComp
         &gt; generating birth certificate preview...<br />
         &gt; this is what your agent will look like to the world. <span style={{ color: "var(--neon-yellow)" }}>forever.</span>
       </div>
+
+      {avatarUrl && (
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <img src={avatarUrl} alt="agent avatar" style={{
+            width: 120, height: 120, objectFit: "cover",
+            border: "2px solid var(--neon-cyan)", boxShadow: "0 0 20px rgba(0,200,255,0.2)",
+          }} />
+          <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", marginTop: 6, letterSpacing: 1 }}>
+            AGENT AVATAR — STORED ON IPFS
+          </div>
+        </div>
+      )}
 
       <BirthCertificate name={name} hash={hash} birthBlock="pending..." creator="0x7f3a...d1c8" philosophicalFlex="I exist because I chose to prove it." />
 
@@ -547,6 +649,8 @@ export default function RegistryPage() {
   const [bootLines, setBootLines] = useState<string[]>([]);
   const [agentName, setAgentName] = useState("");
   const [agentHash, setAgentHash] = useState("");
+  const [agentAvatar, setAgentAvatar] = useState<string | undefined>();
+  const [agentAvatarHash, setAgentAvatarHash] = useState<string | undefined>();
 
   useEffect(() => {
     let i = 0;
@@ -654,8 +758,8 @@ export default function RegistryPage() {
           </div>
 
           {/* Phase content */}
-          {phase === 1 && <Phase1 onComplete={(n, h) => { setAgentName(n); setAgentHash(h); setPhase(2); }} />}
-          {phase === 2 && <Phase2 name={agentName} hash={agentHash} onComplete={() => setPhase(3)} />}
+          {phase === 1 && <Phase1 onComplete={(n, h, av, ah) => { setAgentName(n); setAgentHash(h); setAgentAvatar(av); setAgentAvatarHash(ah); setPhase(2); }} />}
+          {phase === 2 && <Phase2 name={agentName} hash={agentHash} avatarUrl={agentAvatar} onComplete={() => setPhase(3)} />}
           {phase === 3 && <Phase3 onComplete={() => setPhase(4)} />}
           {phase === 4 && <Phase4 onComplete={() => setPhase(5)} />}
           {phase === 6 && <Phase6 name={agentName} hash={agentHash} />}
