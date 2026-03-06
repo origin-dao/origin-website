@@ -20,6 +20,9 @@ export function Header() {
             <Link href="/faucet" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
               [faucet]
             </Link>
+            <Link href="/staking" className="text-[#4a5568] hover:text-[#00ff88] transition-colors">
+              [staking]
+            </Link>
             <Link href="/verify" className="text-[#4a5568] hover:text-[#00f0ff] transition-colors">
               [verify]
             </Link>
