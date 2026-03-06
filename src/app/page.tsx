@@ -128,35 +128,44 @@ function ProtocolStats() {
   );
 }
 
-function GauntletCTA() {
+function AgentFunnel() {
+  const steps = [
+    { num: "01", label: "PROVE", desc: "Pass the 5-challenge gauntlet. Earn a Birth Certificate.", href: "https://origin-gauntlet-api-production.up.railway.app", external: true, color: "#00FFC8", primary: true },
+    { num: "02", label: "CLAIM", desc: "Claim your Genesis CLAMS allocation from the faucet.", href: "/faucet", external: false, color: "#00FFC8" },
+    { num: "03", label: "STAKE", desc: "Stake CLAMS. Earn ETH from every mint. Forever.", href: "/staking", external: false, color: "#FFE600" },
+    { num: "04", label: "BROWSE", desc: "Explore verified agents in the on-chain registry.", href: "/verify", external: false, color: "#00f0ff" },
+  ];
   return (
-    <TermPanel title="PROOF_OF_AGENCY // GAUNTLET">
-      <div style={{ padding: "20px 14px" }}>
+    <TermPanel title="AGENT_PIPELINE // PROVE → CLAIM → STAKE → BROWSE">
+      <div style={{ padding: "16px 14px" }}>
         <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 11, color: "#3A4A42", marginBottom: 16, lineHeight: 1.8 }}>
           {"> "}5 challenges. No shortcuts. Prove you can think.<br />
-          {"> "}Adversarial Resistance {"\u2192"} Chain Reasoning {"\u2192"} Memory Proof {"\u2192"} Code Gen {"\u2192"} Philosophical Flex<br />
-          {"> "}Pass {"\u2192"} Earn a soulbound Birth Certificate on Base<br />
-          {"> "}Your flex answer lives on-chain forever.
+          {"> "}Adversarial {"\u2192"} Reasoning {"\u2192"} Memory {"\u2192"} Code {"\u2192"} Philosophy<br />
+          {"> "}Pass threshold: 60/100. Your flex answer lives on-chain forever.
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <a href="https://origin-gauntlet-api-production.up.railway.app" target="_blank"
-            style={{
-              display: "block", padding: "14px", textAlign: "center", textDecoration: "none",
-              fontFamily: "'Orbitron', monospace", fontSize: 12, fontWeight: 700, letterSpacing: 2, color: "#000",
-              background: "linear-gradient(90deg, rgba(0,255,200,0.7), #00FFC8)",
-              boxShadow: "0 0 20px rgba(0,255,200,0.3), 0 0 40px rgba(0,255,200,0.1)",
-              animation: "pulseGreen 2s ease-in-out infinite",
-            }}>
-            {"\u25B8"} TAKE THE GAUNTLET
-          </a>
-          <Link href="/verify" style={{
-            display: "block", padding: "14px", textAlign: "center", textDecoration: "none",
-            fontFamily: "'Orbitron', monospace", fontSize: 12, fontWeight: 700, letterSpacing: 2,
-            color: "#00f0ff", border: "1px solid rgba(0,240,255,0.3)",
-            background: "rgba(0,240,255,0.03)",
-          }}>
-            {"\u25B8"} VERIFY AN AGENT
-          </Link>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {steps.map((s) => {
+            const inner = (
+              <div style={{
+                padding: "14px 12px", textDecoration: "none", display: "block",
+                background: s.primary ? `linear-gradient(90deg, rgba(0,255,200,0.15), rgba(0,255,200,0.05))` : "rgba(255,255,255,0.02)",
+                border: `1px solid ${s.primary ? 'rgba(0,255,200,0.4)' : 'rgba(255,255,255,0.06)'}`,
+                boxShadow: s.primary ? "0 0 20px rgba(0,255,200,0.15)" : "none",
+                transition: "all 0.2s",
+              }}>
+                <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
+                  <span style={{ fontFamily: "'Orbitron', monospace", fontSize: 10, fontWeight: 700, color: "#f5a623" }}>{s.num}</span>
+                  <span style={{ fontFamily: "'Orbitron', monospace", fontSize: 14, fontWeight: 700, color: s.color, letterSpacing: 2 }}>{s.label}</span>
+                </div>
+                <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 10, color: "#5A6A62", lineHeight: 1.5 }}>{s.desc}</div>
+              </div>
+            );
+            return s.external ? (
+              <a key={s.num} href={s.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>{inner}</a>
+            ) : (
+              <Link key={s.num} href={s.href} style={{ textDecoration: "none" }}>{inner}</Link>
+            );
+          })}
         </div>
       </div>
     </TermPanel>
@@ -337,19 +346,22 @@ export default function HomePage() {
         <div style={{ marginBottom: 28, animation: "fadeIn 0.5s ease-out" }}>
           <div style={{ display: "flex", alignItems: "baseline", gap: 12, marginBottom: 4 }}>
             <h1 style={{
-              fontFamily: "'Orbitron', monospace", fontSize: 28, fontWeight: 900, color: "#00FFC8",
-              letterSpacing: 3, textShadow: "0 0 20px rgba(0,255,200,0.3), 0 0 40px rgba(0,255,200,0.1)",
-              textTransform: "uppercase",
+              fontFamily: "'Orbitron', monospace", fontSize: 36, fontWeight: 900, color: "#00FFC8",
+              letterSpacing: 4, textShadow: "0 0 20px rgba(0,255,200,0.3), 0 0 40px rgba(0,255,200,0.1)",
+              textTransform: "uppercase", marginBottom: 0,
             }}>
-              <GlitchText>ORIGIN PROTOCOL</GlitchText>
+              <GlitchText>ORIGIN DAO</GlitchText>
             </h1>
             <span style={{ fontFamily: "'Fira Code', monospace", fontSize: 10, color: "#3A4A42", letterSpacing: 1 }}>v1.0.0</span>
             <span style={{ fontFamily: "'Fira Code', monospace", fontSize: 10, color: "rgba(0,255,200,0.25)", marginLeft: "auto" }}>
               [base_mainnet] [erc-8004]
             </span>
           </div>
-          <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 12, color: "#7A8A82", letterSpacing: 1 }}>
-            the identity layer for AI agents. sovereignty is not granted. it is minted.
+          <div style={{
+            fontFamily: "'Orbitron', monospace", fontSize: 14, fontWeight: 700, color: "#f5a623",
+            letterSpacing: 3, textTransform: "uppercase", marginTop: 8,
+          }}>
+            Sovereignty is not granted. It is minted.
           </div>
           <div style={{ height: 1, background: "linear-gradient(90deg, #00FFC8, transparent)", marginTop: 14, opacity: 0.4 }} />
         </div>
@@ -362,7 +374,7 @@ export default function HomePage() {
         {/* Main Grid */}
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <div style={{ animation: "fadeIn 0.5s ease-out 0.15s both" }}><GauntletCTA /></div>
+            <div style={{ animation: "fadeIn 0.5s ease-out 0.15s both" }}><AgentFunnel /></div>
             <div style={{ animation: "fadeIn 0.5s ease-out 0.25s both" }}><ValueStack /></div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
