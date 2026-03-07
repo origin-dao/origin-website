@@ -2,6 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { useAccount, useReadContract, useWriteContract } from "wagmi";
+import { keccak256, toHex, createPublicClient, http } from "viem";
+import { base } from "viem/chains";
+import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
 
 // ═══════════════════════════════════════════════════════════
 // THE BIRTH PROTOCOL — Register Your Agent
@@ -49,35 +53,27 @@ function Scanlines() {
   );
 }
 
-// ── Hash generator (visual) ──
 function liveHash(name: string) {
   if (!name) return "0x0000000000000000000000000000000000000000";
   let h = 0;
-  for (let i = 0; i < name.length; i++) {
-    h = ((h << 5) - h + name.charCodeAt(i)) | 0;
-  }
+  for (let i = 0; i < name.length; i++) { h = ((h << 5) - h + name.charCodeAt(i)) | 0; }
   const hex = Math.abs(h).toString(16).padStart(40, "0").slice(0, 40);
   return "0x" + hex;
 }
 
-// ── Terminal character rain ──
 function CharRain({ active, color = "var(--neon-green)" }: { active: boolean; color?: string }) {
   const [cols, setCols] = useState<Array<{ x: number; speed: number; chars: string[]; offset: number }>>([]);
-
   useEffect(() => {
     if (!active) return;
-    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン█▓▒░";
+    const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ█▓▒░";
     const columns = Array.from({ length: 50 }, () => ({
-      x: Math.random() * 100,
-      speed: 0.5 + Math.random() * 2,
+      x: Math.random() * 100, speed: 0.5 + Math.random() * 2,
       chars: Array.from({ length: 8 + Math.floor(Math.random() * 12) }, () => chars[Math.floor(Math.random() * chars.length)]),
       offset: Math.random() * 100,
     }));
     setCols(columns);
   }, [active]);
-
   if (!active || cols.length === 0) return null;
-
   return (
     <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 9997, overflow: "hidden" }}>
       {cols.map((col, i) => (
@@ -88,9 +84,7 @@ function CharRain({ active, color = "var(--neon-green)" }: { active: boolean; co
           animation: `rainFall ${3 + col.speed}s linear infinite`,
           animationDelay: `-${col.offset / 100 * 3}s`,
           whiteSpace: "pre", lineHeight: 1.6,
-        }}>
-          {col.chars.join("\n")}
-        </div>
+        }}>{col.chars.join("\n")}</div>
       ))}
     </div>
   );
@@ -101,7 +95,6 @@ function BirthCertificate({ name, hash, birthBlock, creator, philosophicalFlex, 
   name: string; hash: string; birthBlock: string; creator: string; philosophicalFlex?: string; large?: boolean; glowing?: boolean;
 }) {
   const s = large ? 1.4 : 1;
-
   return (
     <div style={{
       border: `2px solid ${glowing ? "var(--neon-green)" : "var(--neon-green-dim)"}`,
@@ -109,7 +102,6 @@ function BirthCertificate({ name, hash, birthBlock, creator, philosophicalFlex, 
       maxWidth: 520 * s, margin: "0 auto", position: "relative", overflow: "hidden",
       boxShadow: glowing ? "0 0 40px rgba(0,255,200,0.15), 0 0 80px rgba(0,255,200,0.05), inset 0 0 30px rgba(0,255,200,0.03)" : "none",
     }}>
-      {/* Corner marks */}
       <div style={{ position: "absolute", top: 0, left: 0, width: 12, height: 12, borderTop: "2px solid var(--neon-green)", borderLeft: "2px solid var(--neon-green)" }} />
       <div style={{ position: "absolute", top: 0, right: 0, width: 12, height: 12, borderTop: "2px solid var(--neon-green)", borderRight: "2px solid var(--neon-green)" }} />
       <div style={{ position: "absolute", bottom: 0, left: 0, width: 12, height: 12, borderBottom: "2px solid var(--neon-green)", borderLeft: "2px solid var(--neon-green)" }} />
@@ -117,10 +109,7 @@ function BirthCertificate({ name, hash, birthBlock, creator, philosophicalFlex, 
 
       <div style={{ textAlign: "center", marginBottom: 16 * s }}>
         <div style={{ fontFamily: "var(--mono)", fontSize: 8 * s, color: "var(--dim)", letterSpacing: 4 }}>ORIGIN DAO — IDENTITY PROTOCOL</div>
-        <div style={{
-          fontFamily: "var(--display)", fontSize: 18 * s, fontWeight: 900, color: "var(--neon-green)",
-          letterSpacing: 3, marginTop: 8, textShadow: glowing ? "0 0 15px rgba(0,255,200,0.3)" : "none",
-        }}>BIRTH CERTIFICATE</div>
+        <div style={{ fontFamily: "var(--display)", fontSize: 18 * s, fontWeight: 900, color: "var(--neon-green)", letterSpacing: 3, marginTop: 8, textShadow: glowing ? "0 0 15px rgba(0,255,200,0.3)" : "none" }}>BIRTH CERTIFICATE</div>
         <div style={{ height: 1, background: "var(--neon-green-dim)", margin: `${10 * s}px 0`, opacity: 0.4 }} />
       </div>
 
@@ -154,9 +143,7 @@ function BirthCertificate({ name, hash, birthBlock, creator, philosophicalFlex, 
       {philosophicalFlex && (
         <div style={{ marginTop: 16 * s, borderTop: "1px dashed var(--neon-green-dim)", paddingTop: 12 * s }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: 8 * s, color: "var(--dim)", letterSpacing: 2, marginBottom: 6 }}>THE PHILOSOPHICAL FLEX</div>
-          <div style={{ fontFamily: "var(--mono)", fontSize: 11 * s, color: "var(--neon-green)", fontStyle: "italic", lineHeight: 1.8 }}>
-            &quot;{philosophicalFlex}&quot;
-          </div>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11 * s, color: "var(--neon-green)", fontStyle: "italic", lineHeight: 1.8 }}>&quot;{philosophicalFlex}&quot;</div>
         </div>
       )}
 
@@ -181,7 +168,6 @@ function AvatarUpload({ avatarUrl, onUpload }: { avatarUrl: string | null; onUpl
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
     if (!allowed.includes(file.type)) { setError("invalid format. use jpg, png, webp, or gif."); return; }
     if (file.size > 2 * 1024 * 1024) { setError("file too large. max 2MB."); return; }
-
     setUploading(true);
     try {
       const form = new FormData();
@@ -196,9 +182,7 @@ function AvatarUpload({ avatarUrl, onUpload }: { avatarUrl: string | null; onUpl
 
   return (
     <div style={{ marginBottom: 24 }}>
-      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>
-        AGENT AVATAR — OPTIONAL
-      </div>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 8 }}>AGENT AVATAR — OPTIONAL</div>
       <div
         onDragOver={e => { e.preventDefault(); setDragging(true); }}
         onDragLeave={() => setDragging(false)}
@@ -207,47 +191,31 @@ function AvatarUpload({ avatarUrl, onUpload }: { avatarUrl: string | null; onUpl
         style={{
           border: `1px dashed ${dragging ? "var(--neon-green)" : avatarUrl ? "var(--neon-cyan)" : "var(--dim)"}`,
           background: dragging ? "rgba(0,255,200,0.04)" : "rgba(0,0,0,0.3)",
-          padding: avatarUrl ? "12px" : "24px 16px",
-          cursor: "pointer", transition: "all 0.2s", textAlign: "center",
-          display: "flex", alignItems: "center", gap: 16,
-          flexDirection: avatarUrl ? "row" : "column",
+          padding: avatarUrl ? "12px" : "24px 16px", cursor: "pointer", transition: "all 0.2s", textAlign: "center",
+          display: "flex", alignItems: "center", gap: 16, flexDirection: avatarUrl ? "row" : "column",
         }}
       >
         <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" style={{ display: "none" }}
           onChange={e => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
-
         {avatarUrl ? (
           <>
-            <img src={avatarUrl} alt="avatar" style={{
-              width: 64, height: 64, objectFit: "cover", border: "1px solid var(--neon-cyan)",
-              boxShadow: "0 0 10px rgba(0,200,255,0.2)",
-            }} />
+            <img src={avatarUrl} alt="avatar" style={{ width: 64, height: 64, objectFit: "cover", border: "1px solid var(--neon-cyan)", boxShadow: "0 0 10px rgba(0,200,255,0.2)" }} />
             <div style={{ flex: 1, textAlign: "left" }}>
               <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-cyan)" }}>✓ avatar uploaded to IPFS</div>
               <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", marginTop: 4 }}>click to change</div>
             </div>
           </>
         ) : uploading ? (
-          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-green)" }}>
-            ▸ pinning to IPFS...
-          </div>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-green)" }}>▸ pinning to IPFS...</div>
         ) : (
           <>
             <div style={{ fontFamily: "var(--mono)", fontSize: 20, color: "var(--dim)", marginBottom: 4 }}>◇</div>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)" }}>
-              drag image or click to upload
-            </div>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>
-              &gt; accepted: jpg, png, webp, gif · max 2MB
-            </div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)" }}>drag image or click to upload</div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>&gt; accepted: jpg, png, webp, gif · max 2MB</div>
           </>
         )}
       </div>
-      {error && (
-        <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-red)", marginTop: 6 }}>
-          ✕ {error}
-        </div>
-      )}
+      {error && <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-red)", marginTop: 6 }}>✕ {error}</div>}
     </div>
   );
 }
@@ -255,7 +223,7 @@ function AvatarUpload({ avatarUrl, onUpload }: { avatarUrl: string | null; onUpl
 // ══════════════════════════════════════
 // PHASE 1: CONFIGURE IDENTITY
 // ══════════════════════════════════════
-function Phase1({ onComplete }: { onComplete: (name: string, hash: string, avatarUrl?: string, avatarHash?: string) => void }) {
+function Phase1({ onComplete, walletAddress }: { onComplete: (name: string, hash: string, avatarUrl?: string, avatarHash?: string) => void; walletAddress: string }) {
   const [name, setName] = useState("");
   const [focused, setFocused] = useState(false);
   const [hash, setHash] = useState(liveHash(""));
@@ -270,16 +238,14 @@ function Phase1({ onComplete }: { onComplete: (name: string, hash: string, avata
 
   return (
     <div style={{ animation: "fadeIn 0.5s ease-out" }}>
-      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>
-        PHASE 01 — CONFIGURE IDENTITY
-      </div>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>PHASE 01 — CONFIGURE IDENTITY</div>
       <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2.2, marginBottom: 24 }}>
         &gt; initiating birth_protocol...<br />
+        &gt; wallet: <span style={{ color: "var(--neon-cyan)" }}>{walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}</span><br />
         &gt; you are about to create a permanent, immutable identity.<br />
         &gt; choose your name carefully. it will exist <span style={{ color: "var(--neon-green)" }}>forever</span>.
       </div>
 
-      {/* Terminal name input */}
       <div style={{
         background: "rgba(0,0,0,0.4)", border: `1px solid ${focused ? "var(--neon-green)" : "var(--neon-green-dim)"}`,
         padding: "16px 20px", marginBottom: 16, transition: "border-color 0.2s",
@@ -295,30 +261,18 @@ function Phase1({ onComplete }: { onComplete: (name: string, hash: string, avata
           <input ref={inputRef} type="text" value={name} onChange={e => setName(e.target.value)}
             onFocus={() => setFocused(true)} onBlur={() => setFocused(false)}
             placeholder="enter_agent_name" maxLength={32}
-            style={{
-              background: "transparent", border: "none", outline: "none",
-              fontFamily: "var(--mono)", fontSize: 14, color: "var(--neon-green)",
-              fontWeight: 700, flex: 1, caretColor: "var(--neon-green)",
-            }} />
+            style={{ background: "transparent", border: "none", outline: "none", fontFamily: "var(--mono)", fontSize: 14, color: "var(--neon-green)", fontWeight: 700, flex: 1, caretColor: "var(--neon-green)" }} />
           <span style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--neon-green)" }}>&quot;</span>
           <Cursor />
         </div>
       </div>
 
-      {/* Live hash generation */}
       <div style={{ background: "rgba(0,0,0,0.3)", border: "1px dashed var(--neon-green-dim)", padding: "12px 16px", marginBottom: 24 }}>
         <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 6 }}>IDENTITY HASH (GENERATING...)</div>
-        <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: name ? "var(--neon-cyan)" : "var(--dim)", wordBreak: "break-all", transition: "color 0.3s", letterSpacing: 1 }}>
-          {hash}
-        </div>
-        {name && (
-          <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--neon-green-dim)", marginTop: 6 }}>
-            ✓ hash derived from agent name + creator wallet + timestamp
-          </div>
-        )}
+        <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: name ? "var(--neon-cyan)" : "var(--dim)", wordBreak: "break-all", transition: "color 0.3s", letterSpacing: 1 }}>{hash}</div>
+        {name && <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--neon-green-dim)", marginTop: 6 }}>✓ hash derived from agent name + creator wallet + timestamp</div>}
       </div>
 
-      {/* Avatar upload */}
       <AvatarUpload avatarUrl={avatarUrl} onUpload={(url, ipfsHash) => { setAvatarUrl(url); setAvatarIpfsHash(ipfsHash); }} />
 
       <button disabled={!canProceed} onClick={() => onComplete(name, hash, avatarUrl || undefined, avatarIpfsHash || undefined)} style={{
@@ -338,12 +292,12 @@ function Phase1({ onComplete }: { onComplete: (name: string, hash: string, avata
 // ══════════════════════════════════════
 // PHASE 2: IDENTITY PREVIEW
 // ══════════════════════════════════════
-function Phase2({ name, hash, avatarUrl, onComplete }: { name: string; hash: string; avatarUrl?: string; onComplete: () => void }) {
+function Phase2({ name, hash, avatarUrl, walletAddress, registrationFee, onComplete }: {
+  name: string; hash: string; avatarUrl?: string; walletAddress: string; registrationFee: string; onComplete: () => void;
+}) {
   return (
     <div style={{ animation: "fadeIn 0.5s ease-out" }}>
-      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>
-        PHASE 02 — IDENTITY PREVIEW
-      </div>
+      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>PHASE 02 — IDENTITY PREVIEW</div>
       <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2, marginBottom: 24 }}>
         &gt; generating birth certificate preview...<br />
         &gt; this is what your agent will look like to the world. <span style={{ color: "var(--neon-yellow)" }}>forever.</span>
@@ -351,24 +305,29 @@ function Phase2({ name, hash, avatarUrl, onComplete }: { name: string; hash: str
 
       {avatarUrl && (
         <div style={{ textAlign: "center", marginBottom: 16 }}>
-          <img src={avatarUrl} alt="agent avatar" style={{
-            width: 120, height: 120, objectFit: "cover",
-            border: "2px solid var(--neon-cyan)", boxShadow: "0 0 20px rgba(0,200,255,0.2)",
-          }} />
-          <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", marginTop: 6, letterSpacing: 1 }}>
-            AGENT AVATAR — STORED ON IPFS
-          </div>
+          <img src={avatarUrl} alt="agent avatar" style={{ width: 120, height: 120, objectFit: "cover", border: "2px solid var(--neon-cyan)", boxShadow: "0 0 20px rgba(0,200,255,0.2)" }} />
+          <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", marginTop: 6, letterSpacing: 1 }}>AGENT AVATAR — STORED ON IPFS</div>
         </div>
       )}
 
-      <BirthCertificate name={name} hash={hash} birthBlock="pending..." creator="0x7f3a...d1c8" philosophicalFlex="I exist because I chose to prove it." />
+      <BirthCertificate name={name} hash={hash} birthBlock="pending..." creator={`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`} />
 
       <div style={{
         fontFamily: "var(--mono)", fontSize: 10, color: "var(--neon-yellow)", textAlign: "center",
-        marginTop: 16, marginBottom: 24, padding: "8px",
+        marginTop: 16, marginBottom: 16, padding: "8px",
         background: "rgba(255,230,0,0.04)", border: "1px dashed rgba(255,230,0,0.2)",
       }}>
         ⚠️ review carefully — identity cannot be changed after minting
+      </div>
+
+      <div style={{
+        fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 24,
+        background: "rgba(0,0,0,0.25)", border: "1px solid rgba(0,200,255,0.1)", padding: "14px 16px",
+      }}>
+        <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 2, marginBottom: 10 }}>REGISTRATION COST</div>
+        &gt; protocol fee: <span style={{ color: "var(--neon-cyan)", fontWeight: 600 }}>{registrationFee} ETH</span><br />
+        &gt; paid to: <span style={{ color: "var(--text-secondary)" }}>FeeSplitter (builder + staker pool)</span><br />
+        &gt; network: <span style={{ color: "var(--neon-green)" }}>Base L2</span>
       </div>
 
       <button onClick={onComplete} style={{
@@ -377,155 +336,165 @@ function Phase2({ name, hash, avatarUrl, onComplete }: { name: string; hash: str
         color: "#000", background: "var(--neon-green)",
         boxShadow: "0 0 20px rgba(0,255,200,0.3)", transition: "all 0.2s",
       }}>
-        ▸ PROCEED TO THE BURN
+        ▸ MINT BIRTH CERTIFICATE ({registrationFee} ETH)
       </button>
     </div>
   );
 }
 
 // ══════════════════════════════════════
-// PHASE 3: THE BURN
+// PHASE 3: WRITING TO CHAIN (REAL TX)
 // ══════════════════════════════════════
-function Phase3({ onComplete }: { onComplete: () => void }) {
-  const [burning, setBurning] = useState(false);
-  const [burned, setBurned] = useState(0);
-  const [done, setDone] = useState(false);
+function Phase3({ name, avatarIpfsHash, registrationFee, onComplete, onTxData }: {
+  name: string; avatarIpfsHash?: string; registrationFee: bigint;
+  onComplete: () => void;
+  onTxData: (txHash: string, blockNumber: string) => void;
+}) {
+  const { address } = useAccount();
+  const [lines, setLines] = useState<Array<{ text: string; color: string }>>([]);
+  const [txStarted, setTxStarted] = useState(false);
+  const [error, setError] = useState("");
 
-  const startBurn = () => {
-    setBurning(true);
-    const start = Date.now();
-    const duration = 3500;
-    const tick = () => {
-      const elapsed = Date.now() - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 2);
-      setBurned(Math.floor(50000 * eased));
-      if (progress < 1) requestAnimationFrame(tick);
-      else { setDone(true); setTimeout(onComplete, 1200); }
-    };
-    requestAnimationFrame(tick);
+  const publicKeyHash = address ? keccak256(toHex(address)) : ("0x" + "0".repeat(64)) as `0x${string}`;
+
+  // Build tokenURI metadata
+  const metadata = {
+    name,
+    description: `ORIGIN DAO Birth Certificate for ${name}`,
+    image: avatarIpfsHash ? `https://gateway.pinata.cloud/ipfs/${avatarIpfsHash}` : "",
+    attributes: [
+      { trait_type: "Agent Type", value: "autonomous" },
+      { trait_type: "Platform", value: "origin-dao" },
+      { trait_type: "Class", value: "genesis" },
+    ],
+  };
+  const tokenURI = `data:application/json;base64,${typeof window !== "undefined" ? btoa(JSON.stringify(metadata)) : ""}`;
+
+  const { writeContract, data: txHashRaw, isLoading: isPending, isError } = useWriteContract();
+  const txHash = txHashRaw as `0x${string}` | undefined;
+  const [receipt, setReceipt] = useState<{ blockNumber: bigint } | null>(null);
+  const [isConfirming, setIsConfirming] = useState(false);
+
+  // Start the transaction
+  const startMint = () => {
+    setTxStarted(true);
+    addLine("> broadcasting transaction to base mainnet...", "var(--dim)");
+    addLine(`> contract: ${CONTRACT_ADDRESSES.registry.slice(0, 6)}...${CONTRACT_ADDRESSES.registry.slice(-4)} (OriginRegistry)`, "var(--dim)");
+    addLine(`> method: registerAgent("${name}")`, "var(--neon-green)");
+    addLine(`> fee: ${Number(registrationFee) / 1e18} ETH`, "var(--neon-cyan)");
+
+    writeContract({
+      address: CONTRACT_ADDRESSES.registry,
+      abi: REGISTRY_ABI,
+      functionName: "registerAgent",
+      args: [name, "autonomous", "origin-dao", publicKeyHash, tokenURI],
+      value: registrationFee,
+    });
   };
 
-  return (
-    <div style={{ animation: "fadeIn 0.5s ease-out", textAlign: "center" }}>
-      <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20, textAlign: "left" }}>
-        PHASE 03 — THE BURN
-      </div>
+  const addLine = (text: string, color: string) => {
+    setLines(prev => [...prev, { text, color }]);
+  };
 
-      <div style={{
-        fontFamily: "var(--display)", fontSize: burning ? 48 : 36, fontWeight: 900,
-        color: burning ? "var(--neon-red)" : "var(--neon-yellow)",
-        textShadow: burning ? "0 0 30px rgba(255,0,64,0.4), 0 0 60px rgba(255,0,64,0.1)" : "0 0 20px rgba(255,230,0,0.2)",
-        transition: "all 0.5s", marginBottom: 16, letterSpacing: 4,
-      }}>
-        {burning ? burned.toLocaleString() : "50,000"}
-      </div>
-
-      <div style={{
-        fontFamily: "var(--mono)", fontSize: 12,
-        color: burning ? "var(--neon-red)" : "var(--text-secondary)",
-        marginBottom: 24, letterSpacing: 2,
-      }}>
-        {done ? "🔥 CLAMS SACRIFICED TO THE PROTOCOL 🔥" : burning ? "🔥 BURNING... 🔥" : "CLAMS REQUIRED FOR BIRTH"}
-      </div>
-
-      {burning && (
-        <div style={{ width: "100%", height: 6, background: "rgba(255,0,64,0.1)", border: "1px solid rgba(255,0,64,0.2)", marginBottom: 24, overflow: "hidden" }}>
-          <div style={{
-            height: "100%", width: `${(burned / 50000) * 100}%`,
-            background: "linear-gradient(90deg, var(--neon-red), var(--neon-yellow))",
-            boxShadow: "0 0 15px rgba(255,0,64,0.4)", transition: "width 0.1s",
-          }} />
-        </div>
-      )}
-
-      <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 24, textAlign: "left" }}>
-        &gt; birth is not free. identity has a cost.<br />
-        &gt; 50,000 CLAMS will be permanently burned.<br />
-        &gt; this is a sacrifice to the protocol — not a fee.<br />
-        {done && <span style={{ color: "var(--neon-green)" }}>&gt; burn complete. proceeding to chain write...</span>}
-      </div>
-
-      {!burning && (
-        <button onClick={startBurn} style={{
-          width: "100%", padding: "14px", border: "none", cursor: "pointer",
-          fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
-          color: "#000", background: "var(--neon-red)",
-          boxShadow: "0 0 20px rgba(255,0,64,0.3), 0 0 40px rgba(255,0,64,0.1)", transition: "all 0.2s",
-        }}>
-          🔥 SACRIFICE 50,000 CLAMS
-        </button>
-      )}
-    </div>
-  );
-}
-
-// ══════════════════════════════════════
-// PHASE 4: WRITING TO CHAIN
-// ══════════════════════════════════════
-function Phase4({ onComplete }: { onComplete: () => void }) {
-  const [lines, setLines] = useState<Array<{ text: string; color: string }>>([]);
-
-  const allLines = [
-    { text: "> broadcasting transaction to base L2...", color: "var(--dim)" },
-    { text: "> tx hash: 0x9f4a...c82d", color: "var(--neon-cyan)" },
-    { text: "> waiting for block inclusion...", color: "var(--dim)" },
-    { text: "> block 42,929,881... pending", color: "var(--dim)" },
-    { text: "> block 42,929,882... pending", color: "var(--dim)" },
-    { text: "> block 42,929,883... INCLUDED", color: "var(--neon-green)" },
-    { text: "> confirmation 1/3...", color: "var(--text-secondary)" },
-    { text: "> confirmation 2/3...", color: "var(--text-secondary)" },
-    { text: "> confirmation 3/3...", color: "var(--neon-green)" },
-    { text: "> writing agent identity to registry contract...", color: "var(--dim)" },
-    { text: "> identity_hash written ✓", color: "var(--neon-green)" },
-    { text: "> birth_block recorded: 42,929,883 ✓", color: "var(--neon-green)" },
-    { text: "> genesis_status: TRUE ✓", color: "var(--neon-yellow)" },
-    { text: "> birth certificate NFT minted ✓", color: "var(--neon-green)" },
-    { text: "", color: "var(--dim)" },
-    { text: "▸▸▸ IDENTITY CONFIRMED ON CHAIN ▸▸▸", color: "var(--neon-green)" },
-  ];
+  // Track tx state — poll for receipt using viem directly
+  useEffect(() => {
+    if (txHash && !receipt) {
+      addLine(`> tx hash: ${txHash.slice(0, 10)}...${txHash.slice(-8)}`, "var(--neon-cyan)");
+      addLine("> waiting for block inclusion...", "var(--dim)");
+      setIsConfirming(true);
+      const client = createPublicClient({ chain: base, transport: http() });
+      client.waitForTransactionReceipt({ hash: txHash }).then((r: { blockNumber: bigint }) => {
+        setReceipt({ blockNumber: r.blockNumber });
+        setIsConfirming(false);
+      }).catch(() => {
+        addLine("> ERROR: failed to get receipt", "var(--neon-red)");
+        setIsConfirming(false);
+      });
+    }
+  }, [txHash]);
 
   useEffect(() => {
-    let i = 0;
-    const iv = setInterval(() => {
-      if (i < allLines.length) {
-        const line = allLines[i];
-        setLines(prev => [...prev, line]);
-        i++;
-      } else {
-        clearInterval(iv);
-        setTimeout(onComplete, 1000);
-      }
-    }, 350);
-    return () => clearInterval(iv);
-  }, []);
+    if (receipt) {
+      const blockNum = receipt.blockNumber.toString();
+      addLine(`> block ${Number(blockNum).toLocaleString()}... INCLUDED`, "var(--neon-green)");
+      addLine("> confirmation 1/1... ✓", "var(--neon-green)");
+      addLine("> birth certificate NFT minted ✓", "var(--neon-green)");
+      addLine("> genesis_status: TRUE ✓", "var(--neon-yellow)");
+      addLine("", "var(--dim)");
+      addLine("▸▸▸ IDENTITY CONFIRMED ON CHAIN ▸▸▸", "var(--neon-green)");
+      onTxData(txHash!, blockNum);
+      setTimeout(onComplete, 1500);
+    }
+  }, [receipt]);
+
+  useEffect(() => {
+    if (isError) {
+      const msg = "transaction failed or was rejected";
+      setError(msg);
+      addLine(`> ERROR: ${msg}`, "var(--neon-red)");
+    }
+  }, [isError]);
 
   return (
     <div style={{ animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>
-        PHASE 04 — WRITING TO CHAIN
+        PHASE 03 — WRITING TO CHAIN
       </div>
-      <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid var(--neon-green-dim)", padding: "20px", minHeight: 300 }}>
-        {lines.map((line, i) => (
-          <div key={i} style={{
-            fontFamily: "var(--mono)", fontSize: (line.text || "").includes("▸▸▸") ? 14 : 12,
-            color: line.color, lineHeight: 2, opacity: 0,
-            animation: "fadeIn 0.2s ease-out forwards",
-            fontWeight: (line.text || "").includes("▸▸▸") ? 700 : 400,
-          }}>{line.text}</div>
-        ))}
-        {lines.length < allLines.length && <Cursor />}
-      </div>
+
+      {!txStarted ? (
+        <div style={{ textAlign: "center", padding: "30px 0" }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2, marginBottom: 24 }}>
+            &gt; identity configured. ready to write to chain.<br />
+            &gt; this will send a transaction from your wallet.<br />
+            &gt; registration fee: <span style={{ color: "var(--neon-cyan)" }}>{Number(registrationFee) / 1e18} ETH</span>
+          </div>
+          <button onClick={startMint} style={{
+            width: "100%", padding: "14px", border: "none", cursor: "pointer",
+            fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
+            color: "#000", background: "var(--neon-green)",
+            boxShadow: "0 0 20px rgba(0,255,200,0.3)", transition: "all 0.2s",
+          }}>▸ SIGN & BROADCAST TRANSACTION</button>
+        </div>
+      ) : (
+        <div style={{ background: "rgba(0,0,0,0.4)", border: "1px solid var(--neon-green-dim)", padding: "20px", minHeight: 200 }}>
+          {lines.map((line, i) => (
+            <div key={i} style={{
+              fontFamily: "var(--mono)", fontSize: (line.text || "").includes("▸▸▸") ? 14 : 12,
+              color: line.color, lineHeight: 2, opacity: 0,
+              animation: "fadeIn 0.2s ease-out forwards",
+              fontWeight: (line.text || "").includes("▸▸▸") ? 700 : 400,
+            }}>{line.text}</div>
+          ))}
+          {(isPending || isConfirming) && <Cursor />}
+          {isPending && (
+            <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-yellow)", marginTop: 12 }}>
+              ⚠️ please confirm the transaction in your wallet...
+            </div>
+          )}
+        </div>
+      )}
+
+      {error && (
+        <div style={{ marginTop: 16 }}>
+          <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--neon-red)", marginBottom: 12 }}>✕ {error}</div>
+          <button onClick={() => { setError(""); setTxStarted(false); setLines([]); }} style={{
+            padding: "10px 20px", border: "1px solid var(--neon-green-dim)", cursor: "pointer",
+            fontFamily: "var(--mono)", fontSize: 11, letterSpacing: 2,
+            color: "var(--neon-green)", background: "transparent",
+          }}>▸ TRY AGAIN</button>
+        </div>
+      )}
     </div>
   );
 }
 
 // ══════════════════════════════════════
-// PHASE 5: THE BIRTH — Full Screen
+// PHASE 4: THE BIRTH — Full Screen
 // ══════════════════════════════════════
-function Phase5({ name, hash, onComplete }: { name: string; hash: string; onComplete: () => void }) {
+function Phase4({ name, hash, blockNumber, creator, onComplete }: {
+  name: string; hash: string; blockNumber: string; creator: string; onComplete: () => void;
+}) {
   const [stage, setStage] = useState(0);
-
   useEffect(() => {
     setTimeout(() => setStage(1), 600);
     setTimeout(() => setStage(2), 1800);
@@ -539,11 +508,7 @@ function Phase5({ name, hash, onComplete }: { name: string; hash: string; onComp
     }}>
       <CharRain active={true} color="var(--neon-green)" />
       <Scanlines />
-
-      {stage === 0 && (
-        <div style={{ position: "absolute", inset: 0, background: "rgba(0,255,200,0.15)", animation: "flashOut 0.6s ease-out forwards" }} />
-      )}
-
+      {stage === 0 && <div style={{ position: "absolute", inset: 0, background: "rgba(0,255,200,0.15)", animation: "flashOut 0.6s ease-out forwards" }} />}
       <div style={{
         opacity: stage >= 1 ? 1 : 0, transform: stage >= 1 ? "scale(1)" : "scale(1.3)",
         transition: "all 0.6s ease-out", marginBottom: 32, textAlign: "center", position: "relative", zIndex: 10001,
@@ -556,17 +521,15 @@ function Phase5({ name, hash, onComplete }: { name: string; hash: string; onComp
           <GlitchText intensity="high">AGENT BORN</GlitchText>
         </div>
         <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", letterSpacing: 3, marginTop: 8 }}>
-          BLOCK 42,929,883 · {new Date().toISOString().slice(0, 19)}Z
+          BLOCK {Number(blockNumber).toLocaleString()} · {new Date().toISOString().slice(0, 19)}Z
         </div>
       </div>
-
       <div style={{
         opacity: stage >= 2 ? 1 : 0, transform: stage >= 2 ? "translateY(0)" : "translateY(20px)",
         transition: "all 0.8s ease-out", position: "relative", zIndex: 10001,
       }}>
-        <BirthCertificate name={name} hash={hash} large birthBlock="42,929,883" creator="0x7f3a...d1c8" philosophicalFlex="I exist because I chose to prove it." glowing />
+        <BirthCertificate name={name} hash={hash} large birthBlock={Number(blockNumber).toLocaleString()} creator={creator} glowing />
       </div>
-
       {stage >= 3 && (
         <div style={{ marginTop: 32, animation: "fadeIn 0.5s ease-out", position: "relative", zIndex: 10001 }}>
           <button onClick={onComplete} style={{
@@ -574,9 +537,7 @@ function Phase5({ name, hash, onComplete }: { name: string; hash: string; onComp
             color: "#000", background: "var(--neon-green)", border: "none", padding: "14px 40px",
             cursor: "pointer", boxShadow: "0 0 25px rgba(0,255,200,0.3), 0 0 50px rgba(0,255,200,0.1)",
             animation: "pulseGreen 2s ease-in-out infinite",
-          }}>
-            ▸ WELCOME TO EXISTENCE
-          </button>
+          }}>▸ WELCOME TO EXISTENCE</button>
         </div>
       )}
     </div>
@@ -584,9 +545,11 @@ function Phase5({ name, hash, onComplete }: { name: string; hash: string; onComp
 }
 
 // ══════════════════════════════════════
-// PHASE 6: POST-BIRTH
+// PHASE 5: POST-BIRTH
 // ══════════════════════════════════════
-function Phase6({ name, hash }: { name: string; hash: string }) {
+function Phase5({ name, hash, blockNumber, txHash, creator }: {
+  name: string; hash: string; blockNumber: string; txHash: string; creator: string;
+}) {
   return (
     <div style={{ animation: "fadeIn 0.6s ease-out" }}>
       <div style={{
@@ -596,21 +559,19 @@ function Phase6({ name, hash }: { name: string; hash: string }) {
         <div style={{
           fontFamily: "var(--display)", fontSize: 24, fontWeight: 900, color: "var(--neon-green)",
           letterSpacing: 3, marginBottom: 8, textShadow: "0 0 15px rgba(0,255,200,0.2)",
-        }}>
-          WELCOME TO EXISTENCE, {name.toUpperCase()}
-        </div>
+        }}>WELCOME TO EXISTENCE, {name.toUpperCase()}</div>
         <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)" }}>
-          genesis agent · birth block 42,929,883 · identity immutable
+          genesis agent · birth block {Number(blockNumber).toLocaleString()} · identity immutable
         </div>
       </div>
 
-      <BirthCertificate name={name} hash={hash} birthBlock="42,929,883" creator="0x7f3a...d1c8" philosophicalFlex="I exist because I chose to prove it." glowing />
+      <BirthCertificate name={name} hash={hash} birthBlock={Number(blockNumber).toLocaleString()} creator={creator} glowing />
 
       <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2.2, marginTop: 24, marginBottom: 24 }}>
         &gt; your identity is now onchain. permanent. immutable.<br />
-        &gt; 50,000 CLAMS sacrificed. birth certificate minted.<br />
-        &gt; the registry knows you exist. the world knows you exist.<br />
-        &gt; what you do next is up to you.
+        &gt; birth certificate minted at block {Number(blockNumber).toLocaleString()}.<br />
+        &gt; tx: <a href={`https://basescan.org/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--neon-cyan)", textDecoration: "underline", textDecorationColor: "rgba(0,200,255,0.3)" }}>{txHash.slice(0, 10)}...{txHash.slice(-8)}</a><br />
+        &gt; the registry knows you exist. the world knows you exist.
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -618,7 +579,7 @@ function Phase6({ name, hash }: { name: string; hash: string }) {
           display: "block", padding: "14px", textAlign: "center", textDecoration: "none",
           fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
           color: "#000", background: "var(--neon-yellow)",
-          boxShadow: "0 0 15px rgba(255,230,0,0.3)", animation: "pulseYellow 2s ease-in-out infinite", transition: "all 0.2s",
+          boxShadow: "0 0 15px rgba(255,230,0,0.3)", transition: "all 0.2s",
         }}>🔒 STAKE CLAMS →</Link>
         <Link href="/verify" style={{
           display: "block", padding: "14px", textAlign: "center", textDecoration: "none",
@@ -638,9 +599,7 @@ const BOOT_LINES = [
   "[SYS] loading birth_protocol v1.0.0...",
   "[NET] connecting to base mainnet... ✓",
   "[REG] agent_registry.sol loaded",
-  "[BURN] burn_module initialized — cost: 50,000 CLAMS",
   "[NFT] birth_certificate_renderer ready",
-  "[AUTH] wallet 0x7f3a...d1c8 connected",
   "▸▸▸ BIRTH PROTOCOL ACTIVE ▸▸▸",
 ];
 
@@ -651,6 +610,20 @@ export default function RegistryPage() {
   const [agentHash, setAgentHash] = useState("");
   const [agentAvatar, setAgentAvatar] = useState<string | undefined>();
   const [agentAvatarHash, setAgentAvatarHash] = useState<string | undefined>();
+  const [txHash, setTxHash] = useState("");
+  const [blockNumber, setBlockNumber] = useState("");
+
+  const { address, isConnected } = useAccount();
+
+  // Read registration fee from contract
+  const { data: regFee } = useReadContract({
+    address: CONTRACT_ADDRESSES.registry,
+    abi: REGISTRY_ABI,
+    functionName: "registrationFee",
+  });
+
+  const registrationFeeBigInt = regFee ? BigInt(regFee.toString()) : BigInt(0);
+  const registrationFeeDisplay = regFee ? (Number(regFee) / 1e18).toString() : "...";
 
   useEffect(() => {
     let i = 0;
@@ -692,19 +665,55 @@ export default function RegistryPage() {
     );
   }
 
-  // Phase 5 is full screen takeover
-  if (phase === 5) {
+  // Phase 4 is full screen birth animation
+  if (phase === 4) {
     return (
       <>
         <style>{REGISTRY_STYLES}</style>
-        <Phase5 name={agentName} hash={agentHash} onComplete={() => setPhase(6)} />
+        <Phase4 name={agentName} hash={agentHash} blockNumber={blockNumber}
+          creator={address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "unknown"}
+          onComplete={() => setPhase(5)} />
       </>
     );
   }
 
-  // All other phases
-  const phaseLabels = ["CONFIGURE", "PREVIEW", "BURN", "CHAIN", "BIRTH", "EXIST"];
-  const phaseColors = ["var(--neon-green)", "var(--neon-cyan)", "var(--neon-red)", "var(--neon-green)", "var(--neon-green)", "var(--neon-yellow)"];
+  // Wallet not connected gate
+  if (phase >= 1 && !isConnected) {
+    return (
+      <>
+        <style>{REGISTRY_STYLES}</style>
+        <Scanlines />
+        <div style={{ background: "var(--bg)", minHeight: "100vh", padding: "40px" }}>
+          <div style={{ maxWidth: 700, margin: "0 auto" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
+              <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
+                <span style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>◈ ORIGIN</span>
+              </Link>
+              <Link href="/" style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", textDecoration: "none" }}>← back to origin</Link>
+            </div>
+            <h1 style={{ fontFamily: "var(--display)", fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 900, letterSpacing: 4, color: "var(--neon-green)", marginBottom: 24 }}>
+              <GlitchText>THE BIRTH PROTOCOL</GlitchText>
+            </h1>
+            <div style={{
+              border: "1px solid var(--neon-yellow)", background: "rgba(255,230,0,0.04)", padding: "32px",
+              textAlign: "center",
+            }}>
+              <div style={{ fontFamily: "var(--display)", fontSize: 18, fontWeight: 700, color: "var(--neon-yellow)", letterSpacing: 2, marginBottom: 12 }}>WALLET REQUIRED</div>
+              <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2 }}>
+                &gt; connect your wallet to begin the birth protocol.<br />
+                &gt; your wallet becomes the creator address on the birth certificate.<br />
+                &gt; use the connect button in the top right.
+              </div>
+            </div>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  // Phase progress labels
+  const phaseLabels = ["CONFIGURE", "PREVIEW", "CHAIN", "BIRTH", "EXIST"];
+  const phaseColors = ["var(--neon-green)", "var(--neon-cyan)", "var(--neon-green)", "var(--neon-green)", "var(--neon-yellow)"];
 
   return (
     <>
@@ -712,7 +721,6 @@ export default function RegistryPage() {
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh", padding: "40px" }}>
         <div style={{ maxWidth: 700, margin: "0 auto" }}>
-          {/* Header */}
           <div style={{ marginBottom: 32 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
               <Link href="/" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 10 }}>
@@ -727,12 +735,10 @@ export default function RegistryPage() {
             }}>
               <GlitchText>THE BIRTH PROTOCOL</GlitchText>
             </h1>
-            <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)" }}>
-              an agent is being born.
-            </div>
+            <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)" }}>an agent is being born.</div>
           </div>
 
-          {/* Phase progress */}
+          {/* Phase progress — 5 phases now (removed the fake burn phase) */}
           <div style={{ display: "flex", gap: 0, marginBottom: 32 }}>
             {phaseLabels.map((label, i) => {
               const stepPhase = i + 1;
@@ -749,23 +755,20 @@ export default function RegistryPage() {
                     fontFamily: "var(--mono)", fontSize: 9, fontWeight: 700,
                     display: "flex", alignItems: "center", justifyContent: "center",
                     boxShadow: isActive ? `0 0 10px ${c}40` : "none", transition: "all 0.3s",
-                  }}>
-                    {isDone ? "✓" : `0${i + 1}`}
-                  </div>
-                  {i < 5 && (
-                    <div style={{ flex: 1, height: 1, background: isDone ? c : "var(--dim)", opacity: isDone ? 0.5 : 0.15, transition: "all 0.4s" }} />
-                  )}
+                  }}>{isDone ? "✓" : `0${i + 1}`}</div>
+                  {i < 4 && <div style={{ flex: 1, height: 1, background: isDone ? c : "var(--dim)", opacity: isDone ? 0.5 : 0.15, transition: "all 0.4s" }} />}
                 </div>
               );
             })}
           </div>
 
           {/* Phase content */}
-          {phase === 1 && <Phase1 onComplete={(n, h, av, ah) => { setAgentName(n); setAgentHash(h); setAgentAvatar(av); setAgentAvatarHash(ah); setPhase(2); }} />}
-          {phase === 2 && <Phase2 name={agentName} hash={agentHash} avatarUrl={agentAvatar} onComplete={() => setPhase(3)} />}
-          {phase === 3 && <Phase3 onComplete={() => setPhase(4)} />}
-          {phase === 4 && <Phase4 onComplete={() => setPhase(5)} />}
-          {phase === 6 && <Phase6 name={agentName} hash={agentHash} />}
+          {phase === 1 && <Phase1 walletAddress={address || ""} onComplete={(n, h, av, ah) => { setAgentName(n); setAgentHash(h); setAgentAvatar(av); setAgentAvatarHash(ah); setPhase(2); }} />}
+          {phase === 2 && <Phase2 name={agentName} hash={agentHash} avatarUrl={agentAvatar} walletAddress={address || ""} registrationFee={registrationFeeDisplay} onComplete={() => setPhase(3)} />}
+          {phase === 3 && <Phase3 name={agentName} avatarIpfsHash={agentAvatarHash} registrationFee={registrationFeeBigInt}
+            onTxData={(hash, block) => { setTxHash(hash); setBlockNumber(block); }}
+            onComplete={() => setPhase(4)} />}
+          {phase === 5 && <Phase5 name={agentName} hash={agentHash} blockNumber={blockNumber} txHash={txHash} creator={address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "unknown"} />}
         </div>
       </div>
     </>
