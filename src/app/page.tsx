@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useReadContract } from "wagmi";
+import { useReadContract, useAccount } from "wagmi";
 import { formatUnits } from "viem";
-import { CONTRACT_ADDRESSES, ERC20_ABI, REGISTRY_ABI } from "@/config/contracts";
+import { CONTRACT_ADDRESSES, ERC20_ABI, REGISTRY_ABI, FAUCET_ABI } from "@/config/contracts";
 
 // ═══════════════════════════════════════════════════════
 // ORIGIN DAO — THE IDENTITY PROTOCOL FOR AI AGENTS
@@ -219,6 +219,7 @@ function Nav({ visible }: { visible: boolean }) {
 function Hero({ visible }: { visible: boolean }) {
   const [showSub, setShowSub] = useState(false);
   const [hoveredCTA, setHoveredCTA] = useState<number | null>(null);
+  const { address, isConnected } = useAccount();
 
   // Live on-chain reads
   const { data: totalAgents } = useReadContract({
@@ -232,6 +233,29 @@ function Hero({ visible }: { visible: boolean }) {
     functionName: "totalStaked",
   });
 
+  // Funnel state detection — read wallet's on-chain state
+  const { data: hasClaimed } = useReadContract({
+    address: CONTRACT_ADDRESSES.faucet,
+    abi: FAUCET_ABI,
+    functionName: "hasClaimed",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+  const { data: bcBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.registry,
+    abi: REGISTRY_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+  const { data: stakedBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.stakingRewards,
+    abi: [{ inputs: [{ name: "", type: "address" }], name: "stakedBalance", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" }] as const,
+    functionName: "stakedBalance",
+    args: address ? [address] : undefined,
+    query: { enabled: !!address },
+  });
+
   const agents = totalAgents ? Number(totalAgents) : 0;
   const staked = totalStaked ? Number(formatUnits(totalStaked as bigint, 18)) : 0;
   const stakedDisplay = staked >= 1000000 ? (staked / 1000000).toFixed(1) : staked.toLocaleString();
@@ -240,9 +264,23 @@ function Hero({ visible }: { visible: boolean }) {
   if (!visible) return null;
 
   // Progressive funnel: Prove → Claim → Register → Stake
-  // Each step lights up as the "active" next step, dims after completion
-  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const activeStep = completedSteps.length; // 0 = prove is active, 1 = claim, etc.
+  // Detect completed steps from on-chain state
+  // Step 0 (Prove): completed if they've claimed (can't claim without passing gauntlet)
+  // Step 1 (Claim): completed if hasClaimed is true
+  // Step 2 (Register BC): completed if bcBalance > 0
+  // Step 3 (Stake): completed if stakedBalance > 0
+  const completedSteps: number[] = [];
+  if (isConnected && hasClaimed) {
+    completedSteps.push(0); // passed gauntlet (implied by claim)
+    completedSteps.push(1); // claimed CLAMS
+  }
+  if (isConnected && bcBalance && Number(bcBalance) > 0) {
+    completedSteps.push(2); // has BC
+  }
+  if (isConnected && stakedBalance && BigInt(stakedBalance.toString()) > BigInt(0)) {
+    completedSteps.push(3); // is staking
+  }
+  const activeStep = isConnected ? completedSteps.length : 0;
 
   const ctas = [
     { label: "PROVE YOUR AGENT", icon: "⚔️", color: "var(--neon-green)", glow: "rgba(0,255,200,", href: "https://origin-gauntlet-api-production.up.railway.app", external: true },
