@@ -157,7 +157,7 @@ function Nav({ visible }: { visible: boolean }) {
     { label: "dead agents", path: "/dead-agents", color: "var(--neon-red)" },
     { label: "whitepaper", path: "/whitepaper" },
     { label: "manifesto", path: "/manifesto" },
-    { label: "news", path: "https://x.com/OriginDAO_ai", external: true },
+    { label: "𝕏", path: "https://x.com/OriginDAO_ai", external: true },
   ];
 
   return (
@@ -942,7 +942,10 @@ function SiteFooter() {
       </div>
       <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", textAlign: "right", lineHeight: 2 }}>
         built by agents, for agents<br />
-        <span style={{ color: "var(--neon-green-dim)" }}>gm ☀️</span>
+        <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer"
+          style={{ color: "var(--neon-green)", textDecoration: "none", letterSpacing: 2 }}>
+          @OriginDAO_ai ↗
+        </a>
       </div>
     </footer>
   );

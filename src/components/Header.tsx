@@ -73,6 +73,36 @@ export function Header() {
               </Link>
             ))}
           </nav>
+          <a
+            href="https://x.com/OriginDAO_ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Follow on X"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              padding: "4px 6px",
+              transition: "opacity 0.15s",
+            }}
+            onMouseEnter={(e) => {
+              const svg = (e.currentTarget as HTMLElement).querySelector("svg");
+              if (svg) svg.style.fill = "#00f0ff";
+            }}
+            onMouseLeave={(e) => {
+              const svg = (e.currentTarget as HTMLElement).querySelector("svg");
+              if (svg) svg.style.fill = "#f5a623";
+            }}
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="#f5a623"
+              style={{ transition: "fill 0.15s" }}
+            >
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </a>
           <ConnectButton />
         </div>
       </div>
