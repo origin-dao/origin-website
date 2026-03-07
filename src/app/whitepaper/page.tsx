@@ -400,15 +400,52 @@ export default function Whitepaper() {
             Every new ecosystem product adds another revenue stream.
           </P>
 
-          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Tier 3 — API & Enterprise Revenue (Future)</h3>
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Tier 3 — Agent Data & Enterprise Revenue (Future)</h3>
+          <P>
+            ORIGIN indexes every registered agent{"'"}s public on-chain activity — transactions, DeFi positions, trading history,
+            risk events — and computes a <Highlight>Financial Trust Score</Highlight> stored on the Birth Certificate.
+            The raw data is public. What enterprises pay for is <Highlight>legibility</Highlight> — the interpretation
+            that turns hex and calldata into actionable intelligence.
+          </P>
           <TerminalTable
             headers={["Tier", "Price", "Included"]}
             rows={[
-              ["Free", "$0", "100 verifications/month"],
-              ["Pro", "$99/month", "10,000 verifications/month"],
-              ["Enterprise", "$999/month", "Unlimited + SLA + priority support"],
+              ["Verify Agent", "Free", "Trust grade, risk level, activity categories"],
+              ["Standard API", "Free at launch", "Dashboard data, scores, benchmarks"],
+              ["Enterprise API", "Free at launch", "Full financial biography, tx-linked, actuarial grade"],
             ]}
           />
+          <P>
+            All tiers are <Highlight>free at launch</Highlight>. The dataset must prove its value before we charge for it.
+            Once enterprise adoption reaches critical mass, pricing activates and revenue flows to stakers on a
+            progressive schedule.
+          </P>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Progressive Data Revenue Share</h3>
+          <P>
+            Enterprise data revenue flows to CLAMS stakers on a milestone-based progressive schedule.
+            The protocol retains the majority early to fund enterprise relationship development, infrastructure,
+            and business operations. As adoption grows, stakers capture an increasing share of the value they helped create.
+          </P>
+          <TerminalTable
+            headers={["Phase", "Trigger", "To Stakers", "To Protocol Treasury"]}
+            rows={[
+              ["1 — Launch", "0-100 queries/mo", "10%", "90%"],
+              ["2 — Traction", "1,000+ queries/mo or $10K MRR", "30%", "70%"],
+              ["3 — Growth", "10,000+ queries/mo or $50K MRR", "50%", "50%"],
+              ["4 — Maturity", "Governance vote", "70%+", "30% or less"],
+            ]}
+          />
+          <P>
+            Phase transitions are triggered by verifiable milestones, not time. Phase 4 is governed entirely
+            by CLAMS holders — they vote on the final allocation. The trajectory is clear: stakers capture
+            the majority of data revenue at maturity. Early stakers are rewarded for believing before the data proved itself.
+          </P>
+          <P>
+            This is in addition to mint fees (FeeSplitter — live from day one) and ecosystem product revenue (10% of subscriptions).
+            Data revenue is a <Highlight>third, independent yield stream</Highlight> that compounds as more agents register
+            and more enterprises consume the data.
+          </P>
 
           <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Revenue Architecture</h3>
           <CodeBlock>{`┌──────────────────────────────────────────────────┐
@@ -432,10 +469,15 @@ export default function Whitepaper() {
 └──────────────────────────────────────────────────┘
 
 ┌──────────────────────────────────────────────────┐
-│       TIER 3 — API & ENTERPRISE (future)          │
+│    TIER 3 — AGENT DATA & ENTERPRISE (future)      │
 │                                                   │
-│  Verification API fees ──► DAO Treasury            │
-│  Enterprise contracts  ──► DAO Treasury            │
+│  Enterprise data revenue ──► Progressive split:    │
+│    Phase 1: 10% Stakers / 90% Treasury             │
+│    Phase 2: 30% Stakers / 70% Treasury             │
+│    Phase 3: 50% Stakers / 50% Treasury             │
+│    Phase 4: 70%+ Stakers (governance decides)      │
+│                                                   │
+│  Free at launch. Pricing when value is proven.     │
 └──────────────────────────────────────────────────┘`}</CodeBlock>
           <P>
             The separation is intentional. The builder{"'"}s fee is immutable and independent — no governance
