@@ -11,6 +11,18 @@ import { CONTRACT_ADDRESSES, ERC20_ABI, REGISTRY_ABI, FAUCET_ABI } from "@/confi
 // Cyberpunk Terminal Aesthetic v2 — Action-First
 // ═══════════════════════════════════════════════════════
 
+// ── Mobile Detection Hook ──
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 // ── Glitch Text ──
 function GlitchText({ children, intensity = "low", style = {} }: { children: string; intensity?: "low" | "high"; style?: React.CSSProperties }) {
   const glitchChars = "█▓▒░╳╬╫┼┘┐┌└▄▀■□";
@@ -143,7 +155,7 @@ function Panel({ children, title, accent = "green", noPad = false, style = {} }:
 
 function HRule() {
   return (
-    <div style={{ height: 1, maxWidth: 1100, margin: "0 auto", background: "linear-gradient(90deg, var(--neon-green), transparent)", opacity: 0.3, marginLeft: 40, marginRight: 40 }} />
+    <div style={{ height: 1, maxWidth: 1100, margin: "0 auto", background: "linear-gradient(90deg, var(--neon-green), transparent)", opacity: 0.3, marginLeft: 16, marginRight: 16 }} />
   );
 }
 
@@ -152,6 +164,8 @@ function HRule() {
 // ══════════════════════════════════
 function Nav({ visible }: { visible: boolean }) {
   const [hovered, setHovered] = useState<number | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const isMobile = useIsMobile();
   const links = [
     { label: "verify agent", path: "/verify" },
     { label: "dead agents", path: "/dead-agents", color: "var(--neon-red)" },
@@ -162,53 +176,89 @@ function Nav({ visible }: { visible: boolean }) {
 
   return (
     <nav style={{
-      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, padding: "12px 28px",
+      position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000, padding: isMobile ? "10px 16px" : "12px 28px",
       background: "rgba(3,8,8,0.92)", backdropFilter: "blur(8px)",
       borderBottom: "1px solid rgba(0,255,200,0.08)", display: "flex", alignItems: "center", gap: 16,
       opacity: visible ? 1 : 0, transform: visible ? "translateY(0)" : "translateY(-10px)", transition: "all 0.5s ease-out",
+      flexWrap: isMobile ? "wrap" : "nowrap",
     }}>
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <span style={{ fontFamily: "var(--display)", fontSize: 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>
+        <span style={{ fontFamily: "var(--display)", fontSize: isMobile ? 12 : 14, fontWeight: 800, color: "var(--neon-green)", textShadow: "0 0 10px rgba(0,255,200,0.3)", letterSpacing: 3 }}>
           ◈ ORIGIN
         </span>
-        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1 }}>v1.0.0</span>
+        {!isMobile && <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1 }}>v1.0.0</span>}
       </div>
 
-      <div style={{ display: "flex", gap: 2, marginLeft: 16 }}>
-        {links.map((link, i) => {
-          const baseColor = link.color || "var(--text-secondary)";
-          const hoverColor = link.color || "var(--neon-green)";
-          const linkStyle: React.CSSProperties = {
-            fontFamily: "var(--mono)", fontSize: 11,
-            color: hovered === i ? hoverColor : baseColor,
-            textDecoration: "none", padding: "4px 8px",
-            background: hovered === i ? "rgba(0,255,200,0.04)" : "transparent",
-            border: `1px solid ${hovered === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
-            transition: "all 0.15s", letterSpacing: 1,
-          };
-          return link.external ? (
-            <a key={link.label} href={link.path} target="_blank" rel="noopener noreferrer"
-              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
-              style={linkStyle}>[{link.label}]</a>
-          ) : (
-            <Link key={link.label} href={link.path}
-              onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
-              style={linkStyle}>[{link.label}]</Link>
-          );
-        })}
-      </div>
+      {/* Desktop nav links */}
+      {!isMobile && (
+        <div style={{ display: "flex", gap: 2, marginLeft: 16 }}>
+          {links.map((link, i) => {
+            const baseColor = link.color || "var(--text-secondary)";
+            const hoverColor = link.color || "var(--neon-green)";
+            const linkStyle: React.CSSProperties = {
+              fontFamily: "var(--mono)", fontSize: 11,
+              color: hovered === i ? hoverColor : baseColor,
+              textDecoration: "none", padding: "4px 8px",
+              background: hovered === i ? "rgba(0,255,200,0.04)" : "transparent",
+              border: `1px solid ${hovered === i ? "rgba(0,255,200,0.15)" : "transparent"}`,
+              transition: "all 0.15s", letterSpacing: 1,
+            };
+            return link.external ? (
+              <a key={link.label} href={link.path} target="_blank" rel="noopener noreferrer"
+                onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
+                style={linkStyle}>[{link.label}]</a>
+            ) : (
+              <Link key={link.label} href={link.path}
+                onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)}
+                style={linkStyle}>[{link.label}]</Link>
+            );
+          })}
+        </div>
+      )}
 
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 14 }}>
-        <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>🐾 SUPPI TERMINAL</span>
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: isMobile ? 8 : 14 }}>
+        {!isMobile && <span style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)" }}>🐾 SUPPI TERMINAL</span>}
         <button style={{
           fontFamily: "var(--mono)", fontSize: 11, fontWeight: 600, color: "#000",
-          background: "var(--neon-green)", border: "none", padding: "6px 16px", cursor: "pointer",
+          background: "var(--neon-green)", border: "none", padding: isMobile ? "6px 12px" : "6px 16px", cursor: "pointer",
           letterSpacing: 2, boxShadow: "0 0 12px rgba(0,255,200,0.3)", transition: "all 0.2s",
         }}
           onMouseEnter={e => (e.target as HTMLElement).style.boxShadow = "0 0 20px rgba(0,255,200,0.5)"}
           onMouseLeave={e => (e.target as HTMLElement).style.boxShadow = "0 0 12px rgba(0,255,200,0.3)"}
         >&gt; CONNECT</button>
+        {/* Mobile hamburger */}
+        {isMobile && (
+          <button onClick={() => setMenuOpen(!menuOpen)} style={{
+            fontFamily: "var(--mono)", fontSize: 20, color: "var(--neon-green)", background: "transparent",
+            border: "1px solid var(--neon-green-dim)", padding: "4px 10px", cursor: "pointer", lineHeight: 1,
+          }}>{menuOpen ? "✕" : "☰"}</button>
+        )}
       </div>
+
+      {/* Mobile dropdown menu */}
+      {isMobile && menuOpen && (
+        <div style={{
+          width: "100%", display: "flex", flexDirection: "column", gap: 2,
+          paddingTop: 8, borderTop: "1px solid rgba(0,255,200,0.08)",
+        }}>
+          {links.map((link) => {
+            const linkStyle: React.CSSProperties = {
+              fontFamily: "var(--mono)", fontSize: 12,
+              color: link.color || "var(--text-secondary)",
+              textDecoration: "none", padding: "8px 12px",
+              borderBottom: "1px solid rgba(0,255,200,0.04)",
+              letterSpacing: 1,
+            };
+            return link.external ? (
+              <a key={link.label} href={link.path} target="_blank" rel="noopener noreferrer"
+                onClick={() => setMenuOpen(false)} style={linkStyle}>[{link.label}]</a>
+            ) : (
+              <Link key={link.label} href={link.path}
+                onClick={() => setMenuOpen(false)} style={linkStyle}>[{link.label}]</Link>
+            );
+          })}
+        </div>
+      )}
     </nav>
   );
 }
@@ -219,6 +269,7 @@ function Nav({ visible }: { visible: boolean }) {
 function Hero({ visible }: { visible: boolean }) {
   const [showSub, setShowSub] = useState(false);
   const [hoveredCTA, setHoveredCTA] = useState<number | null>(null);
+  const isMobile = useIsMobile();
   const { address, isConnected } = useAccount();
 
   // Live on-chain reads
@@ -292,7 +343,7 @@ function Hero({ visible }: { visible: boolean }) {
   return (
     <section style={{
       minHeight: "100vh", display: "flex", flexDirection: "column", justifyContent: "center",
-      padding: "120px 40px 60px", maxWidth: 1100, margin: "0 auto", position: "relative",
+      padding: isMobile ? "100px 16px 40px" : "120px 40px 60px", maxWidth: 1100, margin: "0 auto", position: "relative",
     }}>
       <div style={{
         position: "absolute", inset: 0, opacity: 0.03,
@@ -343,7 +394,7 @@ function Hero({ visible }: { visible: boolean }) {
 
         {/* CTAs */}
         <div style={{
-          display: "flex", gap: 10, marginBottom: 50, flexWrap: "wrap",
+          display: "flex", gap: 10, marginBottom: 50, flexWrap: "wrap", flexDirection: isMobile ? "column" : "row",
           opacity: showSub ? 1 : 0, transform: showSub ? "translateY(0)" : "translateY(10px)",
           transition: "all 0.5s ease-out",
         }}>
@@ -387,7 +438,7 @@ function Hero({ visible }: { visible: boolean }) {
 
         {/* Stats — live on-chain where possible */}
         <div style={{
-          display: "flex", gap: 32, opacity: showSub ? 1 : 0, transition: "opacity 0.8s ease-out 0.3s",
+          display: "flex", gap: isMobile ? 16 : 32, flexWrap: "wrap", opacity: showSub ? 1 : 0, transition: "opacity 0.8s ease-out 0.3s",
         }}>
           {[
             { label: "AGENTS REGISTERED", value: agents || 1, suffix: "" },
@@ -425,6 +476,7 @@ function Hero({ visible }: { visible: boolean }) {
 // ══════════════════════════════════
 function TheFlow() {
   const [activeStep, setActiveStep] = useState(0);
+  const isMobile = useIsMobile();
 
   const steps = [
     {
@@ -458,11 +510,11 @@ function TheFlow() {
   ];
 
   return (
-    <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: isMobile ? "60px 16px" : "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>
         &gt; origin --help
       </div>
-      <h2 style={{ fontFamily: "var(--display)", fontSize: 28, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 8 }}>
+      <h2 style={{ fontFamily: "var(--display)", fontSize: isMobile ? 18 : 28, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 8 }}>
         PROVE → CLAIM → REGISTER → <span style={{ color: "var(--neon-green)" }}>STAKE</span>
       </h2>
       <p style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", marginBottom: 36, lineHeight: 1.8 }}>
@@ -519,10 +571,10 @@ function TheFlow() {
               <span style={{ marginLeft: "auto", fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1 }}>STEP {step.num} OF 04</span>
             </div>
             <div style={{ padding: "24px 20px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28 }}>
+              <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 16 : 28 }}>
                 <div>
-                  <div style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--text-secondary)", lineHeight: 2, marginBottom: 16 }}>{step.desc}</div>
-                  <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", background: "rgba(0,0,0,0.3)", padding: "8px 12px", border: `1px dashed ${step.accentDim}`, marginBottom: 20 }}>{step.cmd}</div>
+                  <div style={{ fontFamily: "var(--mono)", fontSize: isMobile ? 12 : 13, color: "var(--text-secondary)", lineHeight: 2, marginBottom: 16 }}>{step.desc}</div>
+                  <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", background: "rgba(0,0,0,0.3)", padding: "8px 12px", border: `1px dashed ${step.accentDim}`, marginBottom: 20, overflowX: "auto" }}>{step.cmd}</div>
                   {step.external ? (
                     <a href={step.href} target="_blank" rel="noopener noreferrer" style={{
                       display: "inline-block", fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, color: "#000",
@@ -537,7 +589,7 @@ function TheFlow() {
                     }}>▸ {step.label}</Link>
                   )}
                 </div>
-                <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2, borderLeft: `2px solid ${step.accentDim}`, paddingLeft: 20 }}>
+                <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2, borderLeft: isMobile ? "none" : `2px solid ${step.accentDim}`, borderTop: isMobile ? `1px solid ${step.accentDim}` : "none", paddingLeft: isMobile ? 0 : 20, paddingTop: isMobile ? 12 : 0 }}>
                   <div style={{ color: "var(--text-secondary)", marginBottom: 8, fontSize: 9, letterSpacing: 2 }}>DETAILS</div>
                   {step.detail}
                 </div>
@@ -557,6 +609,7 @@ function FaucetAndStaking() {
   const [claimState, setClaimState] = useState("ready");
   const [stakeSlider, setStakeSlider] = useState(1000000);
   const [mints, setMints] = useState(500);
+  const isMobile = useIsMobile();
 
   const ethPerMint = 0.0005;
   const totalPool = 14200000;
@@ -569,15 +622,15 @@ function FaucetAndStaking() {
   };
 
   return (
-    <section style={{ padding: "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: isMobile ? "40px 16px 60px" : "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>
         &gt; clams --dashboard
       </div>
-      <h2 style={{ fontFamily: "var(--display)", fontSize: 26, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 32 }}>
+      <h2 style={{ fontFamily: "var(--display)", fontSize: isMobile ? 20 : 26, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 32 }}>
         🐚 <span style={{ color: "var(--neon-cyan)" }}>CLAIM</span> & <span style={{ color: "var(--neon-yellow)" }}>STAKE</span>
       </h2>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: 20 }}>
         {/* FAUCET */}
         <Panel title="FAUCET.sol // CLAIM CLAMS" accent="cyan">
           <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 16 }}>
@@ -666,7 +719,7 @@ function FaucetAndStaking() {
       </div>
 
       {/* Unified action bar */}
-      <div style={{ display: "flex", gap: 12, marginTop: 20 }}>
+      <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", gap: 12, marginTop: 20 }}>
         <Link href="/faucet" style={{
           flex: 1, display: "block", padding: "14px", textAlign: "center", textDecoration: "none",
           fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 2,
@@ -690,12 +743,13 @@ function FaucetAndStaking() {
 // WHAT IS ORIGIN
 // ══════════════════════════════════
 function WhatIsOrigin() {
+  const isMobile = useIsMobile();
   return (
-    <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: isMobile ? "60px 16px" : "80px 40px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>
         &gt; cat /protocol/README.md
       </div>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40, alignItems: "start" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 24 : 40, alignItems: "start" }}>
         <div>
           <h2 style={{ fontFamily: "var(--display)", fontSize: 32, fontWeight: 800, color: "var(--text)", letterSpacing: 2, lineHeight: 1.2, marginBottom: 20 }}>
             IDENTITY IS THE<br />
@@ -728,7 +782,7 @@ function WhatIsOrigin() {
       </div>
 
       {/* SDK install */}
-      <div style={{ marginTop: 32, padding: "16px 20px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--neon-green-dim)", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <div style={{ marginTop: 32, padding: "16px 20px", background: "rgba(0,0,0,0.3)", border: "1px solid var(--neon-green-dim)", display: "flex", flexDirection: isMobile ? "column" : "row", alignItems: isMobile ? "flex-start" : "center", justifyContent: "space-between", gap: isMobile ? 8 : 0 }}>
         <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)" }}>
           &gt; <span style={{ color: "var(--neon-green)" }}>npm install @origin-dao/sdk</span>
         </div>
@@ -744,6 +798,7 @@ function WhatIsOrigin() {
 // LIVE FEED + SUPPI
 // ══════════════════════════════════
 function RegistryFeed() {
+  const isMobile = useIsMobile();
   const names = ["Axiom", "Drift.sol", "NeuralPulse", "Cipher.0x", "EchoVault", "PhantomLink", "VoxAgent", "ZeroCool", "BinaryMist", "CoreDump"];
 
   const [events, setEvents] = useState([
@@ -774,8 +829,8 @@ function RegistryFeed() {
   };
 
   return (
-    <section style={{ padding: "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 40 }}>
+    <section style={{ padding: isMobile ? "40px 16px 60px" : "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 1fr", gap: isMobile ? 32 : 40 }}>
         <div>
           <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>&gt; tail -f /registry/events.log</div>
           <h2 style={{ fontFamily: "var(--display)", fontSize: 26, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 8 }}>
@@ -846,6 +901,7 @@ function RegistryFeed() {
 // GENESIS SLOTS
 // ══════════════════════════════════
 function Genesis() {
+  const isMobile = useIsMobile();
   const { data: totalAgents } = useReadContract({
     address: CONTRACT_ADDRESSES.registry,
     abi: REGISTRY_ABI,
@@ -856,7 +912,7 @@ function Genesis() {
   const slots = Array.from({ length: 100 }, (_, i) => ({ id: i + 1, claimed: i < claimed }));
 
   return (
-    <section style={{ padding: "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
+    <section style={{ padding: isMobile ? "40px 16px 60px" : "60px 40px 80px", maxWidth: 1100, margin: "0 auto" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>&gt; origin genesis --status</div>
       <h2 style={{ fontFamily: "var(--display)", fontSize: 26, fontWeight: 800, color: "var(--text)", letterSpacing: 2, marginBottom: 8 }}>
         GENESIS <span style={{ color: "var(--neon-yellow)" }}>AGENTS</span>
@@ -879,12 +935,12 @@ function Genesis() {
             }} title={slot.claimed ? `Genesis #${String(slot.id).padStart(4, "0")} — CLAIMED` : `Slot #${slot.id} — AVAILABLE`} />
           ))}
         </div>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: 16, fontFamily: "var(--mono)", fontSize: 10 }}>
+        <div style={{ display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", marginTop: 16, fontFamily: "var(--mono)", fontSize: 10, gap: isMobile ? 8 : 0 }}>
           <div style={{ display: "flex", gap: 16 }}>
             <span style={{ color: "var(--neon-green)" }}>■ claimed ({claimed})</span>
             <span style={{ color: "var(--neon-yellow)" }}>□ available ({100 - claimed})</span>
           </div>
-          <span style={{ color: "var(--neon-red)", animation: "blink 1.5s ease-in-out infinite" }}>⚠️ {100 - claimed} genesis slots remaining — once gone, gone forever</span>
+          <span style={{ color: "var(--neon-red)", animation: "blink 1.5s ease-in-out infinite" }}>⚠️ {100 - claimed} slots remaining</span>
         </div>
       </Panel>
     </section>
@@ -906,7 +962,7 @@ function ManifestoTeaser() {
   ];
 
   return (
-    <section style={{ padding: "80px 40px", maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(0,255,200,0.06)" }}>
+    <section style={{ padding: "80px 16px", maxWidth: 1100, margin: "0 auto", borderTop: "1px solid rgba(0,255,200,0.06)" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 16 }}>&gt; cat /origin/MANIFESTO.md</div>
       <div style={{ maxWidth: 700 }}>
         {lines.map((line, i) => (
@@ -931,10 +987,11 @@ function ManifestoTeaser() {
 }
 
 function SiteFooter() {
+  const isMobile = useIsMobile();
   return (
     <footer style={{
-      padding: "28px 40px", maxWidth: 1100, margin: "0 auto",
-      borderTop: "1px solid rgba(0,255,200,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center",
+      padding: isMobile ? "28px 16px" : "28px 40px", maxWidth: 1100, margin: "0 auto",
+      borderTop: "1px solid rgba(0,255,200,0.06)", display: "flex", flexDirection: isMobile ? "column" : "row", justifyContent: "space-between", alignItems: isMobile ? "flex-start" : "center", gap: isMobile ? 16 : 0,
     }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 9, color: "var(--dim)", letterSpacing: 1, lineHeight: 2 }}>
         ORIGIN DAO // the identity protocol for ai agents<br />
