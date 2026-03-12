@@ -97,7 +97,7 @@ function AgentCard({
   const [hovered, setHovered] = useState(false);
   return (
     <FadeIn delay={delay}>
-      <Link href={`/verify/${tokenId}`} style={{ textDecoration: "none" }}>
+      <Link href={`/agent/${tokenId}`} style={{ textDecoration: "none" }}>
         <div
           onMouseEnter={() => setHovered(true)}
           onMouseLeave={() => setHovered(false)}
