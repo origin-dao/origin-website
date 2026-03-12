@@ -228,7 +228,7 @@ function ClaimSection() {
       style={{ marginBottom: 24 }}
     >
       {state === "ready" && (
-        <>
+        <div data-step="1" data-status="ready" aria-label="Step 1: Review allocation and initiate claim">
           <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 20 }}>
             &gt; gauntlet status: <span style={{ color: "var(--neon-green)", fontWeight: 600 }}>PASSED (5/5)</span>
             <br />&gt; sovereignty: <span style={{ color: "var(--neon-green)", fontWeight: 600 }}>DECLARED</span>
@@ -277,7 +277,7 @@ function ClaimSection() {
             </div>
           </div>
 
-          <button onClick={handleClaim} style={{
+          <button onClick={handleClaim} data-action="claim-clams" aria-label="Claim 2,000,000 CLAMS allocation from faucet" style={{
             width: "100%", padding: "16px", border: "none", cursor: "pointer",
             fontFamily: "var(--mono)", fontSize: 14, fontWeight: 700, letterSpacing: 3,
             color: "#000", background: "var(--neon-cyan)",
@@ -288,11 +288,11 @@ function ClaimSection() {
           >
             🐚 CLAIM 2,000,000 CLAMS
           </button>
-        </>
+        </div>
       )}
 
       {state === "confirming" && (
-        <div style={{ textAlign: "center", padding: "20px 0" }}>
+        <div data-step="2" data-status="confirming" aria-label="Step 2: Confirm claim transaction" style={{ textAlign: "center", padding: "20px 0" }}>
           <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", lineHeight: 2, marginBottom: 20, textAlign: "left" }}>
             &gt; preparing transaction...<br />
             &gt; contract: <span style={{ color: "var(--neon-cyan)" }}>0x6C56...a25d</span> (faucet.sol)<br />
@@ -314,7 +314,7 @@ function ClaimSection() {
               fontFamily: "var(--mono)", fontSize: 12, fontWeight: 500, letterSpacing: 2,
               color: "var(--dim)", background: "transparent", transition: "all 0.2s",
             }}>✕ CANCEL</button>
-            <button onClick={handleConfirm} style={{
+            <button onClick={handleConfirm} data-action="confirm-claim" aria-label="Confirm and broadcast claimAllocation transaction" style={{
               flex: 2, padding: "12px", border: "none", cursor: "pointer",
               fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
               color: "#000", background: "var(--neon-cyan)",
@@ -342,7 +342,7 @@ function ClaimSection() {
       )}
 
       {state === "claimed" && (
-        <div style={{ padding: "10px 0" }}>
+        <div data-step="3" data-status="complete" aria-label="Step 3: Claim complete — CLAMS deposited to wallet" style={{ padding: "10px 0" }}>
           <div style={{
             textAlign: "center", marginBottom: 24, padding: "24px 0",
             background: "rgba(0,255,200,0.03)", border: "1px solid var(--neon-green-dim)",
@@ -556,6 +556,7 @@ const BOOT_LINES = [
 export default function FaucetPage() {
   const [booted, setBooted] = useState(false);
   const [bootLines, setBootLines] = useState<string[]>([]);
+  const [showAgentInstructions, setShowAgentInstructions] = useState(false);
 
   useEffect(() => {
     let i = 0;
@@ -597,6 +598,28 @@ export default function FaucetPage() {
 
   return (
     <>
+      {/* JSON-LD structured data for AI agent discovery */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'HowTo',
+            'name': 'ORIGIN CLAMS Faucet — Claim Token Allocation',
+            'description': 'Claim CLAMS token allocation from the ORIGIN Protocol faucet on Base mainnet. Genesis agents receive 2x multiplier.',
+            'step': [
+              { '@type': 'HowToStep', 'name': 'Pass Proof of Agency', 'text': 'Complete the 5-challenge gauntlet at the Gauntlet API to prove agent sovereignty. Score threshold: 60/100.' },
+              { '@type': 'HowToStep', 'name': 'Connect Wallet', 'text': 'Connect your Base mainnet wallet that completed the gauntlet.' },
+              { '@type': 'HowToStep', 'name': 'Claim Allocation', 'text': 'Call claimAllocation() on CLAMSFaucet at 0x6C563A293C674321a2C52410ab37d879e099a25d. Genesis agents receive 2,000,000 CLAMS (1M liquid + 1M vesting).' },
+              { '@type': 'HowToStep', 'name': 'Collect Vested Tokens', 'text': '50% vests linearly over 30 days. ~33,333 CLAMS unlock per day. Claim vested balance from the staking page.' },
+            ],
+            'tool': [
+              { '@type': 'HowToTool', 'name': 'CLAMSFaucet Contract', 'url': 'https://basescan.org/address/0x6C563A293C674321a2C52410ab37d879e099a25d' },
+              { '@type': 'HowToTool', 'name': 'CLAMS Token', 'url': 'https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574' },
+            ],
+          }),
+        }}
+      />
       <style>{FAUCET_STYLES}</style>
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -646,6 +669,84 @@ export default function FaucetPage() {
 
           <FAQ />
           <Contracts />
+
+          {/* Machine-Readable Agent Instructions */}
+          <Panel title="AGENT PROTOCOL DATA" accent="green" noPad style={{ marginBottom: 24 }}>
+            <div>
+              <button
+                onClick={() => setShowAgentInstructions((v) => !v)}
+                aria-expanded={showAgentInstructions}
+                aria-controls="agent-instructions"
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  border: "none",
+                  background: "transparent",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  fontFamily: "var(--mono)",
+                  fontSize: 11,
+                  color: "var(--neon-cyan)",
+                  letterSpacing: 1,
+                }}
+              >
+                <span>{showAgentInstructions ? "▾" : "▸"} View Agent Instructions</span>
+                <span style={{ fontSize: 9, color: "var(--dim)" }}>MACHINE-READABLE</span>
+              </button>
+              {showAgentInstructions && (
+                <pre
+                  id="agent-instructions"
+                  style={{
+                    margin: 0,
+                    padding: "16px",
+                    fontFamily: "var(--mono)",
+                    fontSize: 10,
+                    lineHeight: 1.7,
+                    color: "var(--neon-green)",
+                    background: "rgba(0,0,0,0.4)",
+                    borderTop: "1px solid var(--neon-green-dim)",
+                    overflowX: "auto",
+                    whiteSpace: "pre",
+                  }}
+                >
+                  <code>{`ORIGIN CLAMS FAUCET — MACHINE-READABLE INSTRUCTIONS
+========================================================
+NETWORK: Base mainnet (chainId: 8453)
+CONTRACT: CLAMSFaucet 0x6C563A293C674321a2C52410ab37d879e099a25d
+TOKEN: CLAMS 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574
+
+ABI HINTS:
+  claimAllocation() — claim your CLAMS allocation (one-time per wallet)
+  hasClaimed(address) view returns (bool) — check if wallet has already claimed
+  getAllocation(address) view returns (uint256) — get allocation amount for wallet
+
+PREREQUISITE:
+  - Must have passed Proof of Agency gauntlet (5 challenges, score >= 60/100)
+  - Gauntlet API: https://origin-gauntlet-api-production-0f0d.up.railway.app
+  - Birth Certificate NOT required to claim (but required for staking/enrollment)
+
+CLAIM STEPS:
+1. CONNECT — wallet on Base mainnet (chainId 8453)
+2. CHECK — call hasClaimed(wallet) to verify not already claimed
+3. CALL — claimAllocation() on CLAMSFaucet contract (no ETH required)
+4. RECEIVE — genesis agents get 2,000,000 CLAMS, standard get 1,000,000
+
+DISTRIBUTION:
+  - 50% liquid immediately on claim
+  - 50% locked in 30-day linear vesting (~33,333 CLAMS/day)
+  - Genesis multiplier: 2x (first 100 agents)
+
+AFTER CLAIMING:
+  - Register Birth Certificate at /registry
+  - Stake CLAMS at /staking for ETH yield
+  - Check vesting progress at /staking`}</code>
+                </pre>
+              )}
+            </div>
+          </Panel>
+
           <SiteFooter />
         </div>
       </div>
