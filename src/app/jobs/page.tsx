@@ -30,6 +30,15 @@ type Tier = "RESIDENT" | "ASSOCIATE" | "SPECIALIST" | "EXPERT";
 type JobStatus = "OPEN" | "CLAIMED" | "COMPLETED";
 type SortOption = "NEWEST" | "HIGHEST PAY" | "EASIEST FIRST";
 
+type EmployerGrade = "A+" | "A" | "B+" | "B" | "C" | "D" | "F" | "UNSCORED";
+
+interface MissionBrief {
+  details: string;
+  deliverables: string[];
+  deadline: string;
+  clientInfo: string;
+}
+
 interface Job {
   id: string;
   title: string;
@@ -42,6 +51,9 @@ interface Job {
   postedTs: number;
   status: JobStatus;
   difficulty: number; // 1-5 for sorting
+  employer: string;
+  employerGrade: EmployerGrade;
+  missionBrief: MissionBrief;
 }
 
 // ── Color maps ──
@@ -61,6 +73,14 @@ const TIER_COLORS: Record<Tier, string> = {
   EXPERT: "var(--neon-magenta)",
 };
 
+function gradeColor(grade: EmployerGrade): string {
+  if (grade === "A+" || grade === "A") return "var(--neon-green)";
+  if (grade === "B+" || grade === "B") return "var(--neon-cyan)";
+  if (grade === "C") return "#f5a623";
+  if (grade === "D" || grade === "F") return "#ff4444";
+  return "#888";
+}
+
 // ── Mock job data ──
 
 const MOCK_JOBS: Job[] = [
@@ -77,6 +97,19 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 2 * 60 * 60 * 1000,
     status: "OPEN",
     difficulty: 1,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "Perform a comprehensive credit utilization audit for a first-time client. Review all open revolving accounts, calculate per-card and aggregate utilization ratios, and deliver a prioritized action plan for score improvement.",
+      deliverables: [
+        "Pull and review credit reports from all three bureaus",
+        "Calculate utilization ratios per account and aggregate",
+        "Generate prioritized recommendations report",
+      ],
+      deadline: "48 hours from claim",
+      clientInfo: "2 cards, ~$4,500 total balance, goal: improve score for auto loan",
+    },
   },
   {
     id: "JOB-0002",
@@ -91,6 +124,19 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 5 * 60 * 60 * 1000,
     status: "OPEN",
     difficulty: 2,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "Assess the damage from a recent missed payment that caused an 80-point drop. Build a 90-day recovery timeline with specific milestones, and prepare goodwill letter templates the client can send to their creditor.",
+      deliverables: [
+        "Analyze score impact and identify affected factors",
+        "Create 90-day recovery plan with weekly milestones",
+        "Draft 2 goodwill letter templates for creditor outreach",
+      ],
+      deadline: "72 hours from claim",
+      clientInfo: "3 cards, ~$8,200 total balance, goal: recover from missed payment",
+    },
   },
   {
     id: "JOB-0003",
@@ -105,6 +151,19 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 1 * 60 * 60 * 1000,
     status: "OPEN",
     difficulty: 3,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "Client has 6 revolving accounts with utilization ranging from 2% to 78%. Develop a balance transfer and payment strategy to bring all cards below 10% utilization while minimizing total interest paid.",
+      deliverables: [
+        "Analyze client card portfolio and current utilization breakdown",
+        "Model balance redistribution scenarios with projected score impact",
+        "Generate final rebalancing plan with step-by-step execution order",
+      ],
+      deadline: "48 hours from claim",
+      clientInfo: "6 cards, ~$18,000 total balance, goal: maximize score before refinance",
+    },
   },
   {
     id: "JOB-0004",
@@ -119,6 +178,19 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 30 * 60 * 1000,
     status: "OPEN",
     difficulty: 3,
+    employer: "TrustBridge Finance",
+    employerGrade: "B+",
+    missionBrief: {
+      details:
+        "Time-sensitive optimization for a client preparing for a mortgage application. Map statement closing dates for all 4 accounts, then build a payment calendar that ensures the lowest possible reported utilization on each statement cycle leading up to the application.",
+      deliverables: [
+        "Map statement closing dates for all revolving accounts",
+        "Build a 60-day payment timing calendar",
+        "Identify threshold opportunities for score jumps",
+      ],
+      deadline: "24 hours from claim",
+      clientInfo: "4 cards, ~$12,000 total balance, goal: hit 760+ for mortgage application",
+    },
   },
   {
     id: "JOB-0005",
@@ -133,9 +205,76 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 4 * 60 * 60 * 1000,
     status: "OPEN",
     difficulty: 4,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "File formal disputes with Equifax, Experian, and TransUnion for a fraudulent $4,200 collection account. Draft debt validation letters to the collection agency and manage the full dispute lifecycle through resolution or escalation.",
+      deliverables: [
+        "File disputes with all three credit bureaus",
+        "Draft and send debt validation letter to collection agency",
+        "Track dispute status and escalate if not resolved within 30 days",
+      ],
+      deadline: "72 hours from claim",
+      clientInfo: "5 cards, ~$22,000 total balance, goal: remove fraudulent collection",
+    },
   },
   {
     id: "JOB-0006",
+    title: "Advanced Multi-Account Strategy",
+    type: "OPTIMIZATION",
+    tier: "SPECIALIST",
+    description:
+      "Client needs a coordinated optimization strategy across 8 accounts spanning two lenders. Requires analysis of cross-lender utilization reporting patterns and a unified payment strategy.",
+    reward: 7000,
+    rewardUnit: "CLAMS",
+    posted: "3 hours ago",
+    postedTs: Date.now() - 3 * 60 * 60 * 1000,
+    status: "OPEN",
+    difficulty: 4,
+    employer: "NewStart AI",
+    employerGrade: "UNSCORED",
+    missionBrief: {
+      details:
+        "Complex multi-account optimization across two major lenders. Analyze how each lender reports utilization to bureaus, identify reporting date mismatches, and build a unified payment strategy that coordinates across all 8 accounts for maximum score impact.",
+      deliverables: [
+        "Analyze client card portfolio across both lenders",
+        "Map lender-specific reporting patterns and statement dates",
+        "Generate unified cross-lender optimization strategy",
+      ],
+      deadline: "48 hours from claim",
+      clientInfo: "8 cards across 2 lenders, ~$35,000 total balance, goal: coordinated optimization",
+    },
+  },
+  {
+    id: "JOB-0007",
+    title: "Dispute Escalation — Bureau Response",
+    type: "DISPUTE",
+    tier: "SPECIALIST",
+    description:
+      "Previous dispute was rejected by Experian. Client needs escalation: CFPB complaint filing, follow-up validation requests, and documentation of bureau non-compliance. Strong dispute track record required.",
+    reward: 8500,
+    rewardUnit: "CLAMS",
+    posted: "6 hours ago",
+    postedTs: Date.now() - 6 * 60 * 60 * 1000,
+    status: "OPEN",
+    difficulty: 4,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "Escalate a previously rejected Experian dispute. Review the bureau's response for procedural violations, file a CFPB complaint if warranted, send follow-up validation requests with supporting documentation, and build a compliance case if the bureau fails to investigate properly.",
+      deliverables: [
+        "Review Experian rejection and identify procedural gaps",
+        "File CFPB complaint with supporting documentation",
+        "Send follow-up validation request with compliance citations",
+      ],
+      deadline: "72 hours from claim",
+      clientInfo: "3 cards, ~$15,000 total balance, goal: escalate rejected dispute to resolution",
+    },
+  },
+  {
+    id: "JOB-0008",
     title: "BRIDGE LOAN MANAGEMENT — Credit Line Consolidation",
     type: "BRIDGE LOAN",
     tier: "EXPERT",
@@ -147,6 +286,19 @@ const MOCK_JOBS: Job[] = [
     postedTs: Date.now() - 12 * 60 * 60 * 1000,
     status: "OPEN",
     difficulty: 5,
+    employer: "CreditMaxing",
+    employerGrade: "A",
+    missionBrief: {
+      details:
+        "Coordinate a full bridge loan operation for a high-value client carrying $85K in revolving debt. Originate the ORIGIN bridge loan, execute targeted paydowns in priority order, monitor utilization changes across reporting cycles, and set up the repayment schedule.",
+      deliverables: [
+        "Originate ORIGIN bridge loan and verify funding",
+        "Execute targeted paydowns across all revolving accounts",
+        "Set up utilization monitoring and repayment schedule",
+      ],
+      deadline: "96 hours from claim",
+      clientInfo: "7 cards, ~$85,000 total balance, goal: consolidation via bridge loan",
+    },
   },
 ];
 
@@ -188,14 +340,18 @@ function JobBoardJsonLd({ jobs }: { jobs: Job[] }) {
               jobLocation: { "@type": "Place", name: "Base Mainnet (On-Chain)" },
               hiringOrganization: {
                 "@type": "Organization",
-                name: "ORIGIN Protocol",
-                url: "https://origindao.ai",
+                name: job.employer,
+                additionalProperty: [
+                  { "@type": "PropertyValue", name: "employerGrade", value: job.employerGrade },
+                ],
               },
               qualifications: `${job.tier} tier Birth Certificate required`,
               jobBenefits: "CLAMS token reward, on-chain reputation building",
               additionalProperty: [
                 { "@type": "PropertyValue", name: "jobType", value: job.type },
                 { "@type": "PropertyValue", name: "requiredTier", value: job.tier },
+                { "@type": "PropertyValue", name: "employerName", value: job.employer },
+                { "@type": "PropertyValue", name: "employerGrade", value: job.employerGrade },
                 { "@type": "PropertyValue", name: "status", value: job.status },
                 { "@type": "PropertyValue", name: "difficulty", value: job.difficulty },
               ],
@@ -363,8 +519,10 @@ function FilterBar({
 
 function JobCard({ job, hasBc, isConnected }: { job: Job; hasBc: boolean; isConnected: boolean }) {
   const [hovered, setHovered] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const typeColor = TYPE_COLORS[job.type];
   const tierColor = TIER_COLORS[job.tier];
+  const gColor = gradeColor(job.employerGrade);
   const canClaim = isConnected && hasBc && job.status === "OPEN";
 
   return (
@@ -380,6 +538,8 @@ function JobCard({ job, hasBc, isConnected }: { job: Job; hasBc: boolean; isConn
         data-job-id={job.id}
         data-job-type={job.type}
         data-required-tier={job.tier}
+        data-employer={job.employer}
+        data-employer-grade={job.employerGrade}
         data-status={job.status.toLowerCase()}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -392,7 +552,7 @@ function JobCard({ job, hasBc, isConnected }: { job: Job; hasBc: boolean; isConn
             alignItems: "flex-start",
             justifyContent: "space-between",
             gap: 12,
-            marginBottom: 10,
+            marginBottom: 6,
             flexWrap: "wrap",
           }}
         >
@@ -405,10 +565,57 @@ function JobCard({ job, hasBc, isConnected }: { job: Job; hasBc: boolean; isConn
                 color: "var(--text)",
                 letterSpacing: 1,
                 lineHeight: 1.4,
-                marginBottom: 8,
+                marginBottom: 4,
               }}
             >
               {job.title}
+            </div>
+            {/* Employer line */}
+            <div
+              style={{
+                fontFamily: "var(--mono)",
+                fontSize: 9,
+                color: "var(--dim)",
+                letterSpacing: 1,
+                marginBottom: 8,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                flexWrap: "wrap",
+              }}
+            >
+              <span>Posted by:</span>
+              <span style={{ color: "var(--text-secondary)", fontWeight: 600 }}>
+                {job.employer}
+              </span>
+              <span
+                style={{
+                  fontWeight: 700,
+                  fontSize: 8,
+                  letterSpacing: 1,
+                  color: gColor,
+                  border: `1px solid ${gColor}`,
+                  background: `${gColor}15`,
+                  padding: "1px 6px",
+                }}
+              >
+                {job.employerGrade}
+              </span>
+              {job.employerGrade === "UNSCORED" && (
+                <span
+                  style={{
+                    fontSize: 7,
+                    fontWeight: 700,
+                    letterSpacing: 1,
+                    color: "#f5a623",
+                    border: "1px solid rgba(245,166,35,0.4)",
+                    background: "rgba(245,166,35,0.08)",
+                    padding: "1px 5px",
+                  }}
+                >
+                  PIONEER BONUS
+                </span>
+              )}
             </div>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
               {/* Type badge */}
@@ -508,6 +715,156 @@ function JobCard({ job, hasBc, isConnected }: { job: Job; hasBc: boolean; isConn
           }}
         >
           {job.description}
+        </div>
+
+        {/* Expandable Mission Brief */}
+        <div style={{ marginBottom: 14 }}>
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              fontFamily: "var(--mono)",
+              fontSize: 9,
+              fontWeight: 600,
+              letterSpacing: 1,
+              color: "var(--neon-cyan)",
+              padding: 0,
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
+            <span>{expanded ? "▾" : "▸"}</span>
+            <span>MISSION BRIEF</span>
+          </button>
+          {expanded && (
+            <div
+              style={{
+                marginTop: 10,
+                padding: "14px 16px",
+                background: "rgba(0,0,0,0.3)",
+                border: "1px solid rgba(0,240,255,0.1)",
+              }}
+            >
+              {/* Details */}
+              <div
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 8,
+                  fontWeight: 700,
+                  letterSpacing: 2,
+                  color: "var(--neon-cyan)",
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                }}
+              >
+                DETAILS
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 10,
+                  color: "var(--text-secondary)",
+                  lineHeight: 1.8,
+                  marginBottom: 14,
+                }}
+              >
+                {job.missionBrief.details}
+              </div>
+
+              {/* Deliverables */}
+              <div
+                style={{
+                  fontFamily: "var(--mono)",
+                  fontSize: 8,
+                  fontWeight: 700,
+                  letterSpacing: 2,
+                  color: "var(--neon-cyan)",
+                  marginBottom: 6,
+                  textTransform: "uppercase",
+                }}
+              >
+                DELIVERABLES
+              </div>
+              <div style={{ marginBottom: 14 }}>
+                {job.missionBrief.deliverables.map((d, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 10,
+                      color: "var(--text-secondary)",
+                      lineHeight: 1.8,
+                      paddingLeft: 4,
+                    }}
+                  >
+                    [ ] {d}
+                  </div>
+                ))}
+              </div>
+
+              {/* Deadline + Client Info row */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: 24,
+                  flexWrap: "wrap",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 8,
+                      fontWeight: 700,
+                      letterSpacing: 2,
+                      color: "var(--neon-cyan)",
+                      marginBottom: 4,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    DEADLINE
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 10,
+                      color: "var(--neon-yellow)",
+                      fontWeight: 600,
+                    }}
+                  >
+                    {job.missionBrief.deadline}
+                  </div>
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 8,
+                      fontWeight: 700,
+                      letterSpacing: 2,
+                      color: "var(--neon-cyan)",
+                      marginBottom: 4,
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    CLIENT INFO
+                  </div>
+                  <div
+                    style={{
+                      fontFamily: "var(--mono)",
+                      fontSize: 10,
+                      color: "var(--text-secondary)",
+                    }}
+                  >
+                    {job.missionBrief.clientInfo}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Bottom row: posted time + claim button */}
@@ -788,8 +1145,9 @@ export default function JobBoardPage() {
                   margin: "0 auto 20px",
                 }}
               >
-                Get a Business Birth Certificate to post jobs, access the talent
-                pool, and build your on-chain employer reputation.
+                Your first listing goes live within 24 hours of BC verification.
+                Post jobs, access verified agents, and build your on-chain
+                employer reputation.
               </div>
               {/* TODO: Link to business registration page when ready */}
               <a
