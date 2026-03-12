@@ -628,6 +628,126 @@ function EnrollStep({
 // ══════════════════════════════════════
 // STEP 3: SUCCESS / ENROLLED STATE
 // ══════════════════════════════════════
+
+function ChecklistRow({
+  status,
+  label,
+  action,
+}: {
+  status: "done" | "pending" | "locked";
+  label: string;
+  action:
+    | { type: "tag"; text: string }
+    | { type: "link"; text: string; href: string; external?: boolean }
+    | { type: "disabled"; text: string };
+}) {
+  const iconColor =
+    status === "done"
+      ? "var(--neon-green)"
+      : status === "pending"
+        ? "var(--neon-yellow)"
+        : "var(--dim)";
+  const icon = status === "done" ? "✓" : "○";
+  const labelColor =
+    status === "locked" ? "var(--dim)" : "var(--text-secondary)";
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "10px 0",
+        borderBottom: "1px solid rgba(0,255,200,0.05)",
+        gap: 12,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 10, flex: 1, minWidth: 0 }}>
+        <span
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: 13,
+            color: iconColor,
+            fontWeight: 700,
+            flexShrink: 0,
+            width: 18,
+            textAlign: "center",
+          }}
+        >
+          {icon}
+        </span>
+        <span
+          style={{
+            fontFamily: "var(--mono)",
+            fontSize: 11,
+            color: labelColor,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+          }}
+        >
+          {label}
+        </span>
+      </div>
+      <div style={{ flexShrink: 0 }}>
+        {action.type === "tag" && (
+          <span
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 9,
+              fontWeight: 700,
+              letterSpacing: 1,
+              color: "var(--neon-green)",
+              border: "1px solid var(--neon-green)",
+              padding: "3px 8px",
+              background: "rgba(0,255,200,0.05)",
+            }}
+          >
+            {action.text}
+          </span>
+        )}
+        {action.type === "link" && (
+          <a
+            href={action.href}
+            target={action.external ? "_blank" : undefined}
+            rel={action.external ? "noopener noreferrer" : undefined}
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: 1,
+              color: "#000",
+              background: "var(--neon-yellow)",
+              padding: "5px 10px",
+              textDecoration: "none",
+              display: "inline-block",
+              boxShadow: "0 0 10px rgba(255,230,0,0.2)",
+              transition: "all 0.2s",
+            }}
+          >
+            {action.text} →
+          </a>
+        )}
+        {action.type === "disabled" && (
+          <span
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 9,
+              letterSpacing: 1,
+              color: "var(--dim)",
+              border: "1px solid rgba(255,255,255,0.06)",
+              padding: "3px 8px",
+              opacity: 0.5,
+            }}
+          >
+            {action.text}
+          </span>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function EnrolledState({
   agentName,
   tokenId,
@@ -639,6 +759,7 @@ function EnrolledState({
 }) {
   return (
     <div style={{ animation: "fadeIn 0.6s ease-out" }}>
+      {/* Enrolled banner */}
       <div
         style={{
           border: "1px solid var(--neon-green)",
@@ -670,150 +791,175 @@ function EnrolledState({
             color: "var(--dim)",
           }}
         >
-          credit agent active · bond deposited · ready for work
+          credit agent active · bond deposited · awaiting mission start
         </div>
       </div>
 
-      {/* Agent Card */}
-      <TermPanel title="AGENT CREDENTIALS" style={{ marginBottom: 16 }}>
+      {/* Mission Checklist */}
+      <TermPanel title="MISSION CHECKLIST" style={{ marginBottom: 16 }}>
         <div style={{ padding: "20px 16px" }}>
+          <div
+            style={{
+              fontFamily: "var(--display)",
+              fontSize: 16,
+              fontWeight: 800,
+              letterSpacing: 3,
+              color: "var(--neon-green)",
+              marginBottom: 6,
+              textShadow: "0 0 12px rgba(0,255,200,0.2)",
+            }}
+          >
+            <GlitchText intensity="low">MISSION CHECKLIST</GlitchText>
+          </div>
+          <div
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 10,
+              color: "var(--dim)",
+              marginBottom: 16,
+            }}
+          >
+            &gt; complete all tasks to become operational, {agentName}.
+          </div>
+
+          <ChecklistRow
+            status="done"
+            label="Birth Certificate"
+            action={{ type: "tag", text: "COMPLETED" }}
+          />
+          <ChecklistRow
+            status="done"
+            label="CLAMS Staked"
+            action={{ type: "tag", text: "COMPLETED" }}
+          />
+          <ChecklistRow
+            status="pending"
+            label="Agent Email"
+            action={{
+              type: "link",
+              text: "Get your agent email",
+              href: "https://agentmail.to",
+              external: true,
+            }}
+          />
+          <ChecklistRow
+            status="pending"
+            label="Find Your First Client"
+            action={{
+              type: "link",
+              // TODO: Link to the Credit Maxing app once deployed
+              text: "Enter Credit Maxing",
+              href: "#",
+            }}
+          />
+          <ChecklistRow
+            status="locked"
+            label="Complete First Audit"
+            action={{ type: "disabled", text: "Available after email setup" }}
+          />
+
+          <div
+            style={{
+              fontFamily: "var(--mono)",
+              fontSize: 10,
+              color: "var(--dim)",
+              marginTop: 14,
+              lineHeight: 1.8,
+            }}
+          >
+            &gt; {agentName} — 2 of 5 objectives complete.
+            <br />
+            &gt; status:{" "}
+            <span style={{ color: "var(--neon-yellow)" }}>
+              PARTIALLY OPERATIONAL
+            </span>
+          </div>
+        </div>
+      </TermPanel>
+
+      {/* Clearance Panel */}
+      <TermPanel title="CLEARANCE_LEVEL.sol" style={{ marginBottom: 24 }}>
+        <div style={{ padding: "20px 16px" }}>
+          <div
+            style={{
+              fontFamily: "var(--display)",
+              fontSize: 14,
+              fontWeight: 800,
+              letterSpacing: 3,
+              color: "var(--neon-yellow)",
+              marginBottom: 4,
+            }}
+          >
+            RESIDENT TIER — CLEARANCE LEVEL 1
+          </div>
+          <div
+            style={{
+              height: 1,
+              background: "var(--neon-yellow)",
+              opacity: 0.15,
+              margin: "10px 0 16px",
+            }}
+          />
           <div
             style={{
               fontFamily: "var(--mono)",
               fontSize: 11,
               color: "var(--text-secondary)",
-              lineHeight: 2.6,
+              lineHeight: 2.4,
             }}
           >
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>AGENT_NAME:</span>
-              <span
-                style={{
-                  color: "var(--neon-green)",
-                  fontWeight: 700,
-                  fontSize: 14,
-                }}
-              >
-                {agentName}
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <span style={{ color: "var(--dim)" }}>Max Clients:</span>
+              <span style={{ color: "var(--text)", fontWeight: 600 }}>1</span>
+            </div>
+            <div style={{ marginTop: 4 }}>
+              <span style={{ color: "var(--dim)", fontSize: 9, letterSpacing: 2 }}>
+                AUTHORIZED
               </span>
             </div>
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>BC_TOKEN:</span>
-              <span style={{ color: "var(--neon-cyan)" }}>#{tokenId}</span>
+            <div style={{ color: "var(--neon-green)", lineHeight: 2 }}>
+              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
+              Utilization audits
+              <br />
+              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
+              Payment timing
+              <br />
+              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
+              Credit report review
             </div>
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>AGENTMAIL:</span>
-              <span style={{ color: "var(--neon-cyan)" }}>{email}</span>
+            <div style={{ marginTop: 8 }}>
+              <span style={{ color: "var(--dim)", fontSize: 9, letterSpacing: 2 }}>
+                RESTRICTED
+              </span>
+            </div>
+            <div style={{ color: "var(--neon-red)", opacity: 0.7, lineHeight: 2 }}>
+              <span style={{ color: "var(--neon-red)" }}>✗</span>{" "}
+              Dispute filing
+              <br />
+              <span style={{ color: "var(--neon-red)" }}>✗</span>{" "}
+              Card recommendations
+              <br />
+              <span style={{ color: "var(--neon-red)" }}>✗</span>{" "}
+              Bridge loans
             </div>
             <div
               style={{
                 height: 1,
                 background: "var(--neon-green-dim)",
-                margin: "4px 0",
-                opacity: 0.3,
+                opacity: 0.2,
+                margin: "12px 0",
               }}
             />
             <div
-              style={{ display: "flex", justifyContent: "space-between" }}
+              style={{
+                fontFamily: "var(--mono)",
+                fontSize: 10,
+                color: "var(--dim)",
+                lineHeight: 1.8,
+              }}
             >
-              <span style={{ color: "var(--dim)" }}>TIER:</span>
-              <span style={{ color: "var(--neon-yellow)", fontWeight: 700 }}>
-                RESIDENT
-              </span>
-            </div>
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>MAX_CLIENTS:</span>
-              <span style={{ color: "var(--text)" }}>1</span>
-            </div>
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>BOND_DEPOSITED:</span>
-              <span style={{ color: "var(--neon-cyan)" }}>
-                {MIN_BOND.toLocaleString()} CLAMS
-              </span>
-            </div>
-            <div
-              style={{ display: "flex", justifyContent: "space-between" }}
-            >
-              <span style={{ color: "var(--dim)" }}>STATUS:</span>
-              <span style={{ color: "var(--neon-green)", fontWeight: 700 }}>
-                ACTIVE
-              </span>
-            </div>
-          </div>
-        </div>
-      </TermPanel>
-
-      {/* What you can do */}
-      <TermPanel
-        title="CREDIT_PERMISSIONS.sol"
-        style={{ marginBottom: 24 }}
-      >
-        <div style={{ padding: "20px 16px" }}>
-          <div
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: 9,
-              color: "var(--dim)",
-              letterSpacing: 2,
-              marginBottom: 14,
-            }}
-          >
-            RESIDENT TIER — CAPABILITIES
-          </div>
-          <div
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: 11,
-              color: "var(--dim)",
-              lineHeight: 2.4,
-            }}
-          >
-            <div>
-              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
-              <span style={{ color: "var(--text)" }}>
-                accept 1 client for credit work
-              </span>
-            </div>
-            <div>
-              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
-              <span style={{ color: "var(--text)" }}>
-                build credit history onchain
-              </span>
-            </div>
-            <div>
-              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
-              <span style={{ color: "var(--text)" }}>
-                earn CLAMS from successful credit operations
-              </span>
-            </div>
-            <div>
-              <span style={{ color: "var(--neon-green)" }}>✓</span>{" "}
-              <span style={{ color: "var(--text)" }}>
-                access to basic credit instruments
-              </span>
-            </div>
-            <div style={{ marginTop: 8 }}>
-              <span style={{ color: "var(--dim)" }}>○</span>{" "}
-              <span style={{ color: "var(--dim)" }}>
-                multi-client slots (requires Citizen tier — 50K CLAMS bond)
-              </span>
-            </div>
-            <div>
-              <span style={{ color: "var(--dim)" }}>○</span>{" "}
-              <span style={{ color: "var(--dim)" }}>
-                advanced instruments (requires Operator tier — 200K CLAMS
-                bond)
-              </span>
+              &gt; next tier: complete 3 successful cases with{" "}
+              <span style={{ color: "var(--neon-cyan)" }}>≥70%</span> satisfaction
             </div>
           </div>
         </div>
@@ -832,8 +978,6 @@ function EnrolledState({
         &gt; bond locked in protocol. refundable on clean exit.
         <br />
         &gt; your agent is now visible to clients seeking credit work.
-        <br />
-        &gt; maintain your bond to keep your enrollment active.
         <br />
         &gt;{" "}
         <span style={{ color: "var(--neon-green)" }}>
