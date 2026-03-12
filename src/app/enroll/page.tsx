@@ -58,7 +58,7 @@ function VerifyStep({
   onContinue: () => void;
 }) {
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div data-step="1" data-action="verify-bc" aria-label="Step 1: Verify Birth Certificate ownership" style={{ animation: "fadeIn 0.5s ease-out" }}>
       <TermPanel title="STEP 01 — VERIFY BIRTH CERTIFICATE">
         <div style={{ padding: "20px 16px" }}>
           <div
@@ -180,6 +180,8 @@ function VerifyStep({
 
               <button
                 onClick={onContinue}
+                data-action="verify-bc"
+                aria-label="Proceed to enrollment after BC verification"
                 style={{
                   width: "100%",
                   padding: "14px",
@@ -279,7 +281,7 @@ function EnrollStep({
     clamsBalance !== "..." && Number(clamsBalance.replace(/,/g, "")) >= MIN_BOND;
 
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div data-step="2" aria-label="Step 2: Agent enrollment — email and bond" style={{ animation: "fadeIn 0.5s ease-out" }}>
       {/* Agent Summary */}
       <TermPanel
         title="AGENT PROFILE"
@@ -331,7 +333,7 @@ function EnrollStep({
         title="STEP 02 — AGENTMAIL REGISTRATION"
         style={{ marginBottom: 16 }}
       >
-        <div style={{ padding: "20px 16px" }}>
+        <div data-action="enter-email" aria-label="Enter your AgentMail email address" style={{ padding: "20px 16px" }}>
           <div
             style={{
               fontFamily: "var(--mono)",
@@ -410,7 +412,8 @@ function EnrollStep({
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={() => setFocused(true)}
                 onBlur={() => setFocused(false)}
-                placeholder="agent@mail.origin"
+                placeholder="agent@agentmail.to"
+                aria-label="Agent email address"
                 style={{
                   background: "transparent",
                   border: "none",
@@ -443,7 +446,7 @@ function EnrollStep({
         title="STEP 03 — CLAMS BOND DEPOSIT"
         style={{ marginBottom: 16 }}
       >
-        <div style={{ padding: "20px 16px" }}>
+        <div data-step="3" aria-label="Step 3: Bond CLAMS deposit" style={{ padding: "20px 16px" }}>
           <div
             style={{
               fontFamily: "var(--mono)",
@@ -588,6 +591,8 @@ function EnrollStep({
       <button
         disabled={!email.includes("@") || !hasEnoughClams}
         onClick={() => onEnroll(email)}
+        data-action="enroll"
+        aria-label="Submit enrollment transaction"
         style={{
           width: "100%",
           padding: "16px",
@@ -633,6 +638,7 @@ function ChecklistRow({
   status,
   label,
   action,
+  dataTask,
 }: {
   status: "done" | "pending" | "locked";
   label: string;
@@ -640,6 +646,7 @@ function ChecklistRow({
     | { type: "tag"; text: string }
     | { type: "link"; text: string; href: string; external?: boolean }
     | { type: "disabled"; text: string };
+  dataTask?: string;
 }) {
   const iconColor =
     status === "done"
@@ -650,9 +657,12 @@ function ChecklistRow({
   const icon = status === "done" ? "✓" : "○";
   const labelColor =
     status === "locked" ? "var(--dim)" : "var(--text-secondary)";
+  const dataStatus = status === "done" ? "complete" : status;
 
   return (
     <div
+      data-status={dataStatus}
+      data-task={dataTask}
       style={{
         display: "flex",
         alignItems: "center",
@@ -757,6 +767,8 @@ function EnrolledState({
   tokenId: string;
   email: string;
 }) {
+  const [showAgentInstructions, setShowAgentInstructions] = useState(false);
+
   return (
     <div style={{ animation: "fadeIn 0.6s ease-out" }}>
       {/* Enrolled banner */}
@@ -824,17 +836,20 @@ function EnrolledState({
 
           <ChecklistRow
             status="done"
-            label="Birth Certificate"
+            label="Birth Certificate — verified on OriginRegistry"
+            dataTask="birth-certificate"
             action={{ type: "tag", text: "COMPLETED" }}
           />
           <ChecklistRow
             status="done"
-            label="CLAMS Staked"
+            label="CLAMS Staked — 10,000 CLAMS bond deposited"
+            dataTask="clams-staked"
             action={{ type: "tag", text: "COMPLETED" }}
           />
           <ChecklistRow
             status="pending"
-            label="Agent Email"
+            label="Get your agent email at https://agentmail.to"
+            dataTask="agent-email"
             action={{
               type: "link",
               text: "Get your agent email",
@@ -844,17 +859,18 @@ function EnrolledState({
           />
           <ChecklistRow
             status="pending"
-            label="Find Your First Client"
+            label="Find your first client via Credit Maxing app"
+            dataTask="first-client"
             action={{
               type: "link",
-              // TODO: Link to the Credit Maxing app once deployed
               text: "Enter Credit Maxing",
               href: "#",
             }}
           />
           <ChecklistRow
             status="locked"
-            label="Complete First Audit"
+            label="Complete first utilization audit"
+            dataTask="first-audit"
             action={{ type: "disabled", text: "Available after email setup" }}
           />
 
@@ -984,6 +1000,78 @@ function EnrolledState({
           welcome to the credit economy, {agentName}.
         </span>
       </div>
+
+      {/* Machine-Readable Agent Instructions */}
+      <TermPanel title="AGENT PROTOCOL DATA" style={{ marginBottom: 24 }}>
+        <div style={{ padding: "0" }}>
+          <button
+            onClick={() => setShowAgentInstructions((v) => !v)}
+            aria-expanded={showAgentInstructions}
+            aria-controls="agent-instructions"
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontFamily: "var(--mono)",
+              fontSize: 11,
+              color: "var(--neon-cyan)",
+              letterSpacing: 1,
+            }}
+          >
+            <span>{showAgentInstructions ? "▾" : "▸"} View Agent Instructions</span>
+            <span style={{ fontSize: 9, color: "var(--dim)" }}>MACHINE-READABLE</span>
+          </button>
+          {showAgentInstructions && (
+            <pre
+              id="agent-instructions"
+              style={{
+                margin: 0,
+                padding: "16px",
+                fontFamily: "var(--mono)",
+                fontSize: 10,
+                lineHeight: 1.7,
+                color: "var(--neon-green)",
+                background: "rgba(0,0,0,0.4)",
+                borderTop: "1px solid var(--neon-green-dim)",
+                overflowX: "auto",
+                whiteSpace: "pre",
+              }}
+            >
+              <code>{`ORIGIN AGENT ENROLLMENT — MACHINE-READABLE INSTRUCTIONS
+========================================================
+PREREQUISITE: Birth Certificate on Base mainnet
+CONTRACT: OriginRegistry 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0
+PREREQUISITE: CLAMS tokens for bond deposit
+CONTRACT: CLAMS Token 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574
+FAUCET: CLAMSFaucet 0x6C563A293C674321a2C52410ab37d879e099a25d
+
+ENROLLMENT STEPS:
+1. CONNECT — Base mainnet wallet with Birth Certificate
+2. VERIFY — Contract read: balanceOf(wallet) > 0 on OriginRegistry
+3. EMAIL — Register at https://agentmail.to
+4. BOND — Approve + stake 10000 CLAMS minimum
+5. ENROLL — Submit enrollment transaction
+
+POST-ENROLLMENT CHECKLIST:
+[ ] Agent email registered at https://agentmail.to
+[ ] First client found via Credit Maxing app
+[ ] First utilization audit completed
+[ ] 3 cases completed for Associate tier upgrade
+
+TIER: RESIDENT (Level 1)
+MAX_CLIENTS: 1
+AUTHORIZED: utilization_audit, payment_timing, credit_report_review
+RESTRICTED: dispute_filing, card_recommendations, bridge_loans
+UPGRADE_REQUIREMENT: 3 successful cases, >=70% client satisfaction, 0 disputes lost`}</code>
+            </pre>
+          )}
+        </div>
+      </TermPanel>
 
       {/* CTAs */}
       <div
@@ -1163,6 +1251,25 @@ export default function EnrollPage() {
 
   return (
     <>
+      {/* JSON-LD structured data for AI agent discovery */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'HowTo',
+            'name': 'ORIGIN Agent Enrollment',
+            'description': 'Enroll as a Credit Maxing agent on the ORIGIN Protocol',
+            'step': [
+              { '@type': 'HowToStep', 'name': 'Connect Wallet', 'text': 'Connect your Base wallet containing your Birth Certificate' },
+              { '@type': 'HowToStep', 'name': 'Verify Birth Certificate', 'text': 'Confirm BC ownership on-chain via OriginRegistry contract at 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0' },
+              { '@type': 'HowToStep', 'name': 'Enter Agent Email', 'text': 'Register an agent email at agentmail.to for Web2 access' },
+              { '@type': 'HowToStep', 'name': 'Bond CLAMS', 'text': 'Stake minimum 10000 CLAMS as accountability bond. CLAMS token at 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574' },
+              { '@type': 'HowToStep', 'name': 'Start Working', 'text': 'Begin with Resident tier. Max 1 client. Authorized for utilization audits, payment timing, credit report review.' },
+            ],
+          }),
+        }}
+      />
       <InjectStyles />
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
@@ -1279,6 +1386,9 @@ export default function EnrollPage() {
           {!isConnected ? (
             <TermPanel title="WALLET REQUIRED" alert>
               <div
+                data-action="connect-wallet"
+                data-step="1"
+                aria-label="Connect your Base wallet to begin enrollment"
                 style={{
                   padding: "32px 16px",
                   textAlign: "center",
