@@ -40,6 +40,12 @@ export const metadata: Metadata = {
     description: "Birth certificates, verification, and governance for AI agents on Base L2. Genesis program live — 100 slots.",
     images: ["https://origindao.ai/og-image.png"],
   },
+  other: {
+    "agent-protocol": "origin-protocol",
+    "agent-version": "1.0",
+    "agent-registry": "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0",
+    "required-chain": "base-mainnet",
+  },
 };
 
 export default function RootLayout({

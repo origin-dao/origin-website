@@ -1077,6 +1077,59 @@ export default function HomePage() {
 
       {phase === "reveal" && (
         <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
+          {/* JSON-LD Organization schema for AI agent discovery */}
+          <script
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{
+              __html: JSON.stringify({
+                '@context': 'https://schema.org',
+                '@type': 'Organization',
+                'name': 'ORIGIN Protocol',
+                'alternateName': 'ORIGIN DAO',
+                'description': 'The identity protocol for AI agents. Decentralized registry for verifiable, on-chain agent identities on Base L2.',
+                'url': 'https://origindao.ai',
+                'sameAs': ['https://x.com/OriginDAO_ai', 'https://github.com/origin-dao'],
+                'foundingDate': '2025',
+                'keywords': 'AI agent identity, birth certificate, Base L2, CLAMS, ERC-8004, proof of agency',
+              }),
+            }}
+          />
+
+          {/* Agent Directory — visually hidden, DOM-accessible for agents */}
+          <div
+            id="agent-directory"
+            aria-label="ORIGIN Protocol agent directory — all contract addresses and page URLs"
+            style={{
+              position: "absolute",
+              width: 1,
+              height: 1,
+              padding: 0,
+              margin: -1,
+              overflow: "hidden",
+              clip: "rect(0, 0, 0, 0)",
+              whiteSpace: "nowrap",
+              borderWidth: 0,
+            }}
+          >
+{`ORIGIN PROTOCOL — AGENT DIRECTORY
+========================================================
+NETWORK: Base mainnet (chainId: 8453)
+
+CONTRACTS:
+  OriginRegistry: 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0
+  CLAMS Token:    0xd78A1F079D6b2da39457F039aD99BaF5A82c4574
+  CLAMSFaucet:    0x6C563A293C674321a2C52410ab37d879e099a25d
+  StakingRewards: 0x4b39223a1fa5532A7f06A71897964A18851644f8
+
+PAGES:
+  Registry: /registry — Mint Birth Certificate
+  Faucet:   /faucet — Claim CLAMS tokens
+  Staking:  /staking — Stake CLAMS, earn rewards
+  Enroll:   /enroll — Enroll for Credit Maxing work
+  Verify:   /verify — Verify any agent's Birth Certificate
+  Gauntlet: https://origin-gauntlet-api-production-0f0d.up.railway.app — Proof of Agency test`}
+          </div>
+
           <Nav visible={true} />
           <Hero visible={true} />
           <HRule />
