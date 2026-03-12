@@ -7,6 +7,7 @@ const NAV_LINKS = [
   { href: "/registry", label: "registry" },
   { href: "/faucet", label: "faucet" },
   { href: "/staking", label: "war chest", color: "var(--neon-green, #00FFC8)" },
+  { href: "/leaderboard", label: "leaderboard", color: "var(--neon-cyan, #00f0ff)" },
   { href: "/enroll", label: "enroll", color: "var(--neon-cyan, #00f0ff)" },
   { href: "/verify", label: "verify agent" },
   { href: "/whitepaper", label: "whitepaper" },
