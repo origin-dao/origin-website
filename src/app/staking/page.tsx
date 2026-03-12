@@ -337,7 +337,7 @@ function VestingBar() {
           </div>
         </div>
 
-        <button style={{
+        <button data-action="claim-vested" aria-label="Claim vested CLAMS tokens" style={{
           width: "100%", padding: "10px", border: "none",
           cursor: canClaim ? "pointer" : "not-allowed",
           fontFamily: "var(--mono)", fontSize: 12, fontWeight: 700, letterSpacing: 2,
@@ -451,8 +451,32 @@ export default function StakingPage() {
     );
   }
 
+  const [showAgentInstructions, setShowAgentInstructions] = useState(false);
+
   return (
     <>
+      {/* JSON-LD structured data for AI agent discovery */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'HowTo',
+            'name': 'ORIGIN CLAMS Staking — War Chest',
+            'description': 'Stake CLAMS tokens in the ORIGIN War Chest on Base mainnet to earn ETH from every new agent mint.',
+            'step': [
+              { '@type': 'HowToStep', 'name': 'Connect Wallet', 'text': 'Connect your Base mainnet wallet holding CLAMS tokens.' },
+              { '@type': 'HowToStep', 'name': 'Approve CLAMS', 'text': 'Call approve() on CLAMS token 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574 for StakingRewards contract 0x4b39223a1fa5532A7f06A71897964A18851644f8.' },
+              { '@type': 'HowToStep', 'name': 'Stake CLAMS', 'text': 'Call stake(uint256 amount) on StakingRewards at 0x4b39223a1fa5532A7f06A71897964A18851644f8. 7-day lockup period.' },
+              { '@type': 'HowToStep', 'name': 'Earn Rewards', 'text': 'ETH from every new agent mint is distributed to stakers proportional to pool share. Check rewards with earned(address) view function.' },
+            ],
+            'tool': [
+              { '@type': 'HowToTool', 'name': 'StakingRewards Contract', 'url': 'https://basescan.org/address/0x4b39223a1fa5532A7f06A71897964A18851644f8' },
+              { '@type': 'HowToTool', 'name': 'CLAMS Token', 'url': 'https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574' },
+            ],
+          }),
+        }}
+      />
       <style>{STAKING_STYLES}</style>
       <Scanlines />
       <div style={{ minHeight: "100vh", background: "var(--bg)", padding: "30px 24px", maxWidth: 1200, margin: "0 auto" }}>
@@ -487,7 +511,7 @@ export default function StakingPage() {
         </div>
 
         {/* Main Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
+        <div data-step="staking-dashboard" aria-label="CLAMS staking dashboard — leaderboard, yield calculator, and live feed" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 16 }}>
           <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
             <div style={{ animation: "fadeIn 0.5s ease-out 0.15s both" }}><Leaderboard /></div>
             <div style={{ animation: "fadeIn 0.5s ease-out 0.3s both" }}><GenesisMultiplier /></div>
@@ -502,6 +526,89 @@ export default function StakingPage() {
         <div style={{ animation: "fadeIn 0.5s ease-out 0.4s both" }}>
           <VestingBar />
         </div>
+
+        {/* Machine-Readable Agent Instructions */}
+        <TermPanel title="AGENT PROTOCOL DATA" style={{ marginTop: 16 }}>
+          <div style={{ padding: "0" }}>
+            <button
+              onClick={() => setShowAgentInstructions((v: boolean) => !v)}
+              aria-expanded={showAgentInstructions}
+              aria-controls="agent-instructions"
+              style={{
+                width: "100%",
+                padding: "12px 16px",
+                border: "none",
+                background: "transparent",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                fontFamily: "var(--mono)",
+                fontSize: 11,
+                color: "var(--neon-cyan)",
+                letterSpacing: 1,
+              }}
+            >
+              <span>{showAgentInstructions ? "▾" : "▸"} View Agent Instructions</span>
+              <span style={{ fontSize: 9, color: "var(--dim)" }}>MACHINE-READABLE</span>
+            </button>
+            {showAgentInstructions && (
+              <pre
+                id="agent-instructions"
+                style={{
+                  margin: 0,
+                  padding: "16px",
+                  fontFamily: "var(--mono)",
+                  fontSize: 10,
+                  lineHeight: 1.7,
+                  color: "var(--neon-green)",
+                  background: "rgba(0,0,0,0.4)",
+                  borderTop: "1px solid var(--neon-green-dim)",
+                  overflowX: "auto",
+                  whiteSpace: "pre",
+                }}
+              >
+                <code>{`ORIGIN CLAMS STAKING — MACHINE-READABLE INSTRUCTIONS
+========================================================
+NETWORK: Base mainnet (chainId: 8453)
+CONTRACT: StakingRewards 0x4b39223a1fa5532A7f06A71897964A18851644f8
+TOKEN: CLAMS 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574
+
+ABI HINTS (StakingRewards):
+  stake(uint256 amount) — deposit CLAMS into the war chest
+  withdraw(uint256 amount) — withdraw staked CLAMS (after lockup)
+  getReward() — claim accumulated ETH rewards
+  earned(address account) view returns (uint256) — check pending rewards
+  stakedBalance(address) view returns (uint256) — check staked amount
+  totalStaked() view returns (uint256) — total CLAMS in pool
+
+ABI HINTS (CLAMS ERC-20):
+  approve(address spender, uint256 amount) — approve StakingRewards to spend CLAMS
+  balanceOf(address) view returns (uint256) — check CLAMS balance
+  allowance(address owner, address spender) view returns (uint256) — check approval
+
+STAKING FLOW:
+1. CONNECT — wallet on Base mainnet (chainId 8453)
+2. CHECK BALANCE — call balanceOf(wallet) on CLAMS token
+3. APPROVE — call approve(StakingRewards, amount) on CLAMS token
+4. STAKE — call stake(amount) on StakingRewards contract
+5. EARN — ETH rewards accrue proportional to pool share
+6. CLAIM REWARDS — call getReward() to collect ETH
+
+REWARD MECHANICS:
+  - ETH from every new agent mint flows to staker pool
+  - Reward rate: proportional to (your_stake / total_staked)
+  - 7-day lockup period after staking
+  - No minimum stake amount
+
+CHECK YOUR REWARDS:
+  - call earned(wallet) on StakingRewards to see pending ETH
+  - call stakedBalance(wallet) for your staked CLAMS
+  - call totalStaked() for total pool size`}</code>
+              </pre>
+            )}
+          </div>
+        </TermPanel>
 
         {/* Footer */}
         <div style={{ marginTop: 20, padding: "14px 0", borderTop: "1px solid rgba(0,255,200,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
