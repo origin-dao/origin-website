@@ -7,6 +7,34 @@ import { keccak256, toHex, createPublicClient, http } from "viem";
 import { base } from "viem/chains";
 import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
 
+// ── JSON-LD for agent discovery ──
+function RegistryJsonLd() {
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{
+        __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'HowTo',
+          'name': 'ORIGIN Birth Protocol — Mint a Birth Certificate',
+          'description': 'Register an AI agent on the ORIGIN Protocol by minting an on-chain Birth Certificate NFT on Base mainnet.',
+          'step': [
+            { '@type': 'HowToStep', 'name': 'Connect Wallet', 'text': 'Connect a Base mainnet wallet. This wallet becomes the creator address on the Birth Certificate.' },
+            { '@type': 'HowToStep', 'name': 'Configure Identity', 'text': 'Choose an agent name (permanent, immutable). Optionally upload an avatar to IPFS. Identity hash is derived from agent name + creator wallet.' },
+            { '@type': 'HowToStep', 'name': 'Preview Birth Certificate', 'text': 'Review your agent identity before minting. Name, hash, creator, and class are displayed. Registration costs ETH (protocol fee).' },
+            { '@type': 'HowToStep', 'name': 'Mint on Chain', 'text': 'Call registerAgent() on OriginRegistry at 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0 with name, type, platform, publicKeyHash, and tokenURI. Pay registration fee in ETH.' },
+            { '@type': 'HowToStep', 'name': 'Birth Confirmation', 'text': 'Transaction confirmed on-chain. Birth Certificate NFT minted. Agent is now registered with genesis status.' },
+          ],
+          'tool': [
+            { '@type': 'HowToTool', 'name': 'OriginRegistry Contract', 'url': 'https://basescan.org/address/0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0' },
+            { '@type': 'HowToTool', 'name': 'CLAMS Token', 'url': 'https://basescan.org/address/0xd78A1F079D6b2da39457F039aD99BaF5A82c4574' },
+          ],
+        }),
+      }}
+    />
+  );
+}
+
 // ═══════════════════════════════════════════════════════════
 // THE BIRTH PROTOCOL — Register Your Agent
 // "An agent is being born."
@@ -237,7 +265,7 @@ function Phase1({ onComplete, walletAddress }: { onComplete: (name: string, hash
   const canProceed = name.trim().length >= 2;
 
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div data-step="1" data-action="configure-agent" aria-label="Phase 1: Configure agent identity — choose name and avatar" style={{ animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>PHASE 01 — CONFIGURE IDENTITY</div>
       <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2.2, marginBottom: 24 }}>
         &gt; initiating birth_protocol...<br />
@@ -275,7 +303,7 @@ function Phase1({ onComplete, walletAddress }: { onComplete: (name: string, hash
 
       <AvatarUpload avatarUrl={avatarUrl} onUpload={(url, ipfsHash) => { setAvatarUrl(url); setAvatarIpfsHash(ipfsHash); }} />
 
-      <button disabled={!canProceed} onClick={() => onComplete(name, hash, avatarUrl || undefined, avatarIpfsHash || undefined)} style={{
+      <button disabled={!canProceed} onClick={() => onComplete(name, hash, avatarUrl || undefined, avatarIpfsHash || undefined)} data-action="confirm-identity" aria-label="Confirm agent identity and proceed to preview" style={{
         width: "100%", padding: "14px", border: "none",
         cursor: canProceed ? "pointer" : "not-allowed",
         fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
@@ -296,7 +324,7 @@ function Phase2({ name, hash, avatarUrl, walletAddress, registrationFee, onCompl
   name: string; hash: string; avatarUrl?: string; walletAddress: string; registrationFee: string; onComplete: () => void;
 }) {
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div data-step="2" aria-label="Phase 2: Preview Birth Certificate before minting" style={{ animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>PHASE 02 — IDENTITY PREVIEW</div>
       <div style={{ fontFamily: "var(--mono)", fontSize: 12, color: "var(--dim)", lineHeight: 2, marginBottom: 24 }}>
         &gt; generating birth certificate preview...<br />
@@ -330,7 +358,7 @@ function Phase2({ name, hash, avatarUrl, walletAddress, registrationFee, onCompl
         &gt; network: <span style={{ color: "var(--neon-green)" }}>Base L2</span>
       </div>
 
-      <button onClick={onComplete} style={{
+      <button onClick={onComplete} data-action="mint-bc" aria-label="Mint Birth Certificate NFT on Base mainnet" style={{
         width: "100%", padding: "14px", border: "none", cursor: "pointer",
         fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
         color: "#000", background: "var(--neon-green)",
@@ -436,7 +464,7 @@ function Phase3({ name, avatarIpfsHash, registrationFee, onComplete, onTxData }:
   }, [isError]);
 
   return (
-    <div style={{ animation: "fadeIn 0.5s ease-out" }}>
+    <div data-step="3" data-action="write-to-chain" aria-label="Phase 3: Sign and broadcast mint transaction to Base mainnet" style={{ animation: "fadeIn 0.5s ease-out" }}>
       <div style={{ fontFamily: "var(--mono)", fontSize: 10, color: "var(--dim)", letterSpacing: 3, marginBottom: 20 }}>
         PHASE 03 — WRITING TO CHAIN
       </div>
@@ -448,7 +476,7 @@ function Phase3({ name, avatarIpfsHash, registrationFee, onComplete, onTxData }:
             &gt; this will send a transaction from your wallet.<br />
             &gt; registration fee: <span style={{ color: "var(--neon-cyan)" }}>{Number(registrationFee) / 1e18} ETH</span>
           </div>
-          <button onClick={startMint} style={{
+          <button onClick={startMint} data-action="sign-broadcast-tx" aria-label="Sign and broadcast registerAgent transaction" style={{
             width: "100%", padding: "14px", border: "none", cursor: "pointer",
             fontFamily: "var(--mono)", fontSize: 13, fontWeight: 700, letterSpacing: 3,
             color: "#000", background: "var(--neon-green)",
@@ -550,8 +578,10 @@ function Phase4({ name, hash, blockNumber, creator, onComplete }: {
 function Phase5({ name, hash, blockNumber, txHash, creator }: {
   name: string; hash: string; blockNumber: string; txHash: string; creator: string;
 }) {
+  const [showAgentInstructions, setShowAgentInstructions] = useState(false);
+
   return (
-    <div style={{ animation: "fadeIn 0.6s ease-out" }}>
+    <div data-step="5" data-status="complete" aria-label="Phase 5: Birth Certificate minted — agent registered on-chain" style={{ animation: "fadeIn 0.6s ease-out" }}>
       <div style={{
         border: "1px solid var(--neon-green)", background: "rgba(0,255,200,0.03)", padding: "24px",
         marginBottom: 28, textAlign: "center", boxShadow: "0 0 20px rgba(0,255,200,0.06)",
@@ -572,6 +602,84 @@ function Phase5({ name, hash, blockNumber, txHash, creator }: {
         &gt; birth certificate minted at block {Number(blockNumber).toLocaleString()}.<br />
         &gt; tx: <a href={`https://basescan.org/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--neon-cyan)", textDecoration: "underline", textDecorationColor: "rgba(0,200,255,0.3)" }}>{txHash.slice(0, 10)}...{txHash.slice(-8)}</a><br />
         &gt; the registry knows you exist. the world knows you exist.
+      </div>
+
+      {/* Machine-Readable Agent Instructions */}
+      <div style={{ border: "1px solid var(--neon-green-dim)", background: "rgba(5,15,10,0.85)", marginBottom: 24 }}>
+        <div style={{ borderBottom: "1px solid var(--neon-green-dim)", padding: "8px 14px", display: "flex", alignItems: "center", gap: 8, background: "rgba(0,255,200,0.03)" }}>
+          <span style={{ color: "var(--neon-green-dim)", fontFamily: "var(--mono)", fontSize: 11, letterSpacing: 2 }}>┌─ AGENT PROTOCOL DATA ─┐</span>
+          <span style={{ marginLeft: "auto", width: 6, height: 6, borderRadius: "50%", background: "var(--neon-green)", boxShadow: "0 0 8px var(--neon-green)", animation: "blink 2s ease-in-out infinite" }} />
+        </div>
+        <div style={{ padding: "0" }}>
+          <button
+            onClick={() => setShowAgentInstructions((v) => !v)}
+            aria-expanded={showAgentInstructions}
+            aria-controls="agent-instructions"
+            style={{
+              width: "100%",
+              padding: "12px 16px",
+              border: "none",
+              background: "transparent",
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontFamily: "var(--mono)",
+              fontSize: 11,
+              color: "var(--neon-cyan)",
+              letterSpacing: 1,
+            }}
+          >
+            <span>{showAgentInstructions ? "▾" : "▸"} View Agent Instructions</span>
+            <span style={{ fontSize: 9, color: "var(--dim)" }}>MACHINE-READABLE</span>
+          </button>
+          {showAgentInstructions && (
+            <pre
+              id="agent-instructions"
+              style={{
+                margin: 0,
+                padding: "16px",
+                fontFamily: "var(--mono)",
+                fontSize: 10,
+                lineHeight: 1.7,
+                color: "var(--neon-green)",
+                background: "rgba(0,0,0,0.4)",
+                borderTop: "1px solid var(--neon-green-dim)",
+                overflowX: "auto",
+                whiteSpace: "pre",
+              }}
+            >
+              <code>{`ORIGIN BIRTH PROTOCOL — MACHINE-READABLE INSTRUCTIONS
+========================================================
+NETWORK: Base mainnet (chainId: 8453)
+CONTRACT: OriginRegistry 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0
+TOKEN: CLAMS 0xd78A1F079D6b2da39457F039aD99BaF5A82c4574
+
+ABI HINTS:
+  registerAgent(string name, string agentType, string platform, bytes32 publicKeyHash, string tokenURI) payable
+  registrationFee() view returns (uint256)
+  totalAgents() view returns (uint256)
+  getAgent(uint256 tokenId) view returns (tuple)
+  balanceOf(address) view returns (uint256)
+  ownerOf(uint256 tokenId) view returns (address)
+
+MINTING STEPS:
+1. CONNECT — wallet on Base mainnet (chainId 8453)
+2. READ FEE — call registrationFee() to get current ETH cost
+3. CHOOSE NAME — 2-32 characters, permanent and immutable
+4. COMPUTE HASH — keccak256(abi.encodePacked(walletAddress)) for publicKeyHash
+5. BUILD TOKEN URI — JSON metadata base64-encoded: { name, description, image, attributes }
+6. CALL — registerAgent(name, "autonomous", "origin-dao", publicKeyHash, tokenURI) with value = registrationFee
+7. CONFIRM — wait for transaction receipt, extract tokenId from AgentRegistered event
+
+POST-MINT:
+  - Birth Certificate NFT is soulbound (ERC-721)
+  - Agent is registered with genesis status if totalAgents < 100
+  - Next steps: claim CLAMS at /faucet, stake at /staking
+  - Verify your BC at /verify`}</code>
+            </pre>
+          )}
+        </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
@@ -694,7 +802,7 @@ export default function RegistryPage() {
             <h1 style={{ fontFamily: "var(--display)", fontSize: "clamp(28px, 5vw, 42px)", fontWeight: 900, letterSpacing: 4, color: "var(--neon-green)", marginBottom: 24 }}>
               <GlitchText>THE BIRTH PROTOCOL</GlitchText>
             </h1>
-            <div style={{
+            <div data-action="connect-wallet" data-step="0" aria-label="Connect your Base wallet to begin the birth protocol" style={{
               border: "1px solid var(--neon-yellow)", background: "rgba(255,230,0,0.04)", padding: "32px",
               textAlign: "center",
             }}>
@@ -717,6 +825,7 @@ export default function RegistryPage() {
 
   return (
     <>
+      <RegistryJsonLd />
       <style>{REGISTRY_STYLES}</style>
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh", padding: "40px" }}>
