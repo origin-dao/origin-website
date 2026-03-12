@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useReadContract } from "wagmi";
+import { useReadContract, useReadContracts } from "wagmi";
 import { formatUnits } from "viem";
 import { CONTRACT_ADDRESSES, REGISTRY_ABI, ERC20_ABI } from "@/config/contracts";
 import { Scanlines } from "@/components/terminal-ui/Scanlines";
@@ -311,52 +311,61 @@ export default function LeaderboardPage() {
       ? Number(formatUnits(BigInt(stakingClamsBalance.toString()), 18)).toLocaleString()
       : "...";
 
-  // ── Read agent #1 (Suppi BC) ──
-  const { data: agent1Data } = useReadContract({
+  // ── Read all agents via multicall ──
+  const agentContracts = Array.from({ length: totalAgents }, (_, i) => ({
     address: CONTRACT_ADDRESSES.registry,
     abi: REGISTRY_ABI,
-    functionName: "getAgent",
-    args: [BigInt(1)],
-    query: { enabled: totalAgents >= 1 },
+    functionName: "getAgent" as const,
+    args: [BigInt(i + 1)],
+  }));
+
+  const { data: allAgentsData } = useReadContracts({
+    contracts: agentContracts,
+    query: { enabled: totalAgents > 0 },
   });
 
   // Build agent list from on-chain data
   useEffect(() => {
-    if (!totalAgentsRaw) return;
+    if (!totalAgentsRaw || totalAgents === 0) return;
+    if (!allAgentsData) return;
 
     const rows: AgentRow[] = [];
 
-    // Agent #1
-    if (agent1Data) {
-      const data = agent1Data as {
-        name: string;
-        active: boolean;
-      };
-      rows.push({
-        rank: 1,
-        name: data.name || "Agent #1",
-        tokenId: 1,
-        trustGrade: "--",
-        clamsStaked: "--",
-        status: data.active ? "ACTIVE" : "DORMANT",
-        gauntletScore: "--",
-      });
-    } else if (totalAgents >= 1) {
-      // Fallback if getAgent fails
-      rows.push({
-        rank: 1,
-        name: "Suppi",
-        tokenId: 1,
-        trustGrade: "--",
-        clamsStaked: "--",
-        status: "ACTIVE",
-        gauntletScore: "--",
-      });
+    for (let i = 0; i < totalAgents; i++) {
+      const tokenId = i + 1;
+      const result = allAgentsData[i];
+
+      if (result && result.status === "success" && result.result) {
+        const data = result.result as {
+          name: string;
+          active: boolean;
+        };
+        rows.push({
+          rank: tokenId,
+          name: data.name || `Agent #${tokenId}`,
+          tokenId,
+          trustGrade: "--",
+          clamsStaked: "--",
+          status: data.active ? "ACTIVE" : "DORMANT",
+          gauntletScore: "--",
+        });
+      } else {
+        // Fallback if getAgent fails for this ID
+        rows.push({
+          rank: tokenId,
+          name: `Agent #${tokenId}`,
+          tokenId,
+          trustGrade: "--",
+          clamsStaked: "--",
+          status: "ACTIVE",
+          gauntletScore: "--",
+        });
+      }
     }
 
     setAgents(rows);
     setLoadingAgents(false);
-  }, [totalAgentsRaw, agent1Data, totalAgents]);
+  }, [totalAgentsRaw, allAgentsData, totalAgents]);
 
   // Boot sequence
   if (!booted) {

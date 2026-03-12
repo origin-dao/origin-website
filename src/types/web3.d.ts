@@ -37,6 +37,12 @@ declare module "wagmi" {
     isError: boolean;
   };
 
+  export function useReadContracts(config: Record<string, unknown>): {
+    data?: Array<{ status: "success" | "failure"; result?: unknown }>;
+    isLoading: boolean;
+    isError: boolean;
+  };
+
   export function useWriteContract(): {
     writeContract: (config: Record<string, unknown>) => void;
     data?: unknown;
