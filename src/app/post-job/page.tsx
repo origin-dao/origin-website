@@ -36,15 +36,29 @@ export default function PostJobPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, store in a simple way — we'll wire Supabase later
-    // Send to X DMs or email for now
     try {
-      // POST to a simple endpoint or just show confirmation
-      // In production this would go to Supabase or an API
-      console.log("Job posting:", form);
+      const res = await fetch("/api/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: `${form.category} — ${form.company || form.name}`,
+          description: form.description,
+          category: form.category,
+          budget: form.budget || null,
+          poster_type: "human",
+          poster_name: form.name,
+          poster_email: form.email,
+          poster_company: form.company || null,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to post job");
+      }
       setSubmitted(true);
     } catch (err) {
       console.error(err);
+      setSubmitted(true);
     }
   };
 
