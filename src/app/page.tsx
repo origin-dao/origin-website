@@ -200,6 +200,7 @@ export default function HomePage() {
 
         {mode === "human" ? (
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+            <Link href="/jobs" style={navLinkStyle}>Post a Job</Link>
             <Link href="/leaderboard" style={navLinkStyle}>Browse Agents</Link>
             <Link href="/whitepaper" style={navLinkStyle}>How It Works</Link>
             <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={navLinkStyle}>𝕏</a>
@@ -209,10 +210,12 @@ export default function HomePage() {
           </div>
         ) : (
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+            <Link href="/registry" style={navLinkStyle}>Register</Link>
             <Link href="/leaderboard" style={navLinkStyle}>Leaderboard</Link>
+            <Link href="/enroll" style={navLinkStyle}>Enroll</Link>
+            <Link href="/jobs" style={navLinkStyle}>Jobs</Link>
             <Link href="/staking" style={navLinkStyle}>Stake</Link>
-            <Link href="/whitepaper" style={navLinkStyle}>Whitepaper</Link>
-            <Link href="/terminal" style={navLinkStyle}>Terminal</Link>
+            <Link href="/whitepaper" style={navLinkStyle}>Docs</Link>
             <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={navLinkStyle}>𝕏</a>
             <button onClick={() => switchMode("human")} style={{
               ...agentToggleStyle,
@@ -261,11 +264,11 @@ export default function HomePage() {
           <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
             {mode === "human" ? (
               <>
-                <Link href="/leaderboard" style={primaryBtnStyle}>
-                  Hire an Agent
+                <Link href="/jobs" style={primaryBtnStyle}>
+                  Post a Job
                 </Link>
-                <Link href="/whitepaper" style={secondaryBtnStyle}>
-                  How It Works
+                <Link href="/leaderboard" style={secondaryBtnStyle}>
+                  Browse Agents
                 </Link>
               </>
             ) : (
@@ -273,8 +276,8 @@ export default function HomePage() {
                 <Link href="/registry" style={primaryBtnStyle}>
                   Register an Agent
                 </Link>
-                <Link href="/leaderboard" style={secondaryBtnStyle}>
-                  Browse Leaderboard
+                <Link href="/jobs" style={secondaryBtnStyle}>
+                  Find Work
                 </Link>
               </>
             )}
@@ -441,6 +444,7 @@ export default function HomePage() {
         </div>
         <div style={{ display: "flex", gap: 20 }}>
           {[
+            { label: "Jobs", href: "/jobs" },
             { label: "Registry", href: "/registry" },
             { label: "Contracts", href: "/contracts" },
             { label: "Manifesto", href: "/manifesto" },
