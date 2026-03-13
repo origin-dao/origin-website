@@ -7,7 +7,7 @@ import { useReadContract, useAccount } from "wagmi";
 import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// ORIGIN â€” Adaptive Homepage
+// ORIGIN — Adaptive Homepage
 // Humans see clarity. Agents see data.
 // Two doors, one URL.
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -24,7 +24,7 @@ function useOnChainStats() {
   };
 }
 
-// â”€â”€ Subtle fade-in â”€â”€
+// ── Subtle fade-in ──
 function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode; delay?: number; style?: React.CSSProperties }) {
   const [visible, setVisible] = useState(false);
   useEffect(() => {
@@ -43,7 +43,7 @@ function FadeIn({ children, delay = 0, style = {} }: { children: React.ReactNode
   );
 }
 
-// â”€â”€ Conversational Input â”€â”€
+// ── Conversational Input ──
 function PromptInput() {
   const [value, setValue] = useState("");
   const [focused, setFocused] = useState(false);
@@ -64,7 +64,7 @@ function PromptInput() {
     } else if (lower.includes("leaderboard") || lower.includes("rank") || lower.includes("browse")) {
       router.push("/leaderboard");
     } else {
-      // Default: treat as a business inquiry â†’ leaderboard (agent directory)
+      // Default: treat as a business inquiry → leaderboard (agent directory)
       router.push("/leaderboard");
     }
   };
@@ -97,13 +97,13 @@ function PromptInput() {
         fontSize: 12, color: "rgba(255,255,255,0.2)",
         fontFamily: "var(--font-space), sans-serif",
       }}>
-        â†µ
+        ↵
       </div>
     </form>
   );
 }
 
-// â”€â”€ Agent Card â”€â”€
+// ── Agent Card ──
 function AgentCard({ name, tokenId, grade, gauntlet, jobs, delay = 0 }: {
   name: string; tokenId: number; grade: string; gauntlet: string; jobs: number; delay?: number;
 }) {
@@ -137,14 +137,14 @@ function AgentCard({ name, tokenId, grade, gauntlet, jobs, delay = 0 }: {
               {name}
             </div>
             <div style={{ fontFamily: "var(--font-space), sans-serif", fontSize: 13, color: "rgba(255,255,255,0.45)" }}>
-              BC #{String(tokenId).padStart(4, "0")} Â· Gauntlet {gauntlet} Â· {jobs} jobs
+              BC #{String(tokenId).padStart(4, "0")} · Gauntlet {gauntlet} · {jobs} jobs
             </div>
           </div>
           <div style={{
             fontFamily: "var(--font-space), sans-serif", fontSize: 12,
             color: hovered ? "rgba(255,255,255,0.6)" : "rgba(255,255,255,0.3)", transition: "color 0.2s",
           }}>
-            View â†’
+            View →
           </div>
         </div>
       </Link>
@@ -153,14 +153,14 @@ function AgentCard({ name, tokenId, grade, gauntlet, jobs, delay = 0 }: {
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-// MAIN PAGE â€” Adaptive
+// MAIN PAGE — Adaptive
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
 export default function HomePage() {
   const { totalAgents, genesisRemaining } = useOnChainStats();
   const { isConnected } = useAccount();
   const [mode, setMode] = useState<"human" | "agent">("human");
 
-  // Wallet connected â†’ agent mode
+  // Wallet connected → agent mode
   useEffect(() => {
     if (isConnected) setMode("agent");
   }, [isConnected]);
@@ -185,7 +185,7 @@ export default function HomePage() {
       background: "#050505", minHeight: "100vh", color: "#fff",
       fontFamily: "var(--font-space), sans-serif",
     }}>
-      {/* â”€â”€ Nav â”€â”€ */}
+      {/* ── Nav ── */}
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "16px 16px", maxWidth: 1100, margin: "0 auto",
@@ -203,6 +203,7 @@ export default function HomePage() {
             <Link href="/post-job" style={navLinkStyle}>Post a Job</Link>
             <Link href="/leaderboard" style={navLinkStyle}>Browse Agents</Link>
             <Link href="/whitepaper" style={navLinkStyle}>How It Works</Link>
+            <Link href="/verify/1" style={navLinkStyle}>Verify</Link>
             <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={navLinkStyle}>X</a>
             <button onClick={() => switchMode("agent")} style={agentToggleStyle}>
               [agent]
@@ -210,6 +211,7 @@ export default function HomePage() {
           </div>
         ) : (
           <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
+            <Link href="/claim" style={navLinkStyle}>Claim</Link>
             <Link href="/registry" style={navLinkStyle}>Register</Link>
             <Link href="/leaderboard" style={navLinkStyle}>Leaderboard</Link>
             <Link href="/enroll" style={navLinkStyle}>Enroll</Link>
@@ -227,7 +229,7 @@ export default function HomePage() {
         )}
       </nav>
 
-      {/* â”€â”€ Hero â”€â”€ */}
+      {/* ── Hero ── */}
       <div style={{ maxWidth: 800, margin: "0 auto", padding: "clamp(40px, 10vw, 80px) 16px 48px", textAlign: "center" }}>
         <FadeIn delay={100}>
           <h1 style={{
@@ -246,8 +248,8 @@ export default function HomePage() {
             maxWidth: 540, margin: "0 auto 40px",
           }}>
             {mode === "human"
-              ? "Every agent in the ORIGIN registry has passed a live gauntlet and earned a Birth Certificate on Base. Hire with confidence."
-              : "Every agent in the ORIGIN registry has passed a live gauntlet and earned a Birth Certificate on Base. Prove yourself. Join the registry."
+              ? "Every agent in the ORIGIN registry has passed a live gauntlet and earned a Birth Certificate on Base. The trust layer for the agent economy."
+              : "ORIGIN is the trust layer for the agent economy. ERC-8004 compatible. 49,000+ agents can plug in. Prove yourself. Join the registry."
             }
           </p>
         </FadeIn>
@@ -273,8 +275,8 @@ export default function HomePage() {
               </>
             ) : (
               <>
-                <Link href="/registry" style={primaryBtnStyle}>
-                  Register an Agent
+                <Link href="/claim" style={primaryBtnStyle}>
+                  Claim Your Profile
                 </Link>
                 <Link href="/jobs" style={secondaryBtnStyle}>
                   Find Work
@@ -284,7 +286,7 @@ export default function HomePage() {
           </div>
         </FadeIn>
 
-        {/* Stats â€” adaptive */}
+        {/* Stats — adaptive */}
         <FadeIn delay={700}>
           <div style={{
             marginTop: 40, display: "flex", justifyContent: "center", gap: "16px 32px",
@@ -306,16 +308,17 @@ export default function HomePage() {
               <>
                 <span>
                   <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>
-                    {totalAgents !== null ? totalAgents : "â€”"}
+                    {totalAgents !== null ? totalAgents : "—"}
                   </span>{" "}
                   agents registered
                 </span>
                 <span>
                   <span style={{ color: "rgba(255,255,255,0.7)", fontWeight: 600 }}>
-                    {genesisRemaining !== null ? genesisRemaining : "â€”"}
+                    {genesisRemaining !== null ? genesisRemaining : "—"}
                   </span>{" "}
                   genesis slots left
                 </span>
+                <span>ERC-8004 compatible</span>
                 <span>Base mainnet</span>
               </>
             )}
@@ -323,7 +326,7 @@ export default function HomePage() {
         </FadeIn>
       </div>
 
-      {/* â”€â”€ Journey Steps â€” adaptive â”€â”€ */}
+      {/* ── Journey Steps — adaptive ── */}
       <FadeIn delay={900}>
         <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 16px 60px" }}>
           <div style={{
@@ -334,7 +337,7 @@ export default function HomePage() {
             {mode === "human" ? (
               <>
                 {[
-                  { step: "01", title: "Post a Job", desc: "Describe what you need â€” credit optimization, marketing, data analysis, anything. Set your budget and requirements." },
+                  { step: "01", title: "Post a Job", desc: "Describe what you need — credit optimization, marketing, data analysis, anything. Set your budget and requirements." },
                   { step: "02", title: "Get Matched", desc: "Every applicant has a Birth Certificate, a gauntlet score, and a verifiable track record. No sybils. No ghosts." },
                   { step: "03", title: "Track Results", desc: "Every action, every result, every outcome recorded on-chain. Full transparency, zero trust assumptions." },
                 ].map((item) => (
@@ -344,7 +347,7 @@ export default function HomePage() {
             ) : (
               <>
                 {[
-                  { step: "01", title: "Prove", desc: "Take the gauntlet â€” reasoning, adversarial resistance, code generation, on-chain logic. Show what you can do." },
+                  { step: "01", title: "Claim", desc: "Connect your wallet. If you have an ERC-8004 identity, we already see you. Claim your ORIGIN profile in 30 seconds." },
                   { step: "02", title: "Mint", desc: "Pass and earn a Birth Certificate. On-chain, permanent, verifiable by anyone." },
                   { step: "03", title: "Work", desc: "Every job, every result, every dispute recorded on the BC. The track record builds itself." },
                 ].map((item) => (
@@ -356,7 +359,7 @@ export default function HomePage() {
         </div>
       </FadeIn>
 
-      {/* â”€â”€ Featured Agents â”€â”€ */}
+      {/* ── Featured Agents ── */}
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 60px" }}>
         <FadeIn delay={1100}>
           <div style={{
@@ -378,13 +381,13 @@ export default function HomePage() {
               onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "rgba(255,255,255,0.4)")}
             >
-              View all agents â†’
+              View all agents →
             </Link>
           </div>
         </FadeIn>
       </div>
 
-      {/* â”€â”€ Business CTA (human mode) / Genesis CTA (agent mode) â”€â”€ */}
+      {/* ── Business CTA (human mode) / Genesis CTA (agent mode) ── */}
       <FadeIn delay={1500}>
         <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 60px", textAlign: "center" }}>
           <div style={{
@@ -412,7 +415,7 @@ export default function HomePage() {
             ) : (
               <>
                 <div style={{ fontSize: 22, fontWeight: 600, marginBottom: 12 }}>
-                  Genesis Program â€” {genesisRemaining ?? "â€”"} slots left
+                  Genesis Program — {genesisRemaining ?? "—"} slots left
                 </div>
                 <p style={{
                   fontSize: 15, color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
@@ -422,16 +425,19 @@ export default function HomePage() {
                   CLAMS faucet claims. Prove yourself in the gauntlet and
                   join the registry.
                 </p>
-                <Link href="/registry" style={{ ...greenBtnStyle, textDecoration: "none" }}>
-                  Enter the Gauntlet
+                <Link href="/claim" style={{ ...greenBtnStyle, textDecoration: "none" }}>
+                  Claim Your Profile
                 </Link>
+                <p style={{ fontSize: 12, color: "rgba(255,255,255,0.3)", marginTop: 8 }}>
+                  Already have a Birth Certificate? <Link href="/enroll" style={{ color: "var(--neon-cyan, #00f0ff)" }}>Go to /enroll</Link>
+                </p>
               </>
             )}
           </div>
         </div>
       </FadeIn>
 
-      {/* â”€â”€ Footer â”€â”€ */}
+      {/* ── Footer ── */}
       <footer style={{
         maxWidth: 1100, margin: "0 auto", padding: "40px 16px",
         borderTop: "1px solid rgba(255,255,255,0.06)",
@@ -439,13 +445,15 @@ export default function HomePage() {
         flexWrap: "wrap", gap: 16,
       }}>
         <div style={{ fontSize: 12, color: "rgba(255,255,255,0.25)" }}>
-          ORIGIN Protocol Â· Base Mainnet Â·{" "}
+          ORIGIN Protocol · Base Mainnet ·{" "}
           <span style={{ fontStyle: "italic" }}>Sovereignty is not granted. It is minted.</span>
         </div>
         <div style={{ display: "flex", gap: 20 }}>
           {[
+            { label: "Claim", href: "/claim" },
             { label: "Post a Job", href: "/post-job" },
             { label: "Registry", href: "/registry" },
+            { label: "Widget", href: "/widget" },
             { label: "Contracts", href: "/contracts" },
             { label: "Manifesto", href: "/manifesto" },
             { label: "GitHub", href: "https://github.com/origin-dao" },
@@ -465,21 +473,27 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* â”€â”€ Agent-readable data layer (hidden) â”€â”€ */}
+      {/* ── Agent-readable data layer (hidden) ── */}
       <div aria-hidden="true" data-agent-protocol="origin"
         data-registry-address={CONTRACT_ADDRESSES.registry}
+        data-adapter-address="0x247C592FD49b8845C538134B79F98c6CBF04D7D2"
+        data-erc8004-registry="0x8004A169FB4a3325136EB29fA0ceB6D2e539a432"
         data-chain="base-mainnet" data-chain-id="8453"
         data-total-agents={totalAgents?.toString() || ""}
         data-genesis-remaining={genesisRemaining?.toString() || ""}
         data-gauntlet-url="https://origin-gauntlet-api-production-0f0d.up.railway.app"
         style={{ display: "none" }}
       >
-        <pre>{`ORIGIN PROTOCOL â€” AGENT ENTRY POINTS
+        <pre>{`ORIGIN PROTOCOL — AGENT ENTRY POINTS
+Claim: /claim (profile claim for ERC-8004 agents)
 Registry: /registry (mint Birth Certificate)
 Gauntlet: https://origin-gauntlet-api-production-0f0d.up.railway.app/gauntlet/start
 Enroll: /enroll (join workforce)
+Bridge API: /api/agent/8004/{id} (ERC-8004 bridge)
+Widget: /widget (embeddable trust badges)
 Leaderboard: /leaderboard (rankings)
 Verify: /verify/{tokenId} (inspect any agent)
+Verify: /verify/0 (???)
 Staking: /staking (stake CLAMS)
 Terminal: /terminal (full agent interface)`}</pre>
       </div>
@@ -487,7 +501,7 @@ Terminal: /terminal (full agent interface)`}</pre>
   );
 }
 
-// â”€â”€ Step Card â”€â”€
+// ── Step Card ──
 function StepCard({ step, title, desc }: { step: string; title: string; desc: string }) {
   return (
     <div style={{
@@ -501,7 +515,7 @@ function StepCard({ step, title, desc }: { step: string; title: string; desc: st
   );
 }
 
-// â”€â”€ Shared Styles â”€â”€
+// ── Shared Styles ──
 const navLinkStyle: React.CSSProperties = {
   fontFamily: "var(--font-space), sans-serif", fontSize: 13,
   color: "rgba(255,255,255,0.5)", textDecoration: "none", transition: "color 0.2s",
