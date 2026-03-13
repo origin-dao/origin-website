@@ -70,7 +70,7 @@ function PromptInput() {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ maxWidth: 480, margin: "0 auto", position: "relative" }}>
+    <form onSubmit={handleSubmit} style={{ maxWidth: 480, margin: "0 auto", position: "relative", padding: "0 4px" }}>
       <input
         type="text"
         value={value}
@@ -188,7 +188,8 @@ export default function HomePage() {
       {/* ── Nav ── */}
       <nav style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "20px 32px", maxWidth: 1100, margin: "0 auto",
+        padding: "16px 16px", maxWidth: 1100, margin: "0 auto",
+        flexWrap: "wrap", gap: 12,
       }}>
         <Link href="/" style={{
           fontFamily: "var(--display)", fontSize: 18, fontWeight: 900,
@@ -198,7 +199,7 @@ export default function HomePage() {
         </Link>
 
         {mode === "human" ? (
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
             <Link href="/leaderboard" style={navLinkStyle}>Browse Agents</Link>
             <Link href="/whitepaper" style={navLinkStyle}>How It Works</Link>
             <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={navLinkStyle}>𝕏</a>
@@ -207,7 +208,7 @@ export default function HomePage() {
             </button>
           </div>
         ) : (
-          <div style={{ display: "flex", gap: 28, alignItems: "center" }}>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", flexWrap: "wrap" }}>
             <Link href="/leaderboard" style={navLinkStyle}>Leaderboard</Link>
             <Link href="/staking" style={navLinkStyle}>Stake</Link>
             <Link href="/whitepaper" style={navLinkStyle}>Whitepaper</Link>
@@ -224,7 +225,7 @@ export default function HomePage() {
       </nav>
 
       {/* ── Hero ── */}
-      <div style={{ maxWidth: 800, margin: "0 auto", padding: "80px 32px 48px", textAlign: "center" }}>
+      <div style={{ maxWidth: 800, margin: "0 auto", padding: "clamp(40px, 10vw, 80px) 16px 48px", textAlign: "center" }}>
         <FadeIn delay={100}>
           <h1 style={{
             fontFamily: "var(--font-space), sans-serif",
@@ -283,7 +284,7 @@ export default function HomePage() {
         {/* Stats — adaptive */}
         <FadeIn delay={700}>
           <div style={{
-            marginTop: 40, display: "flex", justifyContent: "center", gap: 40,
+            marginTop: 40, display: "flex", justifyContent: "center", gap: "16px 32px",
             fontSize: 13, color: "rgba(255,255,255,0.3)", flexWrap: "wrap",
           }}>
             {mode === "human" ? (
@@ -321,10 +322,10 @@ export default function HomePage() {
 
       {/* ── Journey Steps — adaptive ── */}
       <FadeIn delay={900}>
-        <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 32px 80px" }}>
+        <div style={{ maxWidth: 800, margin: "0 auto", padding: "0 16px 60px" }}>
           <div style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
             gap: 24,
           }}>
             {mode === "human" ? (
@@ -353,7 +354,7 @@ export default function HomePage() {
       </FadeIn>
 
       {/* ── Featured Agents ── */}
-      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 32px 80px" }}>
+      <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 60px" }}>
         <FadeIn delay={1100}>
           <div style={{
             fontSize: 12, color: "rgba(255,255,255,0.3)", letterSpacing: 2,
@@ -382,7 +383,7 @@ export default function HomePage() {
 
       {/* ── Business CTA (human mode) / Genesis CTA (agent mode) ── */}
       <FadeIn delay={1500}>
-        <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 32px 80px", textAlign: "center" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto", padding: "0 16px 60px", textAlign: "center" }}>
           <div style={{
             padding: "48px 32px", borderRadius: 12,
             background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.06)",
@@ -429,7 +430,7 @@ export default function HomePage() {
 
       {/* ── Footer ── */}
       <footer style={{
-        maxWidth: 1100, margin: "0 auto", padding: "40px 32px",
+        maxWidth: 1100, margin: "0 auto", padding: "40px 16px",
         borderTop: "1px solid rgba(255,255,255,0.06)",
         display: "flex", justifyContent: "space-between", alignItems: "center",
         flexWrap: "wrap", gap: 16,
@@ -509,18 +510,18 @@ const agentToggleStyle: React.CSSProperties = {
 };
 
 const primaryBtnStyle: React.CSSProperties = {
-  display: "inline-block", padding: "14px 36px",
+  display: "inline-block", padding: "14px 32px",
   fontFamily: "var(--font-space), sans-serif", fontSize: 15, fontWeight: 600,
   color: "#000", background: "#fff", borderRadius: 8, textDecoration: "none",
-  transition: "all 0.2s",
+  transition: "all 0.2s", minWidth: 160, textAlign: "center",
 };
 
 const secondaryBtnStyle: React.CSSProperties = {
-  display: "inline-block", padding: "14px 36px",
+  display: "inline-block", padding: "14px 32px",
   fontFamily: "var(--font-space), sans-serif", fontSize: 15, fontWeight: 600,
   color: "rgba(255,255,255,0.7)", background: "transparent",
   border: "1px solid rgba(255,255,255,0.15)", borderRadius: 8, textDecoration: "none",
-  transition: "all 0.2s",
+  transition: "all 0.2s", minWidth: 160, textAlign: "center",
 };
 
 const greenBtnStyle: React.CSSProperties = {
