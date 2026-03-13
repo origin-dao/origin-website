@@ -15,6 +15,16 @@ const client = (createPublicClient as any)({
 const cache = new Map<number, { data: Record<string, unknown>; ts: number }>();
 const CACHE_TTL = 60_000;
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
+}
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -23,13 +33,13 @@ export async function GET(
   const agentId = parseInt(id);
 
   if (isNaN(agentId) || agentId < 1) {
-    return NextResponse.json({ error: "Invalid agent ID" }, { status: 400 });
+    return NextResponse.json({ error: "Invalid agent ID" }, { status: 400, headers: CORS_HEADERS });
   }
 
   // Check cache
   const cached = cache.get(agentId);
   if (cached && Date.now() - cached.ts < CACHE_TTL) {
-    return NextResponse.json(cached.data);
+    return NextResponse.json(cached.data, { headers: CORS_HEADERS });
   }
 
   try {
@@ -96,11 +106,11 @@ export async function GET(
     };
 
     cache.set(agentId, { data, ts: Date.now() });
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: CORS_HEADERS });
   } catch (error) {
     return NextResponse.json(
       { error: `Agent #${agentId} not found`, details: error instanceof Error ? error.message : "Unknown" },
-      { status: 404 }
+      { status: 404, headers: CORS_HEADERS }
     );
   }
 }
