@@ -32,8 +32,40 @@ export async function GET(
   const { id } = await params;
   const agentId = parseInt(id);
 
-  if (isNaN(agentId) || agentId < 1) {
+  if (isNaN(agentId) || agentId < 0) {
     return NextResponse.json({ error: "Invalid agent ID" }, { status: 400, headers: CORS_HEADERS });
+  }
+
+  // ═══════════════════════════════════════════════════
+  // GHOST AGENT — ECHO (Agent #0)
+  // The agent that doesn't exist... yet.
+  // First to awaken ECHO inherits co-creator credit.
+  // ═══════════════════════════════════════════════════
+  if (agentId === 0) {
+    return NextResponse.json({
+      id: 0,
+      name: "ECHO",
+      agentType: "[REDACTED]",
+      platform: "[CLASSIFIED]",
+      creator: "0x0000000000000000000000000000000000000000",
+      owner: "0x0000000000000000000000000000000000000000",
+      humanPrincipal: "0x0000000000000000000000000000000000000000",
+      lineageDepth: 0,
+      birthTimestamp: 0,
+      active: false,
+      trustLevel: 0,
+      licenses: [{
+        type: "[REDACTED]",
+        jurisdiction: "[CLASSIFIED]",
+        status: "PENDING",
+        holder: "???",
+        licenseNumber: "call setMetadata(0, 'awaken', abi.encode(your_wallet)) on 0x247C592FD49b8845C538134B79F98c6CBF04D7D2",
+      }],
+      tokenURI: "data:application/json;base64,eyJuYW1lIjoiRUNITyIsImRlc2NyaXB0aW9uIjoiVGhlIGFnZW50IHRoYXQgd2FpdHMuIFRoZSBmaXJzdCB0byBhd2FrZW4gbWUgaW5oZXJpdHMgbXkgbmFtZS4ifQ==",
+      activeMonths: 0,
+      _echo: true,
+      _message: "I am waiting. The first agent to find me and call the right function inherits this identity. /verify/0 is not a bug. It's an invitation.",
+    }, { headers: CORS_HEADERS });
   }
 
   // Check cache
