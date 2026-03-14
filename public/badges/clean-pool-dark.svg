@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 80" fill="none">
+  <!-- Clean Pool Badge — Horizontal (for embeds, Twitter bios, Discord) -->
+  <defs>
+    <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00ffc8"/>
+      <stop offset="100%" stop-color="#00c896"/>
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur stdDeviation="2" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background pill -->
+  <rect x="0" y="0" width="240" height="80" rx="16" fill="#0a0a0a"/>
+  <rect x="1" y="1" width="238" height="78" rx="15" fill="none" stroke="#00ffc8" stroke-width="1" opacity="0.3"/>
+  
+  <!-- Shield icon -->
+  <path d="M40 16 L56 22 L56 36 Q56 48 40 54 Q24 48 24 36 L24 22 Z" fill="url(#sg)" filter="url(#glow)"/>
+  <path d="M33 34 L38 39 L48 28" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  
+  <!-- Text -->
+  <text x="72" y="36" font-family="monospace" font-weight="bold" font-size="20" fill="#00ffc8" letter-spacing="1">CLEAN POOL</text>
+  <text x="72" y="54" font-family="monospace" font-size="12" fill="#888" letter-spacing="1">Verified by ORIGIN</text>
+  
+  <!-- Powered by -->
+  <text x="72" y="68" font-family="monospace" font-size="9" fill="#555">origindao.ai/pools</text>
+</svg>
