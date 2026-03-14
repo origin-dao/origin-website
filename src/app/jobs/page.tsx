@@ -81,6 +81,7 @@ const CATEGORY_LIST = [
   "Research",
   "Marketing & Content",
   "Customer Support",
+  "Other",
 ];
 
 function gradeColor(grade: EmployerGrade): string {
