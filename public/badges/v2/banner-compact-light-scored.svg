@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="44" viewBox="0 0 180 44" fill="none">
+  <rect x="0.5" y="0.5" width="179" height="43" rx="2" fill="#F2FAF5" stroke="#00804A" stroke-width="0.8"/>
+  <path d="M22 8L14 12V20C14 26 17.5 30 22 33C26.5 30 30 26 30 20V12L22 8Z" fill="none" stroke="#00804A" stroke-width="0.7"/>
+  <path d="M18 19L21 22L27 16" stroke="#00804A" stroke-width="1.3" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <line x1="38" y1="11" x2="38" y2="33" stroke="#00804A" stroke-width="0.3" stroke-opacity="0.15"/>
+  <text x="46" y="20" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" letter-spacing="2.5" fill="#00804A">CLEAN POOL</text>
+  <text x="46" y="32" font-family="'JetBrains Mono',monospace" font-size="6" font-weight="400" letter-spacing="1.5" fill="rgba(0,0,0,0.25)">ORIGIN VERIFIED</text>
+</svg>

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="96" viewBox="0 0 120 144" fill="none">
+  <path d="M60 11L13 29V70C13 99 33 124 60 135C87 124 107 99 107 70V29L60 11Z" fill="none" stroke="#00E676" stroke-width="0.8" stroke-opacity="0.25"/>
+  <path d="M60 3L6 24V70C6 103 29 131 60 142C91 131 114 103 114 70V24L60 3Z" fill="#071A0F" stroke="#00E676" stroke-width="2.5"/>
+  <rect x="33" y="20" width="54" height="20" rx="2" fill="#00E676" fill-opacity="0.12" stroke="#00E676" stroke-width="1.2" stroke-opacity="1"/>
+  <text x="60" y="34" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10" font-weight="700" letter-spacing="2" fill="#00E676" fill-opacity="1">A+</text>
+  <path d="M40 69L53 82L80 55" stroke="#00E676" stroke-width="4.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <text x="60" y="101" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" font-weight="700" letter-spacing="4" fill="#00E676">CLEAN</text>
+  <text x="60" y="115" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" font-weight="400" letter-spacing="3" fill="rgba(255,255,255,0.3)">POOL</text>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="144" viewBox="0 0 120 144" fill="none">
+  <metadata>{"@type":"CleanPool","verifiedBy":"ORIGIN","protocol":"origindao.ai"}</metadata>
+  <path d="M60 3L6 24V70C6 103 29 131 60 142C91 131 114 103 114 70V24L60 3Z" fill="#071A0F" stroke="#00E676" stroke-width="1.2"/>
+  <path d="M60 13L15 31V70C15 98 34 122 60 133C86 122 105 98 105 70V31L60 13Z" fill="none" stroke="#00E676" stroke-width="0.4" stroke-opacity="0.15"/>
+  <path d="M40 69L53 82L80 55" stroke="#00E676" stroke-width="3.0" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <text x="60" y="101" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="10.5" font-weight="700" letter-spacing="4" fill="#00E676">CLEAN</text>
+  <text x="60" y="115" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="7.5" font-weight="400" letter-spacing="3" fill="rgba(255,255,255,0.3)">POOL</text>
+  <text x="60" y="128" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="5" font-weight="400" letter-spacing="2" fill="rgba(255,255,255,0.12)">ORIGIN.DAO</text>
+  <path d="M0 0" fill="none" stroke="none" opacity="0" data-guardian="suppi" data-sig="0x" data-origin="true" data-clue=""/>
+</svg>

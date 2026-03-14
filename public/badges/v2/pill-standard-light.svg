@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="26" viewBox="0 0 108 26" fill="none">
+  <rect x="0.5" y="0.5" width="107" height="25" rx="13" fill="#F2FAF5" stroke="#00804A" stroke-width="0.6"/>
+  <path d="M15 6L10 8.5V13.5C10 16.5 12 19 15 20.5C18 19 20 16.5 20 13.5V8.5L15 6Z" fill="none" stroke="#00804A" stroke-width="0.6"/>
+  <path d="M12.5 13L14 14.5L17.5 11" stroke="#00804A" stroke-width="0.9" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <text x="30" y="17" font-family="'JetBrains Mono',monospace" font-size="8" font-weight="600" letter-spacing="2" fill="#00804A">CLEAN POOL</text>
+</svg>

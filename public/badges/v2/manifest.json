@@ -1,0 +1,780 @@
+{
+  "generated": "2026-03-14T17:30:23.141Z",
+  "designVersion": "2.0",
+  "variants": [
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "dark",
+      "tier": "open",
+      "file": "shield-xl-dark-open.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "dark",
+      "tier": "open",
+      "file": "shield-lg-dark-open.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "dark",
+      "tier": "open",
+      "file": "shield-md-dark-open.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "dark",
+      "tier": "open",
+      "file": "shield-sm-dark-open.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "dark",
+      "tier": "open",
+      "file": "shield-micro-dark-open.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "shield-xl-dark-bc.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "shield-lg-dark-bc.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "shield-md-dark-bc.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "shield-sm-dark-bc.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "shield-micro-dark-bc.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "shield-xl-dark-scored.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "shield-lg-dark-scored.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "shield-md-dark-scored.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "shield-sm-dark-scored.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "shield-micro-dark-scored.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "dark",
+      "tier": "a",
+      "file": "shield-xl-dark-a.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "dark",
+      "tier": "a",
+      "file": "shield-lg-dark-a.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "dark",
+      "tier": "a",
+      "file": "shield-md-dark-a.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "dark",
+      "tier": "a",
+      "file": "shield-sm-dark-a.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "dark",
+      "tier": "a",
+      "file": "shield-micro-dark-a.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "shield-xl-dark-a_plus.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "shield-lg-dark-a_plus.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "shield-md-dark-a_plus.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "shield-sm-dark-a_plus.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "shield-micro-dark-a_plus.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "light",
+      "tier": "open",
+      "file": "shield-xl-light-open.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "light",
+      "tier": "open",
+      "file": "shield-lg-light-open.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "light",
+      "tier": "open",
+      "file": "shield-md-light-open.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "light",
+      "tier": "open",
+      "file": "shield-sm-light-open.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "light",
+      "tier": "open",
+      "file": "shield-micro-light-open.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "light",
+      "tier": "bc",
+      "file": "shield-xl-light-bc.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "light",
+      "tier": "bc",
+      "file": "shield-lg-light-bc.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "light",
+      "tier": "bc",
+      "file": "shield-md-light-bc.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "light",
+      "tier": "bc",
+      "file": "shield-sm-light-bc.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "light",
+      "tier": "bc",
+      "file": "shield-micro-light-bc.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "light",
+      "tier": "scored",
+      "file": "shield-xl-light-scored.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "light",
+      "tier": "scored",
+      "file": "shield-lg-light-scored.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "light",
+      "tier": "scored",
+      "file": "shield-md-light-scored.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "light",
+      "tier": "scored",
+      "file": "shield-sm-light-scored.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "light",
+      "tier": "scored",
+      "file": "shield-micro-light-scored.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "light",
+      "tier": "a",
+      "file": "shield-xl-light-a.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "light",
+      "tier": "a",
+      "file": "shield-lg-light-a.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "light",
+      "tier": "a",
+      "file": "shield-md-light-a.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "light",
+      "tier": "a",
+      "file": "shield-sm-light-a.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "light",
+      "tier": "a",
+      "file": "shield-micro-light-a.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "shield",
+      "size": "xl",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "shield-xl-light-a_plus.svg",
+      "width": 120,
+      "height": 144
+    },
+    {
+      "type": "shield",
+      "size": "lg",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "shield-lg-light-a_plus.svg",
+      "width": 80,
+      "height": 96
+    },
+    {
+      "type": "shield",
+      "size": "md",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "shield-md-light-a_plus.svg",
+      "width": 48,
+      "height": 58
+    },
+    {
+      "type": "shield",
+      "size": "sm",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "shield-sm-light-a_plus.svg",
+      "width": 32,
+      "height": 38
+    },
+    {
+      "type": "shield",
+      "size": "micro",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "shield-micro-light-a_plus.svg",
+      "width": 16,
+      "height": 16
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "dark",
+      "tier": "open",
+      "file": "banner-full-dark-open.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "dark",
+      "tier": "open",
+      "file": "banner-compact-dark-open.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "dark",
+      "tier": "open",
+      "file": "banner-mini-dark-open.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "banner-full-dark-bc.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "banner-compact-dark-bc.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "dark",
+      "tier": "bc",
+      "file": "banner-mini-dark-bc.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "banner-full-dark-scored.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "banner-compact-dark-scored.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "dark",
+      "tier": "scored",
+      "file": "banner-mini-dark-scored.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "dark",
+      "tier": "a",
+      "file": "banner-full-dark-a.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "dark",
+      "tier": "a",
+      "file": "banner-compact-dark-a.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "dark",
+      "tier": "a",
+      "file": "banner-mini-dark-a.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "banner-full-dark-a_plus.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "banner-compact-dark-a_plus.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "dark",
+      "tier": "a_plus",
+      "file": "banner-mini-dark-a_plus.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "light",
+      "tier": "open",
+      "file": "banner-full-light-open.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "light",
+      "tier": "open",
+      "file": "banner-compact-light-open.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "light",
+      "tier": "open",
+      "file": "banner-mini-light-open.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "light",
+      "tier": "bc",
+      "file": "banner-full-light-bc.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "light",
+      "tier": "bc",
+      "file": "banner-compact-light-bc.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "light",
+      "tier": "bc",
+      "file": "banner-mini-light-bc.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "light",
+      "tier": "scored",
+      "file": "banner-full-light-scored.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "light",
+      "tier": "scored",
+      "file": "banner-compact-light-scored.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "light",
+      "tier": "scored",
+      "file": "banner-mini-light-scored.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "light",
+      "tier": "a",
+      "file": "banner-full-light-a.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "light",
+      "tier": "a",
+      "file": "banner-compact-light-a.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "light",
+      "tier": "a",
+      "file": "banner-mini-light-a.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "banner",
+      "size": "full",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "banner-full-light-a_plus.svg",
+      "width": 280,
+      "height": 64
+    },
+    {
+      "type": "banner",
+      "size": "compact",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "banner-compact-light-a_plus.svg",
+      "width": 180,
+      "height": 44
+    },
+    {
+      "type": "banner",
+      "size": "mini",
+      "theme": "light",
+      "tier": "a_plus",
+      "file": "banner-mini-light-a_plus.svg",
+      "width": 140,
+      "height": 32
+    },
+    {
+      "type": "pill",
+      "size": "standard",
+      "theme": "dark",
+      "tier": "all",
+      "file": "pill-standard-dark.svg",
+      "width": 108,
+      "height": 26
+    },
+    {
+      "type": "pill",
+      "size": "short",
+      "theme": "dark",
+      "tier": "all",
+      "file": "pill-short-dark.svg",
+      "width": 76,
+      "height": 22
+    },
+    {
+      "type": "pill",
+      "size": "icon",
+      "theme": "dark",
+      "tier": "all",
+      "file": "pill-icon-dark.svg",
+      "width": 26,
+      "height": 26
+    },
+    {
+      "type": "pill",
+      "size": "standard",
+      "theme": "light",
+      "tier": "all",
+      "file": "pill-standard-light.svg",
+      "width": 108,
+      "height": 26
+    },
+    {
+      "type": "pill",
+      "size": "short",
+      "theme": "light",
+      "tier": "all",
+      "file": "pill-short-light.svg",
+      "width": 76,
+      "height": 22
+    },
+    {
+      "type": "pill",
+      "size": "icon",
+      "theme": "light",
+      "tier": "all",
+      "file": "pill-icon-light.svg",
+      "width": 26,
+      "height": 26
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="58" viewBox="0 0 120 144" fill="none">
+  <path d="M60 3L6 24V70C6 103 29 131 60 142C91 131 114 103 114 70V24L60 3Z" fill="#F2FAF5" stroke="#00804A" stroke-width="3.0"/>
+  <rect x="36" y="22" width="48" height="18" rx="2" fill="none" stroke="#00804A" stroke-width="0.8" stroke-opacity="0.4"/>
+  <text x="60" y="34.5" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" font-weight="600" letter-spacing="2" fill="#00804A" fill-opacity="0.7">BC</text>
+  <path d="M40 69L53 82L80 55" stroke="#00804A" stroke-width="7.5" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+</svg>

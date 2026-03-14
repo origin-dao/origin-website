@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="76" height="22" viewBox="0 0 76 22" fill="none">
+  <rect x="0.5" y="0.5" width="75" height="21" rx="11" fill="#F2FAF5" stroke="#00804A" stroke-width="0.6"/>
+  <path d="M13 5L9 7V11C9 13.5 10.5 15.5 13 17C15.5 15.5 17 13.5 17 11V7L13 5Z" fill="none" stroke="#00804A" stroke-width="0.5"/>
+  <path d="M11 10.5L12.5 12L15.5 9" stroke="#00804A" stroke-width="0.8" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <text x="25" y="14.5" font-family="'JetBrains Mono',monospace" font-size="7" font-weight="600" letter-spacing="1.5" fill="#00804A">CLEAN</text>
+</svg>

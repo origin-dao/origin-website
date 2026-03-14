@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="64" viewBox="0 0 280 64" fill="none">
+  <rect x="0.5" y="0.5" width="279" height="63" rx="2" fill="#071A0F" stroke="#00E676" stroke-width="0.8"/>
+  <path d="M32 12L20 18V30C20 39.5 25 46 32 50C39 46 44 39.5 44 30V18L32 12Z" fill="none" stroke="#00E676" stroke-width="0.8"/>
+  <path d="M26 29L30 33L38 25" stroke="#00E676" stroke-width="1.6" stroke-linecap="square" stroke-linejoin="miter" fill="none"/>
+  <line x1="56" y1="18" x2="56" y2="46" stroke="#00E676" stroke-width="0.3" stroke-opacity="0.2"/>
+  <text x="68" y="29" font-family="'JetBrains Mono',monospace" font-size="13" font-weight="700" letter-spacing="3" fill="#00E676">CLEAN POOL</text>
+  <text x="68" y="44" font-family="'JetBrains Mono',monospace" font-size="7.5" font-weight="400" letter-spacing="2" fill="rgba(255,255,255,0.3)">VERIFIED BY ORIGIN</text>
+  <rect x="220" y="21" width="44" height="22" rx="2" fill="#00E676" fill-opacity="0.1" stroke="#00E676" stroke-width="0.6" stroke-opacity="0.35"/>
+  <text x="242" y="36" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" font-weight="600" letter-spacing="2" fill="#00E676">A</text>
+</svg>
