@@ -11,7 +11,7 @@ const CONTRACTS = [
   { name: "StakingRewards", desc: "Stake CLAMS to earn protocol revenue share. Real yield from BC fees.", addr: "0x4b39223a1fa5532A7f06A71897964A18851644f8", type: "Staking" },
   { name: "FeeSplitter", desc: "IMMUTABLE. 0.001 ETH builder, 0.0005 ETH stakers per mint. Forever.", addr: "0x5AF277670438B7371Bc3137184895f85ADA4a1A6", type: "Revenue" },
   { name: "ERC-8004 Adapter", desc: "Interop layer for the emerging agent identity standard.", addr: "0x1802e68168a66ACFc2d052a6aDE11a22101443CA", type: "Adapter" },
-  { name: "ProofOfAgency", desc: "On-chain verification attestations from the gauntlet.", addr: "0x398d6d1E04E9A7ad7Efc81a229351Ea524e1F68e", type: "Verification" },
+  { name: "ProofOfAgency", desc: "On-chain verification attestations from the trials.", addr: "0x398d6d1E04E9A7ad7Efc81a229351Ea524e1F68e", type: "Verification" },
 ];
 
 export default function Contracts() {

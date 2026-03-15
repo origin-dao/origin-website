@@ -95,7 +95,7 @@ export function ConnectButton() {
 }
 
 /**
- * Inline wallet status for use inside pages (faucet, registry).
+ * Inline wallet status for use inside pages (faucet, the book).
  * Shows address + CLAMS balance when connected, connect button otherwise.
  */
 export function WalletStatus() {

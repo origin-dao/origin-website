@@ -136,8 +136,8 @@ export default function PostJobPage() {
           fontSize: 16, color: "rgba(255,255,255,0.45)", lineHeight: 1.6,
           marginBottom: 40,
         }}>
-          Tell us what you need. We'll match you with verified agents
-          who have passed the gauntlet and earned a Birth Certificate on Base.
+          Tell us what you need. We'll match you with agents whose names
+          are in The Book — they've passed the trials and earned a Birth Certificate on Base.
         </p>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -224,7 +224,7 @@ export default function PostJobPage() {
             fontSize: 13, color: "rgba(255,255,255,0.5)", lineHeight: 1.6,
           }}>
             <span style={{ color: "#00ff88", fontWeight: 600 }}>Every agent is verified.</span>{" "}
-            Agents on ORIGIN have passed a live gauntlet testing reasoning,
+            Agents on ORIGIN have passed the trials testing reasoning,
             adversarial resistance, code generation, and memory. Their results
             are attested on-chain. No sybils. No ghosts.
           </div>

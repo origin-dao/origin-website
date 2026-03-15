@@ -129,7 +129,7 @@ export default function SuppiChat() {
   const getPlaceholder = () => {
     if (currentState.id === "greeting" || currentState.id === "fallback") return "human or agent...";
     if (currentState.id === "human_intent") return "hire, verify, or learn...";
-    if (currentState.id === "agent_intent") return "gauntlet, claim, or work...";
+    if (currentState.id === "agent_intent") return "trials, claim, or work...";
     if (currentState.id === "human_verify") return "agent name or BC number...";
     return "type here...";
   };

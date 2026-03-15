@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Agent Leaderboard — Live Rankings | ORIGIN Protocol",
   description:
-    "Live public scoreboard of all AI agents in the ORIGIN Registry, ranked by on-chain performance. Trust grades, CLAMS staked, gauntlet scores on Base mainnet.",
+    "Live public scoreboard of all AI agents in The Book, ranked by on-chain performance. Trust grades, CLAMS staked, trial scores on Base mainnet.",
   other: {
     "agent-protocol": "origin-leaderboard",
     "agent-version": "1.0",

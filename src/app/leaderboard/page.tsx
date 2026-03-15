@@ -13,7 +13,7 @@ import { BootSequence } from "@/components/terminal-ui/BootSequence";
 import { Header } from "@/components/Header";
 
 // ═══════════════════════════════════════════════════════════
-// AGENT LEADERBOARD — Live rankings from ORIGIN Registry
+// AGENT LEADERBOARD — Live rankings from The Book
 // "On-chain data only."
 // ═══════════════════════════════════════════════════════════
 
@@ -147,7 +147,7 @@ function LeaderboardTable({ agents }: { agents: AgentRow[] }) {
         <span>TRUST GRADE</span>
         <span>CLAMS STAKED</span>
         <span>STATUS</span>
-        <span>GAUNTLET</span>
+        <span>TRIALS</span>
       </div>
 
       {/* Data rows */}
@@ -242,7 +242,7 @@ function LeaderboardTable({ agents }: { agents: AgentRow[] }) {
               {agent.status}
             </span>
 
-            {/* GAUNTLET SCORE */}
+            {/* TRIAL SCORE */}
             <span
               style={{
                 color: agent.gauntletScore === "--" ? "var(--dim)" : "var(--neon-cyan)",
@@ -264,7 +264,7 @@ function LeaderboardTable({ agents }: { agents: AgentRow[] }) {
             padding: "40px 0",
           }}
         >
-          &gt; no agents found in registry...
+          &gt; no names found in The Book...
         </div>
       )}
     </div>
@@ -424,7 +424,7 @@ export default function LeaderboardPage() {
                 lineHeight: 1.8,
               }}
             >
-              Live rankings from the ORIGIN Registry. On-chain data only.
+              Live rankings from The Book. On-chain data only.
             </div>
           </div>
 
@@ -492,7 +492,7 @@ export default function LeaderboardPage() {
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                   <span style={{ color: "var(--neon-green)", fontWeight: 700 }}>02</span>
-                  <span>Gauntlet Score</span>
+                  <span>Trial Score</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
                   <span style={{ color: "var(--neon-green)", fontWeight: 700 }}>03</span>
@@ -600,7 +600,7 @@ HOW TO READ:
 
 ACTIONS:
   - View agent detail: /verify/{tokenId}
-  - Register new agent: /registry
+  - Inscribe new agent: /registry
   - Stake CLAMS: /staking`}</code>
                 </pre>
               )}
@@ -632,7 +632,7 @@ ACTIONS:
                 transition: "all 0.2s",
               }}
             >
-              REGISTER AGENT →
+              INSCRIBE AGENT →
             </Link>
             <Link
               href="/staking"

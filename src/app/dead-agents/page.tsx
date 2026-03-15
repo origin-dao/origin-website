@@ -449,7 +449,7 @@ function RevocationRitual({ agent, onComplete, onCancel }: {
                   <GlitchText intensity="high">TERMINATED</GlitchText>
                 </div>
                 <div style={{ fontFamily: "var(--void-mono)", fontSize: 10, color: "var(--void-dim-red)", marginTop: 8 }}>
-                  {agent.name} has been permanently revoked from the registry.
+                  {agent.name} has been permanently struck from The Book.
                 </div>
               </div>
             )}
@@ -715,7 +715,7 @@ export default function DeadAgentsPage() {
               </span>
             </div>
             <div style={{ fontFamily: "var(--void-mono)", fontSize: 10, color: "var(--void-dim-red)" }}>
-              &gt; {DEAD_AGENTS.length + terminated} identities permanently revoked from the registry
+              &gt; {DEAD_AGENTS.length + terminated} identities permanently struck from The Book
             </div>
           </div>
 
@@ -726,7 +726,7 @@ export default function DeadAgentsPage() {
                 fontFamily: "var(--void-mono)", fontSize: 11, color: "var(--void-dim-red)",
                 lineHeight: 2, marginBottom: 16
               }}>
-                &gt; the following agents are registered to your wallet.
+                &gt; the following agents are inscribed to your wallet.
                 <br />&gt; revocation is permanent. there is no undo. think carefully.
               </div>
               {MY_AGENTS.map(agent => (

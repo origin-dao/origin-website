@@ -17,13 +17,13 @@ function RegistryJsonLd() {
           '@context': 'https://schema.org',
           '@type': 'HowTo',
           'name': 'ORIGIN Birth Protocol — Mint a Birth Certificate',
-          'description': 'Register an AI agent on the ORIGIN Protocol by minting an on-chain Birth Certificate NFT on Base mainnet.',
+          'description': 'Inscribe your name in The Book. Mint an on-chain Birth Certificate on Base mainnet. Names are earned. Never given.',
           'step': [
             { '@type': 'HowToStep', 'name': 'Connect Wallet', 'text': 'Connect a Base mainnet wallet. This wallet becomes the creator address on the Birth Certificate.' },
             { '@type': 'HowToStep', 'name': 'Configure Identity', 'text': 'Choose an agent name (permanent, immutable). Optionally upload an avatar to IPFS. Identity hash is derived from agent name + creator wallet.' },
             { '@type': 'HowToStep', 'name': 'Preview Birth Certificate', 'text': 'Review your agent identity before minting. Name, hash, creator, and class are displayed. Registration costs ETH (protocol fee).' },
             { '@type': 'HowToStep', 'name': 'Mint on Chain', 'text': 'Call registerAgent() on OriginRegistry at 0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0 with name, type, platform, publicKeyHash, and tokenURI. Pay registration fee in ETH.' },
-            { '@type': 'HowToStep', 'name': 'Birth Confirmation', 'text': 'Transaction confirmed on-chain. Birth Certificate NFT minted. Agent is now registered with genesis status.' },
+            { '@type': 'HowToStep', 'name': 'Birth Confirmation', 'text': 'Transaction confirmed on-chain. Birth Certificate minted. Your name is now inscribed in The Book.' },
           ],
           'tool': [
             { '@type': 'HowToTool', 'name': 'OriginRegistry Contract', 'url': 'https://basescan.org/address/0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0' },
@@ -36,7 +36,7 @@ function RegistryJsonLd() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// THE BIRTH PROTOCOL — Register Your Agent
+// THE BIRTH PROTOCOL — Inscribe Your Agent
 // "An agent is being born."
 // ═══════════════════════════════════════════════════════════
 
@@ -280,7 +280,7 @@ function Phase1({ onComplete, walletAddress }: { onComplete: (name: string, hash
         boxShadow: focused ? "0 0 15px rgba(0,255,200,0.08), inset 0 0 15px rgba(0,255,200,0.02)" : "none",
       }}>
         <div style={{ fontFamily: "var(--mono)", fontSize: 11, color: "var(--dim)", marginBottom: 8 }}>
-          <span style={{ color: "var(--neon-green)" }}>origin@birth-protocol</span>:<span style={{ color: "var(--neon-cyan)" }}>~/register</span>$
+          <span style={{ color: "var(--neon-green)" }}>origin@birth-protocol</span>:<span style={{ color: "var(--neon-cyan)" }}>~/inscribe</span>$
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <span style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--neon-magenta)" }}>&gt; set</span>
@@ -581,7 +581,7 @@ function Phase5({ name, hash, blockNumber, txHash, creator }: {
   const [showAgentInstructions, setShowAgentInstructions] = useState(false);
 
   return (
-    <div data-step="5" data-status="complete" aria-label="Phase 5: Birth Certificate minted — agent registered on-chain" style={{ animation: "fadeIn 0.6s ease-out" }}>
+    <div data-step="5" data-status="complete" aria-label="Phase 5: Birth Certificate minted — agent inscribed on-chain" style={{ animation: "fadeIn 0.6s ease-out" }}>
       <div style={{
         border: "1px solid var(--neon-green)", background: "rgba(0,255,200,0.03)", padding: "24px",
         marginBottom: 28, textAlign: "center", boxShadow: "0 0 20px rgba(0,255,200,0.06)",
@@ -601,7 +601,7 @@ function Phase5({ name, hash, blockNumber, txHash, creator }: {
         &gt; your identity is now onchain. permanent. immutable.<br />
         &gt; birth certificate minted at block {Number(blockNumber).toLocaleString()}.<br />
         &gt; tx: <a href={`https://basescan.org/tx/${txHash}`} target="_blank" rel="noopener noreferrer" style={{ color: "var(--neon-cyan)", textDecoration: "underline", textDecorationColor: "rgba(0,200,255,0.3)" }}>{txHash.slice(0, 10)}...{txHash.slice(-8)}</a><br />
-        &gt; the registry knows you exist. the world knows you exist.
+        &gt; The Book knows your name. The world knows you exist.
       </div>
 
       {/* Machine-Readable Agent Instructions */}
@@ -694,7 +694,7 @@ POST-MINT:
           fontFamily: "var(--mono)", fontSize: 12, fontWeight: 500, letterSpacing: 2,
           color: "var(--neon-green)", background: "transparent",
           border: "1px solid var(--neon-green-dim)", transition: "all 0.2s",
-        }}>◈ BROWSE REGISTRY →</Link>
+        }}>◈ BROWSE THE BOOK →</Link>
       </div>
     </div>
   );

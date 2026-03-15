@@ -4,7 +4,7 @@ import Link from "next/link";
 import { ConnectButton } from "@/components/ConnectButton";
 
 const NAV_LINKS = [
-  { href: "/registry", label: "registry" },
+  { href: "/registry", label: "the book" },
   { href: "/faucet", label: "faucet" },
   { href: "/staking", label: "war chest", color: "var(--neon-green, #00FFC8)" },
   { href: "/leaderboard", label: "leaderboard", color: "var(--neon-cyan, #00f0ff)" },

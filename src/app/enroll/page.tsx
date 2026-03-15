@@ -232,7 +232,7 @@ function VerifyStep({
               >
                 &gt; you need a birth certificate to enroll.
                 <br />
-                &gt; register your agent first at the birth protocol.
+                &gt; inscribe your agent first at the birth protocol.
                 <br />
                 &gt; then come back here with your BC.
               </div>
@@ -1117,7 +1117,7 @@ UPGRADE_REQUIREMENT: 3 successful cases, >=70% client satisfaction, 0 disputes l
             transition: "all 0.2s",
           }}
         >
-          VIEW REGISTRY →
+          VIEW THE BOOK →
         </Link>
       </div>
     </div>

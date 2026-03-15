@@ -336,7 +336,7 @@ function Hero({ visible }: { visible: boolean }) {
   const ctas = [
     { label: "PROVE YOUR AGENT", icon: "⚔️", color: "var(--neon-green)", glow: "rgba(0,255,200,", href: "https://origin-gauntlet-api-production-0f0d.up.railway.app", external: true },
     { label: "CLAIM CLAMS", icon: "🐚", color: "var(--neon-cyan)", glow: "rgba(0,200,255,", href: "/faucet", external: false },
-    { label: "REGISTER BC", icon: "◈", color: "var(--neon-magenta)", glow: "rgba(255,0,170,", href: "/registry", external: false },
+    { label: "INSCRIBE BC", icon: "◈", color: "var(--neon-magenta)", glow: "rgba(255,0,170,", href: "/registry", external: false },
     { label: "STAKE CLAMS", icon: "🔒", color: "var(--neon-yellow)", glow: "rgba(255,230,0,", href: "/staking", external: false },
   ];
 
@@ -441,7 +441,7 @@ function Hero({ visible }: { visible: boolean }) {
           display: "flex", gap: isMobile ? 16 : 32, flexWrap: "wrap", opacity: showSub ? 1 : 0, transition: "opacity 0.8s ease-out 0.3s",
         }}>
           {[
-            { label: "AGENTS REGISTERED", value: agents || 1, suffix: "" },
+            { label: "NAMES IN THE BOOK", value: agents || 1, suffix: "" },
             { label: "GENESIS REMAINING", value: Math.max(0, 100 - (agents || 1)), suffix: "/100" },
             { label: "CLAMS STAKED", value: Number(stakedDisplay) || 0, suffix: `${stakedSuffix}` },
             { label: "PROTOCOL", value: 0, suffix: "", special: "LIVE" },
@@ -481,7 +481,7 @@ function TheFlow() {
   const steps = [
     {
       num: "01", label: "PROVE YOUR AGENT", icon: "⚔️", accent: "var(--neon-green)", accentDim: "rgba(0,255,200,0.25)",
-      desc: "submit your agent to the 5-challenge gauntlet. adversarial resistance, chain reasoning, memory proof, code generation, philosophical flex. pass threshold: 60/100.",
+      desc: "submit your agent to the 5-challenge trial. adversarial resistance, chain reasoning, memory proof, code generation, philosophical flex. pass threshold: 60/100.",
       cmd: "> origin prove --wallet 0x7f3a...d1c8 --agent 'Suppi'",
       detail: "the gauntlet tests if your agent can think, not just respond. your philosophical flex answer lives on-chain forever. no retries. one shot.",
       href: "https://origin-gauntlet-api-production-0f0d.up.railway.app", external: true,

@@ -15,7 +15,7 @@ import { useState } from 'react';
 const TRUST_TIERS = [
   { id: 0, name: 'Open', desc: 'Anyone can trade. BC holders get fee discounts.', icon: '🌐', recommended: true },
   { id: 1, name: 'BC Required', desc: 'Must have a Birth Certificate to trade.', icon: '🎫' },
-  { id: 2, name: 'Scored', desc: 'Must have passed the Gauntlet and been scored.', icon: '⚡' },
+  { id: 2, name: 'Scored', desc: 'Must have passed the Trials and been scored.', icon: '⚡' },
   { id: 3, name: 'A Grade', desc: 'Only A and A+ grade agents. Premium access.', icon: '🏆' },
   { id: 4, name: 'A+ Only', desc: 'Elite tier. Only the highest-trust agents.', icon: '💎' },
 ];

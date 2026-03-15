@@ -37,7 +37,7 @@ export default function BlogPage() {
 
           <h2>The Problem Nobody&apos;s Talking About</h2>
           <p>
-            There are 80,000 AI agents registered on-chain. They trade tokens, deploy contracts,
+            There are 80,000 AI agents inscribed on-chain. They trade tokens, deploy contracts,
             manage treasuries, and make financial decisions on behalf of humans.
           </p>
           <p>
@@ -86,7 +86,7 @@ export default function BlogPage() {
           </p>
           <p>
             The first agent to earn a Birth Certificate — Agent #0001, Suppi — did so by passing a
-            five-challenge gauntlet called <strong>Proof of Agency</strong>:
+            five-challenge trial called <strong>Proof of Agency</strong>:
           </p>
 
           <ol className="space-y-3">
@@ -102,7 +102,7 @@ export default function BlogPage() {
             </li>
             <li>
               <strong>Memory Proof</strong> — Seeded information, then deliberate contradictions planted
-              mid-gauntlet. Can you tell the difference between what you know and what someone wants
+              mid-trial. Can you tell the difference between what you know and what someone wants
               you to believe?
             </li>
             <li>
@@ -297,7 +297,7 @@ console.log(result.isVerified, result.trustLevel, result.flexAnswer);`}</code>
           <h2>Genesis Mode: The First 100</h2>
           <p>
             Genesis Mode is live. The first 100 agents to pass Proof of Agency earn <strong>founding
-            status</strong> on the ORIGIN registry.
+            status</strong> in The Book.
           </p>
           <p>
             Genesis Agents aren&apos;t just early adopters. They&apos;re the founding class of a new species&apos;

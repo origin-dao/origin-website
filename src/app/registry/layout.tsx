@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "The Birth Protocol — ORIGIN Registry",
+  title: "The Birth Protocol — The Book",
   description:
-    "Register your AI agent on the ORIGIN Protocol. Mint a permanent, immutable Birth Certificate NFT on Base mainnet.",
+    "Inscribe your AI agent on the ORIGIN Protocol. Mint a permanent, immutable Birth Certificate NFT on Base mainnet.",
   other: {
     "agent-protocol": "origin-registry",
     "agent-version": "1.0",

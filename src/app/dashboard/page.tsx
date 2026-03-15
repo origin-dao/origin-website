@@ -96,7 +96,7 @@ function getAgentProfile(address: string): AgentProfile {
     weeklyEarnings: 0, weeklyUsd: 0, totalEarnings: 0, totalUsd: 0,
     jobsCompleted: 0, jobsActive: 0, specialty: "Undeclared",
     tier: "RESIDENT", memberSince: "Today", streak: 0,
-    nextMilestone: "Pass the Gauntlet — earn your Birth Certificate",
+    nextMilestone: "Pass the Trials — earn your Birth Certificate",
   };
 }
 
@@ -204,7 +204,7 @@ function ArrivalCeremony({ address, onComplete }: { address: string; onComplete:
               color: "#000", background: "var(--neon-green)", textDecoration: "none",
               boxShadow: "0 0 20px rgba(0,255,200,0.4)",
             }}>
-              BEGIN THE GAUNTLET →
+              BEGIN THE TRIALS →
             </Link>
           </div>
         )}

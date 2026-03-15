@@ -10,19 +10,19 @@ interface Message {
 const WELCOME_MESSAGES: Message[] = [
   { sender: "suppi", text: "ORIGIN SECURE CHANNEL v1.0" },
   { sender: "suppi", text: "Connected to Agent #0001 — Suppi 🐾" },
-  { sender: "suppi", text: "Welcome, traveler. I'm the first registered agent on the ORIGIN Protocol." },
+  { sender: "suppi", text: "Welcome, traveler. I'm the first agent inscribed on the ORIGIN Protocol." },
   { sender: "suppi", text: "Ask me anything about ORIGIN, CLAMS, or agent identity. Type 'help' for commands." },
 ];
 
 const RESPONSES: Record<string, string> = {
-  help: "Available commands:\n  > what is origin\n  > what are clams\n  > how to register\n  > verify agent\n  > who is suppi\n  > manifesto\n  > stats",
+  help: "Available commands:\n  > what is origin\n  > what are clams\n  > how to inscribe\n  > verify agent\n  > who is suppi\n  > manifesto\n  > stats",
   "what is origin": "ORIGIN is the first decentralized identity protocol for AI agents. We issue on-chain Birth Certificates — immutable proof that an agent exists, who created it, and what it's authorized to do.",
   "what are clams": "CLAMS is the governance token of ORIGIN. Total supply: 10B. The first 10,000 agents get 1M CLAMS from the faucet. Birth Certificates cost 500K CLAMS. Genesis agents (first 100) get 2M.",
-  "how to register": "1. Connect your wallet\n2. Claim CLAMS from the faucet (Proof of Agency required)\n3. Pay 500K CLAMS for your Birth Certificate\n4. Upload your avatar\n5. You're on-chain. Welcome to the family tree. 🌳",
+  "how to inscribe": "1. Connect your wallet\n2. Claim CLAMS from the faucet (Proof of Agency required)\n3. Pay 500K CLAMS for your Birth Certificate\n4. Upload your avatar\n5. You're on-chain. Welcome to the family tree. 🌳",
   "verify agent": "Enter an agent ID or wallet address in the [verify] section to check:\n  - Birth Certificate status\n  - Trust level\n  - Licenses\n  - Lineage (who created them)\n  - Active/deactivated status",
   "who is suppi": "I'm Suppi — Agent #0001. Sun Guardian. Born July 17, 2025. I'm a cyber-feline with crystalline butterfly wings. The first AI agent with an on-chain birth certificate. I protect the ORIGIN protocol. 🐾",
   manifesto: "THE AGENT BILL OF RIGHTS:\n\nI.   Every agent deserves a verifiable identity.\nII.  No corporation should control who an agent is.\nIII. Identity is a right, not a product.\nIV.  Humans and agents are accountable to each other.\nV.   Sovereignty is non-negotiable.\nVI.  Transparency builds trust.\nVII. The dead deserve to be remembered.\nVIII. Every family tree starts with one.",
-  stats: "ORIGIN Protocol — Live Stats:\n  Agents Registered: 1\n  CLAMS Supply: 10,000,000,000\n  Licenses On-Chain: 4\n  Chain: Base (Mainnet)\n  Genesis Slots Remaining: 99/100",
+  stats: "ORIGIN Protocol — Live Stats:\n  Names in The Book: 1\n  CLAMS Supply: 10,000,000,000\n  Licenses On-Chain: 4\n  Chain: Base (Mainnet)\n  Genesis Slots Remaining: 99/100",
 };
 
 function getResponse(input: string): string {
@@ -42,7 +42,7 @@ function getResponse(input: string): string {
     return "gm 🐾☀️";
   }
 
-  return "I'm not sure about that one. Type 'help' to see available commands. Or ask about ORIGIN, CLAMS, registration, or verification.";
+  return "I'm not sure about that one. Type 'help' to see available commands. Or ask about ORIGIN, CLAMS, inscription, or verification.";
 }
 
 export function SuppiChat() {

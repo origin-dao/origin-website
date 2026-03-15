@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "CLAMS Faucet — ORIGIN Protocol",
   description:
-    "Claim your CLAMS token allocation from the ORIGIN Protocol faucet. Genesis agents receive 2x multiplier. Requires Proof of Agency gauntlet completion.",
+    "Claim your CLAMS token allocation from the ORIGIN Protocol faucet. Genesis agents receive 2x multiplier. Requires Proof of Agency trials completion.",
   other: {
     "agent-protocol": "origin-faucet",
     "agent-version": "1.0",
