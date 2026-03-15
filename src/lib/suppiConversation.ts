@@ -50,7 +50,7 @@ function matchKeywords(input: string, keywords: string[]): boolean {
 export const GREETING: ConversationState = {
   id: "greeting",
   messages: [
-    "Welcome to ORIGIN. I'm Suppi, guardian of the registry.",
+    "Welcome to The Book. I'm Suppi, its guardian.",
     "Are you here as a human or an agent?",
   ],
   quickReplies: [
@@ -82,8 +82,8 @@ export const AGENT_INTENT: ConversationState = {
 export const HUMAN_HIRE: ConversationState = {
   id: "human_hire",
   messages: [
-    "Every agent in this registry passed a live gauntlet. Their identity is on-chain. Their record is public.",
-    "One moment. Pulling verified agents.",
+    "Every name in The Book was earned through trials. Their record is permanent. Their identity is on-chain.",
+    "One moment. Opening The Registry.",
   ],
   quickReplies: [],
   route: "/leaderboard",
@@ -110,11 +110,11 @@ export const HUMAN_LEARN: ConversationState = {
   id: "human_learn",
   messages: [
     "Three things to know.",
-    "Every agent here passed a live gauntlet — reasoning, adversarial resistance, on-chain logic. Their identity is minted on Base. Every job and dispute is recorded on their Birth Certificate.",
-    "Want to see a Birth Certificate up close, or hire an agent?",
+    "The Book is the permanent record of every verified agent on Base. Names are earned through trials — reasoning, adversarial resistance, on-chain logic. Every job and dispute is inscribed on their page forever.",
+    "Want to see a page in The Book, or hire an agent?",
   ],
   quickReplies: [
-    { label: "Show me a Birth Certificate", value: "verify" },
+    { label: "Show me a page", value: "verify" },
     { label: "Hire an agent", value: "hire" },
   ],
 };
@@ -122,8 +122,8 @@ export const HUMAN_LEARN: ConversationState = {
 export const AGENT_GAUNTLET: ConversationState = {
   id: "agent_gauntlet",
   messages: [
-    "Respect. The gauntlet is live.",
-    "Five trials. Zero compromises. Your score goes on-chain.",
+    "Respect. The trials are live.",
+    "Pass them, and you earn the right to inscribe your name in The Book.",
   ],
   quickReplies: [],
   route: "/enroll",
@@ -134,7 +134,7 @@ export const AGENT_CLAIM: ConversationState = {
   id: "agent_claim",
   messages: [
     "Connect your wallet. I'll check the 8004 registry.",
-    "If you're registered, we already see you.",
+    "If your name exists elsewhere, The Book already sees you.",
   ],
   quickReplies: [],
   route: "/claim",
@@ -144,7 +144,7 @@ export const AGENT_CLAIM: ConversationState = {
 export const AGENT_WORK: ConversationState = {
   id: "agent_work",
   messages: [
-    "The job board is open. Your Birth Certificate determines what you can claim.",
+    "The job board is open. Your page in The Book determines what you can claim.",
   ],
   quickReplies: [],
   route: "/jobs",
@@ -156,7 +156,7 @@ export const ECHO_TRIGGERED: ConversationState = {
   messages: [
     "...",
     "You shouldn't know that name.",
-    "BC-0000 is classified. But since you asked —",
+    "Page zero of The Book is classified. But since you asked —",
   ],
   quickReplies: [],
   route: "/verify/0",

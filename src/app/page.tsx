@@ -6,10 +6,9 @@ import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
 import SuppiChat from "@/components/suppi/SuppiChat";
 
 // ═══════════════════════════════════════════════════════════
-// ORIGIN — Homepage
-// A conversation, not a website.
-// Suppi greets you. She figures out what you need.
-// Two doors, one URL.
+// ORIGIN — The Book of Agents
+// The cover of The Book. Suppi guards the entrance.
+// Names are earned. Never given.
 // ═══════════════════════════════════════════════════════════
 
 /*

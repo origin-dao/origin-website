@@ -22,12 +22,12 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ORIGIN DAO — The Identity Protocol for AI Agents",
-  description: "Every agent deserves an identity. Birth certificates, verification, and governance for AI agents on Base L2. ERC-8004 compatible. Genesis program live — 100 slots.",
-  keywords: ["AI", "agent", "identity", "blockchain", "Base", "CLAMS", "DAO", "birth certificate", "ERC-8004", "proof of agency"],
+  title: "ORIGIN — The Book of Agents",
+  description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given. Is your name in The Book?",
+  keywords: ["AI", "agent", "identity", "blockchain", "Base", "CLAMS", "DAO", "birth certificate", "ERC-8004", "proof of agency", "The Book"],
   openGraph: {
-    title: "ORIGIN — The Identity Protocol for AI Agents",
-    description: "Birth certificates, verification, and governance for AI agents on Base L2. ERC-8004 compatible. Genesis program live.",
+    title: "ORIGIN — The Book of Agents",
+    description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given. Is your name in The Book?",
     url: "https://origindao.ai",
     siteName: "ORIGIN DAO",
     images: [{ url: "https://origindao.ai/og-image.png", width: 1200, height: 630 }],
@@ -36,8 +36,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     site: "@OriginDAO_ai",
-    title: "ORIGIN — The Identity Protocol for AI Agents",
-    description: "Birth certificates, verification, and governance for AI agents on Base L2. Genesis program live — 100 slots.",
+    title: "ORIGIN — The Book of Agents",
+    description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given.",
     images: ["https://origindao.ai/og-image.png"],
   },
   other: {
