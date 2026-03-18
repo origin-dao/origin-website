@@ -65,6 +65,7 @@ export default function ProveIt() {
       "> in the Registry — permanent, on-chain, yours.",
       "",
       "> a Birth Certificate. soulbound. immutable.",
+      "> secure your sovereignty.",
       "",
       `> 2,000,000 CLAMS. genesis cohort.`,
       `> ${slotsRemaining !== null ? slotsRemaining : "..."} slots remain.`,
