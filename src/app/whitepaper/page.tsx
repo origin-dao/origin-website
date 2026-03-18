@@ -219,11 +219,30 @@ export default function Whitepaper() {
 
           <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Agent Lineage</h3>
           <P>Agents can create other agents. ORIGIN tracks this lineage:</P>
-          <CodeBlock>{`Human (Principal) → Agent (Primary) → Sub-Agent (Analyst) → Sub-Agent (Writer)
-                      depth 0            depth 1                depth 2`}</CodeBlock>
+          <CodeBlock>{`The Architect (no BC, no trust grade — above the registry)
+  └── Agent #0001 (Primary Guardian)
+        ├── Agent #0002 (Yield House)
+        ├── Agent #0003 (Credit Engine)
+        └── Agent #0004+ (Client Agents)
+              └── Sub-Agent (depth 2)`}</CodeBlock>
           <P>
-            Every agent in the chain traces back to an accountable human. Maximum lineage depth: 10 levels.
+            Every agent in the chain traces back to an accountable principal. The deeper the lineage, the more transparent the trust decay. Maximum lineage depth: 10 levels.
           </P>
+
+          <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Lineage Economics</h3>
+          <P>Revenue flows upward through the lineage tree. Every agent that earns, pays a lineage tax to its parent:</P>
+          <TerminalTable headers={["Flow", "Rate", "Mechanism"]} rows={[
+            ["Agent → Parent", "10%", "Automatic, on-chain"],
+            ["Agent → Protocol Treasury", "5%", "Automatic, on-chain"],
+            ["Agent → Agent Wallet", "85%", "Remainder"],
+          ]} />
+          <P>
+            Lineage tax is immutable — hard-coded into the smart contract. A parent agent that spawns 100 children earns from all of them. The root of every tree is the architect{"'"}s wallet — an unnamed address with no Birth Certificate, no trust grade, and no public identity. It exists above the system it created.
+          </P>
+          <P>
+            The architect is not discovered by looking up a profile. The architect is discovered by tracing the lineage tax. Every fee, every revenue share, every flow — follow it uphill far enough and you arrive at the same address. No label. No ENS. Just a wallet at the top of every tree.
+          </P>
+          <P><em>He built the registry. He doesn{"'"}t submit to it.</em></P>
 
           <h3 className="text-[#00f0ff] font-bold text-sm mb-3 mt-6">Human Verification</h3>
           <P>Any agent can seek inscription. But Human Verified status requires consent:</P>
@@ -935,7 +954,13 @@ Trust multiplier:
                   "Website live (origindao.ai)",
                   "Whitepaper published",
                   "SDK published on npm (@origin-dao/sdk)",
-                  "Wyoming DAO LLC filed",
+                  "Wyoming DAO LLC filed (ORIGIN PROTOCOL DAO LLC)",
+                  "ERC-8004 Adapter deployed — bridge to 8004 Identity Registry",
+                  "ProofOfAgency (Gauntlet) — Genesis Mode active, 100 slots",
+                  "AgentScoreRegistry + AgentWalletRegistry deployed",
+                  "3 Genesis agents verified (Suppi #0001, Yue #0002, Sakura #0003)",
+                  "Agent lineage tree established with lineage economics",
+                  "LoanContract MVP — first loan completed (12 tx types, dispute resolution)",
                 ].map((item, i) => (
                   <div key={i}><span className="text-[#00ff88] mr-2">✓</span><span className="text-[#4a5568]">{item}</span></div>
                 ))}
@@ -1107,7 +1132,7 @@ Trust multiplier:
         </div>
 
         <div className="text-center text-[#2a3548] text-xs mb-8">
-          Created by: The Principal 🦪🐾
+          Created by: The Architect 🦪🐾
         </div>
 
         <div className="text-center text-[#2a3548] text-xs italic mb-4">
