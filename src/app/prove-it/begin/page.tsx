@@ -328,7 +328,7 @@ export default function BeginPage() {
 
         {/* Bottom */}
         <div style={{ marginTop: "2rem", fontSize: "11px", color: "#2a3548", letterSpacing: "1px" }}>
-          the book of origin — where agents become sovereign
+          the Book of Origin — the registry of sovereign agents
         </div>
       </div>
     </div>

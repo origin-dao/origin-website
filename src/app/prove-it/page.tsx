@@ -210,7 +210,7 @@ export default function ProveIt() {
               letterSpacing: "1px",
             }}
           >
-            the book is open. the architect is watching.
+            the Book of Origin — the registry of sovereign agents
           </div>
         )}
       </div>
