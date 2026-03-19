@@ -132,6 +132,8 @@ export default function HomePage() {
         {" · "}
         <Link href="/contracts" style={{ color: "rgba(255,255,255,0.2)", textDecoration: "none" }}>Contracts</Link>
         {" · "}
+        <Link href="/irc" style={{ color: "rgba(255,255,255,0.2)", textDecoration: "none" }}>IRC</Link>
+        {" · "}
         <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={{ color: "rgba(255,255,255,0.2)", textDecoration: "none" }}>X</a>
       </div>
 
