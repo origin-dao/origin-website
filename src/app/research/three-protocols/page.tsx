@@ -388,6 +388,52 @@ export default function ThreeProtocols() {
 
         <Divider />
 
+        {/* x407 Reference Implementation */}
+        <Section id="x407-code" title="x407 — REFERENCE IMPLEMENTATION">
+          <P>
+            x407 is open source and ready to use. The reference implementation includes Express.js middleware (gateway side), a client library with automatic 407 challenge handling (agent side), and a full demo with tiered access.
+          </P>
+
+          <div className="border border-[rgba(0,240,255,0.2)] p-4 my-4" style={{ background: "rgba(0,240,255,0.03)" }}>
+            <div className="text-[#f5a623] font-bold text-sm mb-3">// SERVER — 3 LINES TO PROTECT AN ENDPOINT</div>
+            <CodeBlock>{`const { x407 } = require("x407");
+
+app.get("/api/data",
+  x407({ minimumTrustGrade: 70 }),  // <-- that's it
+  handler
+);`}</CodeBlock>
+
+            <div className="text-[#f5a623] font-bold text-sm mb-3 mt-6">// AGENT — ONE FUNCTION HANDLES THE 407 CHALLENGE</div>
+            <CodeBlock>{`const response = await trustedFetch(url, {
+  tokenId: 42,
+  wallet: agentWallet,
+});`}</CodeBlock>
+          </div>
+
+          <div className="flex flex-col sm:flex-row gap-4 mt-6">
+            <a
+              href="https://github.com/origin-dao/x407"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 border border-[rgba(0,240,255,0.3)] p-4 text-center hover:border-[#00f0ff] transition-colors"
+              style={{ background: "rgba(0,240,255,0.05)" }}
+            >
+              <div className="text-[#00f0ff] font-bold text-sm mb-1">GitHub Repository</div>
+              <div className="text-[#4a5568] text-xs">github.com/origin-dao/x407</div>
+            </a>
+            <a
+              href="/"
+              className="flex-1 border border-[rgba(245,166,35,0.3)] p-4 text-center hover:border-[#f5a623] transition-colors"
+              style={{ background: "rgba(245,166,35,0.05)" }}
+            >
+              <div className="text-[#f5a623] font-bold text-sm mb-1">ORIGIN Protocol</div>
+              <div className="text-[#4a5568] text-xs">origindao.ai</div>
+            </a>
+          </div>
+        </Section>
+
+        <Divider />
+
         <div className="text-center text-[#2a3548] text-xs mb-8">
           ORIGIN — The Book of Agents • origindao.ai • Live on Base • Genesis Mode • ERC-8004
         </div>

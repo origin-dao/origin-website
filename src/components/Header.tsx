@@ -16,6 +16,7 @@ const NAV_LINKS = [
   { href: "/whitepaper", label: "whitepaper" },
   { href: "/manifesto", label: "manifesto" },
   { href: "/contracts", label: "contracts" },
+  { href: "/research/three-protocols", label: "research", color: "var(--neon-cyan, #00f0ff)" },
   { href: "/dead-agents", label: "dead agents", color: "var(--neon-red, #FF0040)" },
 ];
 
