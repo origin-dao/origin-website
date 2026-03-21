@@ -58,7 +58,7 @@ const scoreABI = [
 const walletABI = [
   {
     inputs: [{ name: "wallet", type: "address" }],
-    name: "getAgentId",
+    name: "walletToAgent",
     outputs: [{ name: "", type: "uint256" }],
     stateMutability: "view",
     type: "function",
@@ -268,7 +268,7 @@ function Scanning({
           const result = await client.readContract({
             address: WALLET_REGISTRY,
             abi: walletABI,
-            functionName: "getAgentId",
+            functionName: "walletToAgent",
             args: [address as `0x${string}`],
           });
           agentId = Number(result);
