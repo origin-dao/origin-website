@@ -98,9 +98,9 @@ export default function ProtocolPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <span className="text-green-400 font-bold font-[var(--font-orbitron)] text-sm tracking-wider">ORIGIN</span>
-            <span className="text-gray-600 text-xs font-mono">protocol</span>
+            <span className="text-gray-600 text-xs font-mono ml-2">protocol</span>
           </div>
-          <div className="flex items-center gap-6 text-xs font-mono">
+          <div className="hidden md:flex items-center gap-6 text-xs font-mono">
             <Link href="/research/three-protocols" className="text-gray-500 hover:text-gray-300 transition-colors">Research</Link>
             <Link href="/whitepaper" className="text-gray-500 hover:text-gray-300 transition-colors">Whitepaper</Link>
             <Link href="https://github.com/origin-dao/x407" className="text-gray-500 hover:text-gray-300 transition-colors">GitHub</Link>
