@@ -168,9 +168,7 @@ export default function ProtocolPage() {
           <h2 className="text-2xl md:text-3xl font-bold font-[var(--font-orbitron)] text-gray-200 mb-4">
             Five steps. Real HTTP headers. Verifiable on-chain.
           </h2>
-          <p className="text-gray-500 text-sm mb-12 max-w-2xl">
-            A VC or protocol dev can read this in 30 seconds and understand exactly what x407 does.
-          </p>
+          <div className="mb-12" />
 
           <div className="grid md:grid-cols-5 gap-3">
             <FlowStep
