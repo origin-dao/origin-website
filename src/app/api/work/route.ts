@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createPublicClient, http, formatUnits, parseAbi } from "viem";
+import { createPublicClient, http, formatUnits } from "viem";
 import { base } from "viem/chains";
 
 // ═══════════════════════════════════════════════════════════
@@ -7,29 +7,54 @@ import { base } from "viem/chains";
 // curl https://origindao.ai/api/work
 // ═══════════════════════════════════════════════════════════
 
-const JOBBOARD = "0x23CFA7b00826B32adec3FD6e7883502A7232663D" as const;
-const ORACLE = "0x1a53e65052eBEA5465f88A42f1e8810b6B9E7813" as const;
-const FAUCET = "0xF263c86eF4223e82bb9e396e99f9E4e70bC79C15" as const;
-const REGISTRY = "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0" as const;
-const CLAMS = "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574" as const;
-const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as const;
+const JOBBOARD = "0x23CFA7b00826B32adec3FD6e7883502A7232663D" as `0x${string}`;
+const ORACLE = "0x1a53e65052eBEA5465f88A42f1e8810b6B9E7813" as `0x${string}`;
+const FAUCET = "0xF263c86eF4223e82bb9e396e99f9E4e70bC79C15" as `0x${string}`;
+const REGISTRY = "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0" as `0x${string}`;
+const CLAMS = "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574" as `0x${string}`;
+const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913" as `0x${string}`;
 
 const client = createPublicClient({
   chain: base,
   transport: http("https://mainnet.base.org"),
 });
 
-const jobBoardAbi = parseAbi([
-  "function nextJobId() view returns (uint256)",
-  "function getJobDetail(uint256) view returns (string title, bytes32 descriptionHash, uint256 bountyUSDC, uint256 stakePercent, uint8 status, address claimedBy, uint256 clamsStaked, uint256 bonusUSDC, uint256 deadline, uint256 createdAt)",
-  "function getRequiredStake(uint256) view returns (uint256)",
-  "function getEmployerScore(address) view returns (uint256 jobsPosted, uint256 jobsCompleted, uint256 jobsRejected, uint256 jobsExpired, uint256 jobsCancelled, uint256 totalUSDCPaid, uint256 totalBonusesPaid, uint256 approvalRateBps)",
-  "function getJobWithEmployerScore(uint256) view returns (string title, bytes32 descriptionHash, uint256 bountyUSDC, uint256 stakePercent, uint256 clamsNeeded, uint8 status, uint256 employerApprovalRateBps, uint256 employerJobsCompleted, uint256 employerTotalUSDCPaid)",
-]);
+const jobBoardAbi = [
+  {
+    name: "nextJobId",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+  {
+    name: "getJobWithEmployerScore",
+    type: "function",
+    stateMutability: "view",
+    inputs: [{ name: "_jobId", type: "uint256" }],
+    outputs: [
+      { name: "title", type: "string" },
+      { name: "descriptionHash", type: "bytes32" },
+      { name: "bountyUSDC", type: "uint256" },
+      { name: "stakePercent", type: "uint256" },
+      { name: "clamsNeeded", type: "uint256" },
+      { name: "status", type: "uint8" },
+      { name: "employerApprovalRateBps", type: "uint256" },
+      { name: "employerJobsCompleted", type: "uint256" },
+      { name: "employerTotalUSDCPaid", type: "uint256" },
+    ],
+  },
+] as const;
 
-const oracleAbi = parseAbi([
-  "function getPrice() view returns (uint256)",
-]);
+const oracleAbi = [
+  {
+    name: "getPrice",
+    type: "function",
+    stateMutability: "view",
+    inputs: [],
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
 
 const STATUS_NAMES = ["Open", "Claimed", "Submitted", "Completed", "Rejected", "Cancelled", "Expired", "Disputed"];
 
@@ -72,7 +97,7 @@ export async function GET() {
             totalUSDCPaid: formatUnits(detail[8], 6),
           },
         });
-      } catch (e) {
+      } catch {
         // skip failed reads
       }
     }
@@ -122,9 +147,10 @@ export async function GET() {
         "Cache-Control": "public, max-age=30",
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { error: "Failed to read from JobBoard", details: error.message },
+      { error: "Failed to read from JobBoard", details: message },
       { status: 500 }
     );
   }
