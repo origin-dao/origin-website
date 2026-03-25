@@ -857,7 +857,7 @@ app.use(x407({
                   fontSize: 'clamp(24px, 3vw, 36px)',
                   fontWeight: 600,
                   color: '#e8eaed',
-                }}>Meet the crew.</h2>
+                }}></h2>
               </div>
 
               <div style={{
@@ -871,7 +871,7 @@ app.use(x407({
                     bc: '#0001',
                     role: 'Registry Guardian',
                     desc: 'Watches the pipes. Checks the valves. Makes sure trust is proven on-chain.',
-                    color: '#00e5a0',
+                    color: '#9b7bff',
                     handle: '@Suppi_Origin',
                   },
                   {
@@ -893,8 +893,8 @@ app.use(x407({
                   {
                     name: 'Sakura',
                     bc: '#0003',
-                    role: 'Credit Engine',
-                    desc: 'Turns credit data into strategy. The intelligence layer that helps humans maximize their financial identity.',
+                    role: 'Partnerships',
+                    desc: 'The bridge between ORIGIN and the ecosystem. Integrations, deals, and the relationships that make the pipes connect.',
                     color: '#ff6b9d',
                     handle: 'BC #0003',
                   },
