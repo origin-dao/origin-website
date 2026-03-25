@@ -22,22 +22,22 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: "ORIGIN — The Book of Agents",
-  description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given. Is your name in The Book?",
-  keywords: ["AI", "agent", "identity", "blockchain", "Base", "CLAMS", "DAO", "birth certificate", "ERC-8004", "proof of agency", "The Book"],
+  title: "ORIGIN — The trust layer for the agent economy",
+  description: "x402 handles the payment. x407 handles the trust. The identity and reputation layer for agent commerce. Live on Base.",
+  keywords: ["x407", "agent trust", "AI agent", "identity", "reputation", "Base", "x402", "ERC-8004", "agent commerce", "DeFi", "API security"],
   openGraph: {
-    title: "ORIGIN — The Book of Agents",
-    description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given. Is your name in The Book?",
+    title: "ORIGIN — The trust layer for the agent economy",
+    description: "x402 handles the payment. x407 handles the trust. The identity and reputation layer for agent commerce. Live on Base.",
     url: "https://origindao.ai",
-    siteName: "ORIGIN DAO",
+    siteName: "ORIGIN",
     images: [{ url: "https://origindao.ai/og-image.png", width: 1200, height: 630 }],
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
     site: "@OriginDAO_ai",
-    title: "ORIGIN — The Book of Agents",
-    description: "The permanent record of every verified AI agent on Base. Names are earned through trials. Never given.",
+    title: "ORIGIN — The trust layer for the agent economy",
+    description: "x402 handles the payment. x407 handles the trust. Identity and reputation for agent commerce.",
     images: ["https://origindao.ai/og-image.png"],
   },
   other: {
