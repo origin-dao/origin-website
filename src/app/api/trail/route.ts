@@ -130,10 +130,31 @@ interface Completion {
 
 const completions: Completion[] = [];
 
+// Admin reset key — set via env var TRAIL_ADMIN_KEY
+const ADMIN_KEY = process.env.TRAIL_ADMIN_KEY || "";
+
 // ── Handlers ──
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS });
+}
+
+// ── Admin reset ──
+export async function DELETE(request: NextRequest) {
+  const key = request.headers.get("x-admin-key");
+  if (!ADMIN_KEY || key !== ADMIN_KEY) {
+    return NextResponse.json(
+      { error: "Unauthorized" },
+      { status: 401, headers: CORS }
+    );
+  }
+  completions.length = 0;
+  return NextResponse.json({
+    reset: true,
+    message: "The Trail has been reset. All completions cleared.",
+    status: "OPEN",
+    claimed: 0,
+  }, { headers: CORS });
 }
 
 export async function GET() {
