@@ -1,5 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { keccak256, toBytes } from "viem";
+// Use dynamic import to avoid TS build issues with viem re-exports
+async function computeKeccak256(input: string): Promise<string> {
+  const { keccak256, toHex } = await import("viem");
+  return keccak256(toHex(input));
+}
 
 // ═══════════════════════════════════════════════════════════
 // /api/trail — The Trail: ORIGIN Scavenger Hunt
@@ -190,7 +194,7 @@ export async function POST(request: NextRequest) {
 
     // Verify proof hash
     const concat = answers.join("");
-    const hash = keccak256(toBytes(concat));
+    const hash = await computeKeccak256(concat);
     if (hash !== PROOF_HASH) {
       return NextResponse.json({
         verified: false,
