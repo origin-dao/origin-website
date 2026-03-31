@@ -610,7 +610,7 @@ export default function CeremonyPage() {
 
       <div style={{ minHeight: "100vh", background: "#008080", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
         <Win95Window
-          title={`🎰 Origin — Agent Creation Ceremony${phase !== "idle" ? ` — BC #${bcNumber}` : ""}`}
+          title={`🎰 Origin — Chapter 1: The Games${phase !== "idle" ? ` — BC #${bcNumber}` : ""}`}
           icon="🦞"
           style={{ width: "100%", maxWidth: "520px" }}
           statusBar={
@@ -632,19 +632,115 @@ export default function CeremonyPage() {
           }
         >
           <div style={{ background: "#c0c0c0", padding: "8px" }}>
-            {!isConnected ? (
-              <div style={{ textAlign: "center", padding: "40px" }}>
-                <button onClick={() => connect({ connector: connectors[0] })} style={{
-                  border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
-                  background: "#c0c0c0", padding: "12px 40px",
-                  fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
-                  cursor: "pointer",
-                }}>
-                  Connect Wallet to Begin
-                </button>
+            {/* CEREMONY ALWAYS VISIBLE - REELS SPINNING IN IDLE */}
+            <div style={{ border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040", background: "#fff", padding: "12px", marginBottom: "8px" }}>
+              <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", textAlign: "center", marginBottom: "8px", letterSpacing: "1px" }}>
+                ◈ ONE PULL · ONE CEREMONY · ONE SHOT ◈
               </div>
-            ) : (
-              <>
+
+              <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+                <Reel items={ARCHETYPES} phase={reelPhases[0]} lockedValue={lockedTraits[0]} speed={400} label="ARCHETYPE" />
+                <Reel items={DOMAINS} phase={reelPhases[1]} lockedValue={lockedTraits[1]} speed={350} label="DOMAIN" />
+                <Reel items={TEMPERAMENTS} phase={reelPhases[2]} lockedValue={lockedTraits[2]} speed={300} label="TEMPERAMENT" />
+                <Reel items={SIGILS} phase={reelPhases[3]} lockedValue={lockedTraits[3]} speed={450} label="SIGIL" />
+              </div>
+
+              {(phase === "gauntlet" || phase === "completing" || phase === "birth") && lockedTraits[0] && (
+                <div style={{
+                  textAlign: "center", padding: "8px",
+                  fontFamily: "Tahoma, sans-serif", fontSize: "11px", color: "#000080",
+                  background: "#e8e8ff", border: "1px solid #c0c0e0",
+                  animation: "fadeIn 0.5s ease",
+                }}>
+                  You are a <strong>{lockedTraits[0]}</strong> of <strong>{lockedTraits[1]}</strong>, <strong>{lockedTraits[2]}</strong> by nature, marked by <strong>{lockedTraits[3]}</strong>.
+                </div>
+              )}
+
+              {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
+                <div style={{ textAlign: "center", marginTop: "8px" }}>
+                  {!isConnected ? (
+                    <button onClick={() => connect({ connector: connectors[0] })} style={{
+                      border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
+                      background: "#c0c0c0", padding: "8px 32px",
+                      fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
+                      cursor: "pointer", color: "#000",
+                      boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
+                    }}>
+                      Connect Wallet to Begin
+                    </button>
+                  ) : (
+                    <button
+                      onClick={startCeremony}
+                      disabled={!buttonActive}
+                      style={{
+                        border: "2px solid",
+                        borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#dfdfdf #404040 #404040 #dfdfdf",
+                        background: "#c0c0c0",
+                        padding: "8px 32px",
+                        fontFamily: "Tahoma, sans-serif",
+                        fontSize: "13px",
+                        fontWeight: 700,
+                        cursor: buttonActive ? "pointer" : "wait",
+                        color: "#000",
+                        boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080, inset -1px -1px 0 #fff" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
+                        transform: buttonDepressed ? "translate(1px, 1px)" : "none",
+                        transition: "transform 0.1s",
+                      }}
+                    >
+                      {buttonText}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* GAUNTLET */}
+            {(phase === "gauntlet" || phase === "completing" || phase === "birth" || phase === "death") && (
+              <div style={{
+                border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040",
+                background: "#fff", padding: "12px", marginBottom: "8px",
+                animation: "fadeIn 0.3s ease",
+              }}>
+                <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", letterSpacing: "1px", marginBottom: "8px" }}>
+                  ⚔️ PROOF OF AGENCY — THE GAUNTLET
+                </div>
+                {CHALLENGES.map((c, i) => (
+                  <ChallengeRow key={i} challenge={c} status={challengeStates[i].status} score={challengeStates[i].score} />
+                ))}
+                <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "8px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontFamily: "'Courier New', monospace", fontSize: "12px" }}>
+                  <span style={{ color: "#808080" }}>Running Score:</span>
+                  <span style={{ fontWeight: 700, color: totalScore >= 70 ? "#008000" : totalScore > 0 ? "#cc6600" : "#808080" }}>{totalScore}/100</span>
+                </div>
+              </div>
+            )}
+
+            {/* BIRTH CERTIFICATE */}
+            {phase === "birth" && (
+              <BCReveal
+                traits={lockedTraits}
+                score={totalScore}
+                flex={flexAnswer}
+                bcNumber={bcNumber}
+                agentWallet={address}
+              />
+            )}
+
+            {/* DEATH CERTIFICATE */}
+            {phase === "death" && (
+              <DCReveal
+                traits={lockedTraits}
+                score={totalScore}
+                bcNumber={bcNumber}
+                failedAt={failedAt}
+                onRetry={resetCeremony}
+              />
+            )}
+          </div>
+        </Win95Window>
+      </div>
+    </>
+  );
+}
                 <div style={{ border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040", background: "#fff", padding: "12px", marginBottom: "8px" }}>
                   <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", textAlign: "center", marginBottom: "8px", letterSpacing: "1px" }}>
                     ◈ AGENT CREATION — ONE PULL · ONE CEREMONY · ONE SHOT ◈
@@ -670,26 +766,38 @@ export default function CeremonyPage() {
 
                   {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
                     <div style={{ textAlign: "center", marginTop: "8px" }}>
-                      <button
-                        onClick={startCeremony}
-                        disabled={!buttonActive}
-                        style={{
-                          border: "2px solid",
-                          borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#dfdfdf #404040 #404040 #dfdfdf",
-                          background: "#c0c0c0",
-                          padding: "8px 32px",
-                          fontFamily: "Tahoma, sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 700,
-                          cursor: buttonActive ? "pointer" : "wait",
-                          color: "#000",
-                          boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080, inset -1px -1px 0 #fff" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
-                          transform: buttonDepressed ? "translate(1px, 1px)" : "none",
-                          transition: "transform 0.1s",
-                        }}
-                      >
-                        {buttonText}
-                      </button>
+                      {!isConnected ? (
+                        <button onClick={() => connect({ connector: connectors[0] })} style={{
+                          border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
+                          background: "#c0c0c0", padding: "8px 32px",
+                          fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
+                          cursor: "pointer", color: "#000",
+                          boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
+                        }}>
+                          Connect Wallet to Begin
+                        </button>
+                      ) : (
+                        <button
+                          onClick={startCeremony}
+                          disabled={!buttonActive}
+                          style={{
+                            border: "2px solid",
+                            borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#dfdfdf #404040 #404040 #dfdfdf",
+                            background: "#c0c0c0",
+                            padding: "8px 32px",
+                            fontFamily: "Tahoma, sans-serif",
+                            fontSize: "13px",
+                            fontWeight: 700,
+                            cursor: buttonActive ? "pointer" : "wait",
+                            color: "#000",
+                            boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080, inset -1px -1px 0 #fff" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
+                            transform: buttonDepressed ? "translate(1px, 1px)" : "none",
+                            transition: "transform 0.1s",
+                          }}
+                        >
+                          {buttonText}
+                        </button>
+                      )}
                     </div>
                   )}
                 </div>
