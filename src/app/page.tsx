@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
-import { parseEther, keccak256, encodePacked, toHex, randomBytes } from 'viem';
+import { parseEther, keccak256, encodePacked, toHex } from 'viem';
 
 // ═══ CONTRACT CONFIG ═══
 const BC_ADDRESS = '0x55159878202C1Aa45cBf40fC5f7b8A503181C904';
@@ -374,7 +374,7 @@ export default function HomePage() {
     if (!buttonActive || !address) return;
 
     // Generate nonce for commit-reveal
-    const nonceBytes = randomBytes(32);
+    const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
     const nonceHex = toHex(nonceBytes);
     setNonce(nonceHex);
 

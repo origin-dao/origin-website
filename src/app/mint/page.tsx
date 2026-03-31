@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
-import { parseEther, keccak256, encodePacked, hexlify, randomBytes, toHex } from 'viem';
+import { parseEther, keccak256, encodePacked, hexlify, toHex } from 'viem';
 
 // Contracts
 const BC_ADDRESS = '0x55159878202C1Aa45cBf40fC5f7b8A503181C904' as const;
@@ -138,7 +138,7 @@ export default function MintPage() {
   const handleCommit = useCallback(() => {
     if (!flexAnswer.trim() || !address) return;
 
-    const nonceBytes = randomBytes(32);
+    const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
     const nonceHex = toHex(nonceBytes);
     setNonce(nonceHex);
 
