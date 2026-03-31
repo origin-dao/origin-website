@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { parseEther, keccak256, encodePacked, toHex } from 'viem';
 
@@ -284,7 +284,6 @@ const PressFeed = () => {
 // ═══ MAIN PAGE ═══
 export default function HomePage() {
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
 
   // Ceremony phase: idle | committing | waitingBlock | revealing | spinning | locking | gauntlet | completing | birth | death
   const [phase, setPhase] = useState("idle");
@@ -529,9 +528,8 @@ export default function HomePage() {
                 {phase === "idle" ? "Ready" : phase === "committing" || phase === "waitingBlock" ? "⏳ Confirming..." : phase === "revealing" ? "🔓 Revealing..." : phase === "spinning" ? "🎰 Spinning..." : phase === "gauntlet" ? "⚔️ Gauntlet" : phase === "completing" ? "⏳ Minting..." : phase === "birth" ? "🎉 Born!" : "💀 Dead"}
               </span>
               {isConnected && (
-                <span style={{ border: "1px solid #808080", padding: "0 6px", marginLeft: "auto", display: "flex", gap: "8px", alignItems: "center" }}>
+                <span style={{ border: "1px solid #808080", padding: "0 6px", marginLeft: "auto" }}>
                   {address?.slice(0, 6)}...{address?.slice(-4)}
-                  <button onClick={() => disconnect()} style={{ background: "none", border: "none", color: "#000080", cursor: "pointer", fontFamily: "Tahoma", fontSize: "9px", textDecoration: "underline" }}>Disconnect</button>
                 </span>
               )}
             </div>
