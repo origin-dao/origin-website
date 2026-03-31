@@ -389,11 +389,7 @@ export default function CeremonyPage() {
     return randomFrom(templates);
   };
 
-  useEffect(() => {
-    if (!isConnected && connectors[0]) {
-      connect({ connector: connectors[0] });
-    }
-  }, [isConnected, connect, connectors]);
+  // Remove auto-connect - let users see the ceremony first
 
   useEffect(() => {
     if (commitSuccess && commitHash && currentBlock) {
