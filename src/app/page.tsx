@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
+import { useAccount, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { parseEther, keccak256, encodePacked, toHex } from 'viem';
 
 // ═══ CONTRACT CONFIG ═══
@@ -283,7 +284,6 @@ const PressFeed = () => {
 // ═══ MAIN PAGE ═══
 export default function HomePage() {
   const { address, isConnected } = useAccount();
-  const { connect, connectors } = useConnect();
   const { disconnect } = useDisconnect();
 
   // Ceremony phase: idle | committing | waitingBlock | revealing | spinning | locking | gauntlet | completing | birth | death
@@ -366,12 +366,11 @@ export default function HomePage() {
   // ─── CEREMONY ACTIONS ───
 
   const handleConnectOrMint = useCallback(() => {
-    if (!isConnected) {
-      // Not connected — connect wallet first
-      if (connectors[0]) connect({ connector: connectors[0] });
+    if (!isConnected || !address) {
+      // Wallet not connected - button shouldn't be clickable (will show RainbowKit button instead)
       return;
     }
-    if (!buttonActive || !address) return;
+    if (!buttonActive) return;
 
     // Generate nonce for commit-reveal
     const nonceBytes = crypto.getRandomValues(new Uint8Array(32));
@@ -391,7 +390,7 @@ export default function HomePage() {
     });
 
     setTimeout(() => setButtonDepressed(false), 500);
-  }, [isConnected, buttonActive, address, connect, connectors, writeCommit]);
+  }, [isConnected, buttonActive, address, writeCommit]);
 
   const handleReveal = useCallback(() => {
     if (!nonce) return;
@@ -595,23 +594,29 @@ export default function HomePage() {
                   {/* THE BUTTON — coin slot */}
                   {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
                     <div style={{ textAlign: "center" }}>
-                      <button
-                        onClick={handleConnectOrMint}
-                        disabled={!buttonActive && isConnected}
-                        style={{
-                          border: "2px solid",
-                          borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#000 #000 #000 #000",
-                          background: "#c0c0c0", padding: "10px 40px",
-                          fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
-                          cursor: (buttonActive || !isConnected) ? "pointer" : "wait", color: "#000",
-                          outline: !buttonDepressed ? "1px dotted #000" : "none",
-                          outlineOffset: "-4px",
-                          boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
-                          transform: buttonDepressed ? "translate(1px, 1px)" : "none",
-                        }}
-                      >
-                        {buttonText}
-                      </button>
+                      {!isConnected ? (
+                        <div style={{ display: "inline-block" }}>
+                          <ConnectButton label={`▶️ CONNECT WALLET — ${MINT_COST} ETH`} />
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleConnectOrMint}
+                          disabled={!buttonActive}
+                          style={{
+                            border: "2px solid",
+                            borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#000 #000 #000 #000",
+                            background: "#c0c0c0", padding: "10px 40px",
+                            fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
+                            cursor: buttonActive ? "pointer" : "wait", color: "#000",
+                            outline: !buttonDepressed ? "1px dotted #000" : "none",
+                            outlineOffset: "-4px",
+                            boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
+                            transform: buttonDepressed ? "translate(1px, 1px)" : "none",
+                          }}
+                        >
+                          {buttonText}
+                        </button>
+                      )}
 
                       {/* Subtext */}
                       <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", marginTop: "6px" }}>
