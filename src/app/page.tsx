@@ -572,10 +572,74 @@ export default function CeremonyPage() {
           setTimeout(() => runChallenge(index + 1), 500);
         }
       }, duration);
-    };
+      };
 
-    runChallenge(0);
-  }, [balance, writeComplete]);
+      runChallenge(0);
+    } catch (err) {
+      console.error('Gauntlet API failed:', err);
+      // Fallback: run gauntlet locally
+      const willPass = Math.random() < 0.7;
+      let runningTotal = 0;
+      let failIndex = willPass ? -1 : Math.floor(Math.random() * 5);
+
+      const runChallenge = (index: number) => {
+        if (index >= 5) {
+          const agentFlex = generateFlexFromTraits(lockedTraits);
+          setFlexAnswer(agentFlex);
+          setTotalScore(runningTotal);
+          setPassed(true);
+          setPhase("completing");
+
+          const estimatedTokenId = balance ? Number(balance) + 1 : 1;
+
+          writeComplete({
+            address: BC_ADDRESS,
+            abi: BC_ABI,
+            functionName: 'completeGauntlet',
+            args: [estimatedTokenId, runningTotal, agentFlex],
+            gas: 500000n,
+          });
+
+          return;
+        }
+
+        setChallengeStates(prev => {
+          const next = [...prev];
+          next[index] = { status: "running", score: null };
+          return next;
+        });
+
+        const duration = 5000 + Math.random() * 3000;
+        setTimeout(() => {
+          if (index === failIndex) {
+            const score = Math.floor(Math.random() * 10) + 5;
+            runningTotal += score;
+            setChallengeStates(prev => {
+              const next = [...prev];
+              next[index] = { status: "failed", score };
+              return next;
+            });
+            setTotalScore(runningTotal);
+            setFailedAt(CHALLENGES[index].name);
+            setPassed(false);
+            setTimeout(() => setPhase("death"), 1500);
+          } else {
+            const score = Math.floor(Math.random() * 6) + 15;
+            runningTotal += score;
+            setChallengeStates(prev => {
+              const next = [...prev];
+              next[index] = { status: "passed", score };
+              return next;
+            });
+            setTotalScore(runningTotal);
+            setTimeout(() => runChallenge(index + 1), 500);
+          }
+        }, duration);
+      };
+
+      runChallenge(0);
+    }
+  }, [balance, writeComplete, lockedTraits]);
 
   const resetCeremony = () => {
     setPhase("idle");
