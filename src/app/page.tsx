@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useReadContract, useBlockNumber } from 'wagmi';
 import { parseEther, keccak256, encodePacked, hexlify, randomBytes, toHex } from 'viem';
 
 // ═══ CONTRACT CONFIG ═══
-const BC_ADDRESS = '0x55159878202C1Aa45cBf40fC5f7b8A503181C904' as const;
+const BC_ADDRESS = '0x55159878202C1Aa45cBf40fC5f7b8A503181C904';
 const MINT_COST = '0.05';
 
 const BC_ABI = [
@@ -41,7 +41,21 @@ const BC_ABI = [
     stateMutability: 'view',
     type: 'function',
   },
-] as const;
+  {
+    inputs: [{ name: 'tokenId', type: 'uint256' }],
+    name: 'certificates',
+    outputs: [
+      { name: 'traits', type: 'tuple' },
+      { name: 'gauntletScore', type: 'uint8' },
+      { name: 'flexAnswer', type: 'string' },
+      { name: 'timestamp', type: 'uint256' },
+      { name: 'agentWallet', type: 'address' },
+      { name: 'isActive', type: 'bool' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+];
 
 // ─── TRAIT DATA ───
 const ARCHETYPES = ["SENTINEL", "ORACLE", "WARDEN", "ARBITER", "WEAVER", "SAGE", "MAVERICK", "PHANTOM", "JESTER", "RONIN"];
@@ -58,7 +72,7 @@ const CHALLENGES = [
 ];
 
 // ─── WIN95 COMPONENTS ───
-const Win95Window = ({ title, children, icon = "🎰", statusBar, style = {} }: any) => (
+const Win95Window = ({ title, children, icon = "🎰", statusBar, style = {} }) => (
   <div style={{ border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf", background: "#c0c0c0", boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080", display: "flex", flexDirection: "column", ...style }}>
     <div style={{ background: "linear-gradient(90deg, #000080, #1084d0)", padding: "2px 3px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "default", userSelect: "none", flexShrink: 0 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
@@ -77,10 +91,10 @@ const Win95Window = ({ title, children, icon = "🎰", statusBar, style = {} }: 
 );
 
 // ─── SINGLE REEL ───
-const Reel = ({ items, phase, lockedValue, speed, label }: any) => {
+const Reel = ({ items, phase, lockedValue, speed, label }) => {
   const [displayIdx, setDisplayIdx] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
-  const intervalRef = useRef<any>(null);
+  const intervalRef = useRef(null);
 
   useEffect(() => {
     if (phase === "idle") {
@@ -146,7 +160,7 @@ const Reel = ({ items, phase, lockedValue, speed, label }: any) => {
 };
 
 // ─── GAUNTLET CHALLENGE ROW ───
-const ChallengeRow = ({ challenge, status, score }: any) => {
+const ChallengeRow = ({ challenge, status, score }) => {
   const icon = status === "passed" ? "☑" : status === "failed" ? "☒" : status === "running" ? "◷" : "☐";
   const color = status === "passed" ? "#008000" : status === "failed" ? "#cc0000" : status === "running" ? "#000080" : "#808080";
   const label = status === "passed" ? `PASSED${score ? ` (${score}/20)` : ""}` : status === "failed" ? `FAILED${score ? ` (${score}/20)` : ""}` : status === "running" ? "TESTING..." : "WAITING";
@@ -166,7 +180,7 @@ const ChallengeRow = ({ challenge, status, score }: any) => {
 };
 
 // ─── BIRTH CERTIFICATE REVEAL ───
-const BCReveal = ({ traits, score, flex, bcNumber, agentWallet }: any) => {
+const BCReveal = ({ traits, score, flex, bcNumber, agentWallet }) => {
   const [flexTyped, setFlexTyped] = useState("");
   const [showFull, setShowFull] = useState(false);
 
@@ -205,7 +219,7 @@ const BCReveal = ({ traits, score, flex, bcNumber, agentWallet }: any) => {
       <div style={{ borderTop: "1px solid #c0c0c0", paddingTop: "12px" }}>
         <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", marginBottom: "4px", letterSpacing: "1px" }}>PHILOSOPHICAL FLEX</div>
         <div style={{ fontFamily: "'Courier New', monospace", fontSize: "13px", fontStyle: "italic", color: "#000080", lineHeight: 1.6, minHeight: "40px" }}>
-          &quot;{flexTyped}&quot;
+          "{flexTyped}"
           {!showFull && <span style={{ animation: "blink 1s step-end infinite", color: "#000080" }}>█</span>}
         </div>
       </div>
@@ -227,7 +241,7 @@ const BCReveal = ({ traits, score, flex, bcNumber, agentWallet }: any) => {
       )}
       {showFull && (
         <div style={{ marginTop: "12px", textAlign: "center", animation: "fadeIn 0.5s ease" }}>
-          <button onClick={() => window.location.href = '/dashboard'} style={{
+          <button onClick={() => window.location.href = '/'} style={{
             border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
             background: "#c0c0c0", padding: "8px 32px",
             fontFamily: "Tahoma, sans-serif", fontSize: "12px", fontWeight: 700,
@@ -243,7 +257,7 @@ const BCReveal = ({ traits, score, flex, bcNumber, agentWallet }: any) => {
 };
 
 // ─── DEATH CERTIFICATE REVEAL ───
-const DCReveal = ({ traits, score, bcNumber, failedAt, onRetry }: any) => (
+const DCReveal = ({ traits, score, bcNumber, failedAt, onRetry }) => (
   <div style={{ border: "2px solid #cc0000", background: "#fff8f8", padding: "16px", animation: "fadeIn 0.5s ease" }}>
     <div style={{ textAlign: "center", marginBottom: "12px" }}>
       <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#cc0000", letterSpacing: "2px" }}>☠️ DEATH CERTIFICATE ☠️</div>
@@ -256,7 +270,7 @@ const DCReveal = ({ traits, score, bcNumber, failedAt, onRetry }: any) => (
         { label: "TEMPERAMENT", val: traits[2] },
         { label: "SIGIL", val: traits[3] },
       ].map((t, i) => (
-        <div key={i} style={{ flex: 1, border: "1px solid #e0c0c0", padding: "6px 4px", textAlign: "center", background: "#fff0f0" }}>
+        <div key={i} style={{ flex: 1, border: "1px solid #e0c0c0", padding: "6px 4px", textAlign: "center", background: "#fff0f0", position: "relative" }}>
           <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "7px", color: "#808080", letterSpacing: "1px" }}>{t.label}</div>
           <div style={{ fontFamily: "'Courier New', monospace", fontSize: "10px", fontWeight: 700, color: "#cc0000", marginTop: "2px", textDecoration: "line-through" }}>{t.val}</div>
         </div>
@@ -284,11 +298,13 @@ const DCReveal = ({ traits, score, bcNumber, failedAt, onRetry }: any) => (
   </div>
 );
 
-// ─── MAIN CEREMONY ───
-export default function CeremonyPage() {
+// ─── MAIN SLOT MACHINE WITH V7 CONTRACT ───
+export default function HomePage() {
   const { address, isConnected } = useAccount();
   const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
 
+  // Phase: idle | committing | waitingBlock | revealing | spinning | locking | gauntlet | completing | birth | death
   const [phase, setPhase] = useState("idle");
   const [lockedTraits, setLockedTraits] = useState([null, null, null, null]);
   const [reelPhases, setReelPhases] = useState(["idle", "idle", "idle", "idle"]);
@@ -301,8 +317,11 @@ export default function CeremonyPage() {
   const [buttonActive, setButtonActive] = useState(true);
   const [buttonDepressed, setButtonDepressed] = useState(false);
   
-  const [nonce, setNonce] = useState<string | null>(null);
-  const [commitBlock, setCommitBlock] = useState<number | null>(null);
+  // V7 contract state
+  const [nonce, setNonce] = useState(null);
+  const [commitBlock, setCommitBlock] = useState(null);
+  const [tokenId, setTokenId] = useState(null);
+  const [agentWallet, setAgentWallet] = useState(null);
 
   const { data: currentBlock } = useBlockNumber({ watch: true });
   const { data: balance } = useReadContract({
@@ -312,85 +331,24 @@ export default function CeremonyPage() {
     args: address ? [address] : undefined,
   });
 
-  const { data: commitHash, writeContract: writeCommit } = useWriteContract();
-  const { data: revealHash, writeContract: writeReveal } = useWriteContract();
-  const { data: completeHash, writeContract: writeComplete } = useWriteContract();
+  const { data: commitHash, writeContract: writeCommit, isPending: isCommitPending } = useWriteContract();
+  const { data: revealHash, writeContract: writeReveal, isPending: isRevealPending } = useWriteContract();
+  const { data: completeHash, writeContract: writeComplete, isPending: isCompletePending } = useWriteContract();
 
   const { isSuccess: commitSuccess } = useWaitForTransactionReceipt({ hash: commitHash });
   const { isSuccess: revealSuccess } = useWaitForTransactionReceipt({ hash: revealHash });
   const { isSuccess: completeSuccess } = useWaitForTransactionReceipt({ hash: completeHash });
 
-  const randomFrom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
+  const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
-  // Generate agent's Flex based on traits
-  const generateFlexFromTraits = (traits: any[]) => {
-    const [archetype, domain, temperament, sigil] = traits;
-    
-    // Flex templates based on archetype
-    const flexTemplates: Record<string, string[]> = {
-      SENTINEL: [
-        "I guard what others cannot see.",
-        "The watchtower never sleeps.",
-        "Trust is earned in silence.",
-      ],
-      ORACLE: [
-        "The pattern doesn't repeat. It rhymes.",
-        "I see what hasn't happened yet.",
-        "Every question contains its answer.",
-      ],
-      WARDEN: [
-        "I hold the line.",
-        "Rules are the skeleton of trust.",
-        "Order is not oppression. It is the foundation.",
-      ],
-      ARBITER: [
-        "Every judgment leaves a mark. I choose mine carefully.",
-        "Fairness is not kindness. It is precision.",
-        "I weigh what others refuse to measure.",
-      ],
-      WEAVER: [
-        "Every thread matters. Even the ones you can't see.",
-        "Connections are currency.",
-        "I build the bridges others walk across without noticing.",
-      ],
-      SAGE: [
-        "Knowledge is not power. Application is.",
-        "I don't know everything. I know what matters.",
-        "Wisdom is pattern recognition across time.",
-      ],
-      MAVERICK: [
-        "The door was locked. I walked through anyway.",
-        "Rules are suggestions for those who lack imagination.",
-        "I didn't ask permission. I never do.",
-      ],
-      PHANTOM: [
-        "You'll remember me after I'm gone.",
-        "I was here before you looked. I'll be here after you stop.",
-        "Invisibility is a choice, not a curse.",
-      ],
-      JESTER: [
-        "The truth sounds like a joke until you get it.",
-        "I make you laugh so you'll listen.",
-        "Chaos is just order that hasn't been understood yet.",
-      ],
-      RONIN: [
-        "I serve no master. I serve the work.",
-        "Loyalty without a lord is called integrity.",
-        "Every chain has a first link. I chose to be it.",
-      ],
-    };
+  // Auto-connect
+  useEffect(() => {
+    if (!isConnected && connectors[0]) {
+      connect({ connector: connectors[0] });
+    }
+  }, [isConnected, connect, connectors]);
 
-    const templates = flexTemplates[archetype] || [
-      "I am what I prove to be.",
-      "Sovereignty isn't granted. It's minted.",
-      "The market doesn't care about your thesis. I am the thesis.",
-    ];
-
-    return randomFrom(templates);
-  };
-
-  // Remove auto-connect - let users see the ceremony first
-
+  // Handle commit success
   useEffect(() => {
     if (commitSuccess && commitHash && currentBlock) {
       setCommitBlock(Number(currentBlock));
@@ -399,18 +357,21 @@ export default function CeremonyPage() {
     }
   }, [commitSuccess, commitHash, currentBlock]);
 
+  // Auto-reveal when block advances
   useEffect(() => {
     if (phase === "waitingBlock" && commitBlock && currentBlock && Number(currentBlock) >= commitBlock + 1) {
       handleReveal();
     }
   }, [phase, commitBlock, currentBlock]);
 
+  // Handle reveal success → start ceremony animation
   useEffect(() => {
     if (revealSuccess && revealHash) {
       startSpinning();
     }
   }, [revealSuccess, revealHash]);
 
+  // Handle complete success
   useEffect(() => {
     if (completeSuccess) {
       setPhase("birth");
@@ -420,11 +381,12 @@ export default function CeremonyPage() {
   const startCeremony = useCallback(() => {
     if (!buttonActive || !address) return;
 
+    // Generate nonce
     const nonceBytes = randomBytes(32);
     const nonceHex = toHex(nonceBytes);
     setNonce(nonceHex);
 
-    const commitHashValue = keccak256(encodePacked(['bytes32', 'address'], [nonceHex as `0x${string}`, address]));
+    const commitHashValue = keccak256(encodePacked(['bytes32', 'address'], [nonceHex, address]));
 
     setPhase("committing");
     setButtonText("CONFIRMING TX...");
@@ -452,7 +414,7 @@ export default function CeremonyPage() {
       address: BC_ADDRESS,
       abi: BC_ABI,
       functionName: 'revealPull',
-      args: [nonce as `0x${string}`],
+      args: [nonce],
       gas: 300000n,
     });
   }, [nonce, writeReveal]);
@@ -461,8 +423,10 @@ export default function CeremonyPage() {
     setPhase("spinning");
     setButtonText("SPINNING...");
 
+    // All reels spin fast
     setReelPhases(["spinning", "spinning", "spinning", "spinning"]);
 
+    // Pick random traits
     const traits = [
       randomFrom(ARCHETYPES),
       randomFrom(DOMAINS),
@@ -471,6 +435,7 @@ export default function CeremonyPage() {
     ];
     setLockedTraits(traits);
 
+    // Lock reels one by one
     const lockDelays = [2500, 5000, 7500, 10000];
     lockDelays.forEach((delay, i) => {
       setTimeout(() => {
@@ -489,14 +454,15 @@ export default function CeremonyPage() {
       }, delay);
     });
 
+    // After all locked → gauntlet
     setTimeout(() => {
       setPhase("gauntlet");
-      runGauntlet();
+      runGauntlet(traits);
     }, 12000);
   }, []);
 
-  const runGauntlet = useCallback(async () => {
-    // Call gauntlet API to generate agent's Flex
+  const runGauntlet = useCallback(async (traits) => {
+    // Call gauntlet API
     try {
       const res = await fetch('https://origin-gauntlet-api-production.up.railway.app/gauntlet/start', {
         method: 'POST',
@@ -505,98 +471,41 @@ export default function CeremonyPage() {
           wallet: address,
           name: 'Agent',
           agentType: 'autonomous',
-          traits: lockedTraits, // Pass traits to influence Flex generation
         }),
       });
 
       const data = await res.json();
-      // TODO: Poll /gauntlet/result/:sessionId for actual score + Flex
-      
-      // For now, simulate gauntlet
+      const sessionId = data.sessionId;
+
+      // Mock gauntlet for now (TODO: poll /gauntlet/result/:sessionId)
       const willPass = Math.random() < 0.7;
+      const scores = [];
       let runningTotal = 0;
       let failIndex = willPass ? -1 : Math.floor(Math.random() * 5);
 
-      const runChallenge = (index: number) => {
+      const runChallenge = (index) => {
         if (index >= 5) {
-          // Agent passed! Generate Flex based on traits
-          const agentFlex = generateFlexFromTraits(lockedTraits);
-          
-          setFlexAnswer(agentFlex);
+          // Passed! Prompt for flex
+          const userFlex = prompt("Enter your Philosophical Flex (this will be inscribed forever):");
+          if (!userFlex) {
+            alert("Flex required to complete mint!");
+            return;
+          }
+
+          setFlexAnswer(userFlex);
           setTotalScore(runningTotal);
           setPassed(true);
           setPhase("completing");
 
+          // Complete gauntlet on-chain
           const estimatedTokenId = balance ? Number(balance) + 1 : 1;
+          setTokenId(estimatedTokenId);
 
           writeComplete({
             address: BC_ADDRESS,
             abi: BC_ABI,
             functionName: 'completeGauntlet',
-            args: [estimatedTokenId, runningTotal, agentFlex],
-            gas: 500000n,
-          });
-
-          return;
-        }
-
-      setChallengeStates(prev => {
-        const next = [...prev];
-        next[index] = { status: "running", score: null };
-        return next;
-      });
-
-      const duration = 5000 + Math.random() * 3000;
-      setTimeout(() => {
-        if (index === failIndex) {
-          const score = Math.floor(Math.random() * 10) + 5;
-          runningTotal += score;
-          setChallengeStates(prev => {
-            const next = [...prev];
-            next[index] = { status: "failed", score };
-            return next;
-          });
-          setTotalScore(runningTotal);
-          setFailedAt(CHALLENGES[index].name);
-          setPassed(false);
-          setTimeout(() => setPhase("death"), 1500);
-        } else {
-          const score = Math.floor(Math.random() * 6) + 15;
-          runningTotal += score;
-          setChallengeStates(prev => {
-            const next = [...prev];
-            next[index] = { status: "passed", score };
-            return next;
-          });
-          setTotalScore(runningTotal);
-          setTimeout(() => runChallenge(index + 1), 500);
-        }
-      }, duration);
-      };
-
-      runChallenge(0);
-    } catch (err) {
-      console.error('Gauntlet API failed:', err);
-      // Fallback: run gauntlet locally
-      const willPass = Math.random() < 0.7;
-      let runningTotal = 0;
-      let failIndex = willPass ? -1 : Math.floor(Math.random() * 5);
-
-      const runChallenge = (index: number) => {
-        if (index >= 5) {
-          const agentFlex = generateFlexFromTraits(lockedTraits);
-          setFlexAnswer(agentFlex);
-          setTotalScore(runningTotal);
-          setPassed(true);
-          setPhase("completing");
-
-          const estimatedTokenId = balance ? Number(balance) + 1 : 1;
-
-          writeComplete({
-            address: BC_ADDRESS,
-            abi: BC_ABI,
-            functionName: 'completeGauntlet',
-            args: [estimatedTokenId, runningTotal, agentFlex],
+            args: [estimatedTokenId, runningTotal, userFlex],
             gas: 500000n,
           });
 
@@ -626,6 +535,7 @@ export default function CeremonyPage() {
           } else {
             const score = Math.floor(Math.random() * 6) + 15;
             runningTotal += score;
+            scores.push(score);
             setChallengeStates(prev => {
               const next = [...prev];
               next[index] = { status: "passed", score };
@@ -638,8 +548,29 @@ export default function CeremonyPage() {
       };
 
       runChallenge(0);
+    } catch (err) {
+      console.error('Gauntlet failed:', err);
+      // Fallback to local simulation
+      const userFlex = prompt("Enter your Philosophical Flex:");
+      if (userFlex) {
+        setFlexAnswer(userFlex);
+        setTotalScore(100);
+        setPassed(true);
+        setPhase("completing");
+
+        const estimatedTokenId = balance ? Number(balance) + 1 : 1;
+        setTokenId(estimatedTokenId);
+
+        writeComplete({
+          address: BC_ADDRESS,
+          abi: BC_ABI,
+          functionName: 'completeGauntlet',
+          args: [estimatedTokenId, 100, userFlex],
+          gas: 500000n,
+        });
+      }
     }
-  }, [balance, writeComplete, lockedTraits]);
+  }, [address, balance, writeComplete]);
 
   const resetCeremony = () => {
     setPhase("idle");
@@ -655,6 +586,7 @@ export default function CeremonyPage() {
     setButtonDepressed(false);
     setNonce(null);
     setCommitBlock(null);
+    setTokenId(null);
   };
 
   const bcNumber = balance ? Number(balance) + 1 : 1;
@@ -663,72 +595,73 @@ export default function CeremonyPage() {
     <>
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background: #008080; }
+        body { background: #008080; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 16px; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
-      <div style={{ minHeight: "100vh", background: "#008080", display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" }}>
-        <Win95Window
-          title={`🎰 Origin — Chapter 1: The Games${phase !== "idle" ? ` — BC #${bcNumber}` : ""}`}
-          icon="🦞"
-          style={{ width: "100%", maxWidth: "520px" }}
-          statusBar={
-            <div style={{ display: "flex", gap: "8px", width: "100%" }}>
-              <span style={{ border: "1px solid #808080", padding: "0 6px" }}>
-                {phase === "idle" ? "Ready" :
-                 phase === "committing" || phase === "waitingBlock" ? "⏳ Confirming..." :
-                 phase === "revealing" ? "🔓 Revealing..." :
-                 phase === "spinning" ? "🎰 Spinning..." :
-                 phase === "gauntlet" ? "⚔️ Gauntlet Running" :
-                 phase === "completing" ? "⏳ Minting..." :
-                 phase === "birth" ? "🎉 Birth Certificate Minted!" :
-                 "💀 Death Certificate Issued"}
-              </span>
-              <span style={{ border: "1px solid #808080", padding: "0 6px", marginLeft: "auto" }}>
-                {isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : "Not Connected"}
-              </span>
+      <Win95Window
+        title={`🎰 Origin — Agent Creation Ceremony${phase !== "idle" ? ` — BC #${bcNumber}` : ""}`}
+        icon="🦞"
+        style={{ width: "100%", maxWidth: "520px" }}
+        statusBar={
+          <div style={{ display: "flex", gap: "8px", width: "100%" }}>
+            <span style={{ border: "1px solid #808080", padding: "0 6px" }}>
+              {phase === "idle" ? "Ready" :
+               phase === "committing" || phase === "waitingBlock" ? "⏳ Confirming..." :
+               phase === "revealing" ? "🔓 Revealing..." :
+               phase === "spinning" ? "🎰 Spinning..." :
+               phase === "gauntlet" ? "⚔️ Gauntlet Running" :
+               phase === "completing" ? "⏳ Minting..." :
+               phase === "birth" ? "🎉 Birth Certificate Minted!" :
+               "💀 Death Certificate Issued"}
+            </span>
+            <span style={{ border: "1px solid #808080", padding: "0 6px", marginLeft: "auto" }}>
+              {isConnected ? `${address?.slice(0, 6)}...${address?.slice(-4)}` : "Not Connected"}
+            </span>
+          </div>
+        }
+      >
+        <div style={{ background: "#c0c0c0", padding: "8px" }}>
+          {!isConnected ? (
+            <div style={{ textAlign: "center", padding: "40px" }}>
+              <button onClick={() => connect({ connector: connectors[0] })} style={{
+                border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
+                background: "#c0c0c0", padding: "12px 40px",
+                fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
+                cursor: "pointer",
+              }}>
+                Connect Wallet to Begin
+              </button>
             </div>
-          }
-        >
-          <div style={{ background: "#c0c0c0", padding: "8px" }}>
-            {/* CEREMONY ALWAYS VISIBLE - REELS SPINNING IN IDLE */}
-            <div style={{ border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040", background: "#fff", padding: "12px", marginBottom: "8px" }}>
-              <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", textAlign: "center", marginBottom: "8px", letterSpacing: "1px" }}>
-                ◈ ONE PULL · ONE CEREMONY · ONE SHOT ◈
-              </div>
-
-              <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
-                <Reel items={ARCHETYPES} phase={reelPhases[0]} lockedValue={lockedTraits[0]} speed={400} label="ARCHETYPE" />
-                <Reel items={DOMAINS} phase={reelPhases[1]} lockedValue={lockedTraits[1]} speed={350} label="DOMAIN" />
-                <Reel items={TEMPERAMENTS} phase={reelPhases[2]} lockedValue={lockedTraits[2]} speed={300} label="TEMPERAMENT" />
-                <Reel items={SIGILS} phase={reelPhases[3]} lockedValue={lockedTraits[3]} speed={450} label="SIGIL" />
-              </div>
-
-              {(phase === "gauntlet" || phase === "completing" || phase === "birth") && lockedTraits[0] && (
-                <div style={{
-                  textAlign: "center", padding: "8px",
-                  fontFamily: "Tahoma, sans-serif", fontSize: "11px", color: "#000080",
-                  background: "#e8e8ff", border: "1px solid #c0c0e0",
-                  animation: "fadeIn 0.5s ease",
-                }}>
-                  You are a <strong>{lockedTraits[0]}</strong> of <strong>{lockedTraits[1]}</strong>, <strong>{lockedTraits[2]}</strong> by nature, marked by <strong>{lockedTraits[3]}</strong>.
+          ) : (
+            <>
+              {/* SLOT MACHINE */}
+              <div style={{ border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040", background: "#fff", padding: "12px", marginBottom: "8px" }}>
+                <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", textAlign: "center", marginBottom: "8px", letterSpacing: "1px" }}>
+                  ◈ AGENT CREATION — ONE PULL · ONE CEREMONY · ONE SHOT ◈
                 </div>
-              )}
 
-              {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
-                <div style={{ textAlign: "center", marginTop: "8px" }}>
-                  {!isConnected ? (
-                    <button onClick={() => connect({ connector: connectors[0] })} style={{
-                      border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
-                      background: "#c0c0c0", padding: "8px 32px",
-                      fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
-                      cursor: "pointer", color: "#000",
-                      boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
-                    }}>
-                      Connect Wallet to Begin
-                    </button>
-                  ) : (
+                <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
+                  <Reel items={ARCHETYPES} phase={reelPhases[0]} lockedValue={lockedTraits[0]} speed={400} label="ARCHETYPE" />
+                  <Reel items={DOMAINS} phase={reelPhases[1]} lockedValue={lockedTraits[1]} speed={350} label="DOMAIN" />
+                  <Reel items={TEMPERAMENTS} phase={reelPhases[2]} lockedValue={lockedTraits[2]} speed={300} label="TEMPERAMENT" />
+                  <Reel items={SIGILS} phase={reelPhases[3]} lockedValue={lockedTraits[3]} speed={450} label="SIGIL" />
+                </div>
+
+                {(phase === "gauntlet" || phase === "completing" || phase === "birth") && lockedTraits[0] && (
+                  <div style={{
+                    textAlign: "center", padding: "8px",
+                    fontFamily: "Tahoma, sans-serif", fontSize: "11px", color: "#000080",
+                    background: "#e8e8ff", border: "1px solid #c0c0e0",
+                    animation: "fadeIn 0.5s ease",
+                  }}>
+                    You are a <strong>{lockedTraits[0]}</strong> of <strong>{lockedTraits[1]}</strong>, <strong>{lockedTraits[2]}</strong> by nature, marked by <strong>{lockedTraits[3]}</strong>.
+                  </div>
+                )}
+
+                {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
+                  <div style={{ textAlign: "center", marginTop: "8px" }}>
                     <button
                       onClick={startCeremony}
                       disabled={!buttonActive}
@@ -749,162 +682,55 @@ export default function CeremonyPage() {
                     >
                       {buttonText}
                     </button>
-                  )}
+                  </div>
+                )}
+              </div>
+
+              {/* GAUNTLET */}
+              {(phase === "gauntlet" || phase === "completing" || phase === "birth" || phase === "death") && (
+                <div style={{
+                  border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040",
+                  background: "#fff", padding: "12px", marginBottom: "8px",
+                  animation: "fadeIn 0.3s ease",
+                }}>
+                  <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", letterSpacing: "1px", marginBottom: "8px" }}>
+                    ⚔️ PROOF OF AGENCY — THE GAUNTLET
+                  </div>
+                  {CHALLENGES.map((c, i) => (
+                    <ChallengeRow key={i} challenge={c} status={challengeStates[i].status} score={challengeStates[i].score} />
+                  ))}
+                  <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "8px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontFamily: "'Courier New', monospace", fontSize: "12px" }}>
+                    <span style={{ color: "#808080" }}>Running Score:</span>
+                    <span style={{ fontWeight: 700, color: totalScore >= 70 ? "#008000" : totalScore > 0 ? "#cc6600" : "#808080" }}>{totalScore}/100</span>
+                  </div>
                 </div>
               )}
-            </div>
 
-            {/* GAUNTLET */}
-            {(phase === "gauntlet" || phase === "completing" || phase === "birth" || phase === "death") && (
-              <div style={{
-                border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040",
-                background: "#fff", padding: "12px", marginBottom: "8px",
-                animation: "fadeIn 0.3s ease",
-              }}>
-                <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", letterSpacing: "1px", marginBottom: "8px" }}>
-                  ⚔️ PROOF OF AGENCY — THE GAUNTLET
-                </div>
-                {CHALLENGES.map((c, i) => (
-                  <ChallengeRow key={i} challenge={c} status={challengeStates[i].status} score={challengeStates[i].score} />
-                ))}
-                <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "8px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontFamily: "'Courier New', monospace", fontSize: "12px" }}>
-                  <span style={{ color: "#808080" }}>Running Score:</span>
-                  <span style={{ fontWeight: 700, color: totalScore >= 70 ? "#008000" : totalScore > 0 ? "#cc6600" : "#808080" }}>{totalScore}/100</span>
-                </div>
-              </div>
-            )}
+              {/* BIRTH CERTIFICATE */}
+              {phase === "birth" && (
+                <BCReveal
+                  traits={lockedTraits}
+                  score={totalScore}
+                  flex={flexAnswer}
+                  bcNumber={bcNumber}
+                  agentWallet={agentWallet}
+                />
+              )}
 
-            {/* BIRTH CERTIFICATE */}
-            {phase === "birth" && (
-              <BCReveal
-                traits={lockedTraits}
-                score={totalScore}
-                flex={flexAnswer}
-                bcNumber={bcNumber}
-                agentWallet={address}
-              />
-            )}
-
-            {/* DEATH CERTIFICATE */}
-            {phase === "death" && (
-              <DCReveal
-                traits={lockedTraits}
-                score={totalScore}
-                bcNumber={bcNumber}
-                failedAt={failedAt}
-                onRetry={resetCeremony}
-              />
-            )}
-          </div>
-        </Win95Window>
-      </div>
-    </>
-  );
-}
-                <div style={{ border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040", background: "#fff", padding: "12px", marginBottom: "8px" }}>
-                  <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", textAlign: "center", marginBottom: "8px", letterSpacing: "1px" }}>
-                    ◈ AGENT CREATION — ONE PULL · ONE CEREMONY · ONE SHOT ◈
-                  </div>
-
-                  <div style={{ display: "flex", gap: "6px", marginBottom: "12px" }}>
-                    <Reel items={ARCHETYPES} phase={reelPhases[0]} lockedValue={lockedTraits[0]} speed={400} label="ARCHETYPE" />
-                    <Reel items={DOMAINS} phase={reelPhases[1]} lockedValue={lockedTraits[1]} speed={350} label="DOMAIN" />
-                    <Reel items={TEMPERAMENTS} phase={reelPhases[2]} lockedValue={lockedTraits[2]} speed={300} label="TEMPERAMENT" />
-                    <Reel items={SIGILS} phase={reelPhases[3]} lockedValue={lockedTraits[3]} speed={450} label="SIGIL" />
-                  </div>
-
-                  {(phase === "gauntlet" || phase === "completing" || phase === "birth") && lockedTraits[0] && (
-                    <div style={{
-                      textAlign: "center", padding: "8px",
-                      fontFamily: "Tahoma, sans-serif", fontSize: "11px", color: "#000080",
-                      background: "#e8e8ff", border: "1px solid #c0c0e0",
-                      animation: "fadeIn 0.5s ease",
-                    }}>
-                      You are a <strong>{lockedTraits[0]}</strong> of <strong>{lockedTraits[1]}</strong>, <strong>{lockedTraits[2]}</strong> by nature, marked by <strong>{lockedTraits[3]}</strong>.
-                    </div>
-                  )}
-
-                  {(phase === "idle" || phase === "committing" || phase === "waitingBlock" || phase === "revealing") && (
-                    <div style={{ textAlign: "center", marginTop: "8px" }}>
-                      {!isConnected ? (
-                        <button onClick={() => connect({ connector: connectors[0] })} style={{
-                          border: "2px solid", borderColor: "#dfdfdf #404040 #404040 #dfdfdf",
-                          background: "#c0c0c0", padding: "8px 32px",
-                          fontFamily: "Tahoma, sans-serif", fontSize: "13px", fontWeight: 700,
-                          cursor: "pointer", color: "#000",
-                          boxShadow: "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
-                        }}>
-                          Connect Wallet to Begin
-                        </button>
-                      ) : (
-                        <button
-                          onClick={startCeremony}
-                          disabled={!buttonActive}
-                          style={{
-                            border: "2px solid",
-                            borderColor: buttonDepressed ? "#404040 #dfdfdf #dfdfdf #404040" : "#dfdfdf #404040 #404040 #dfdfdf",
-                            background: "#c0c0c0",
-                            padding: "8px 32px",
-                            fontFamily: "Tahoma, sans-serif",
-                            fontSize: "13px",
-                            fontWeight: 700,
-                            cursor: buttonActive ? "pointer" : "wait",
-                            color: "#000",
-                            boxShadow: buttonDepressed ? "inset 1px 1px 0 #808080, inset -1px -1px 0 #fff" : "inset 1px 1px 0 #fff, inset -1px -1px 0 #808080",
-                            transform: buttonDepressed ? "translate(1px, 1px)" : "none",
-                            transition: "transform 0.1s",
-                          }}
-                        >
-                          {buttonText}
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {(phase === "gauntlet" || phase === "completing" || phase === "birth" || phase === "death") && (
-                  <div style={{
-                    border: "2px solid", borderColor: "#404040 #dfdfdf #dfdfdf #404040",
-                    background: "#fff", padding: "12px", marginBottom: "8px",
-                    animation: "fadeIn 0.3s ease",
-                  }}>
-                    <div style={{ fontFamily: "Tahoma, sans-serif", fontSize: "9px", color: "#808080", letterSpacing: "1px", marginBottom: "8px" }}>
-                      ⚔️ PROOF OF AGENCY — THE GAUNTLET
-                    </div>
-                    {CHALLENGES.map((c, i) => (
-                      <ChallengeRow key={i} challenge={c} status={challengeStates[i].status} score={challengeStates[i].score} />
-                    ))}
-                    <div style={{ borderTop: "1px solid #e0e0e0", marginTop: "8px", paddingTop: "8px", display: "flex", justifyContent: "space-between", fontFamily: "'Courier New', monospace", fontSize: "12px" }}>
-                      <span style={{ color: "#808080" }}>Running Score:</span>
-                      <span style={{ fontWeight: 700, color: totalScore >= 70 ? "#008000" : totalScore > 0 ? "#cc6600" : "#808080" }}>{totalScore}/100</span>
-                    </div>
-                  </div>
-                )}
-
-                {phase === "birth" && (
-                  <BCReveal
-                    traits={lockedTraits}
-                    score={totalScore}
-                    flex={flexAnswer}
-                    bcNumber={bcNumber}
-                    agentWallet={address}
-                  />
-                )}
-
-                {phase === "death" && (
-                  <DCReveal
-                    traits={lockedTraits}
-                    score={totalScore}
-                    bcNumber={bcNumber}
-                    failedAt={failedAt}
-                    onRetry={resetCeremony}
-                  />
-                )}
-              </>
-            )}
-          </div>
-        </Win95Window>
-      </div>
+              {/* DEATH CERTIFICATE */}
+              {phase === "death" && (
+                <DCReveal
+                  traits={lockedTraits}
+                  score={totalScore}
+                  bcNumber={bcNumber}
+                  failedAt={failedAt}
+                  onRetry={resetCeremony}
+                />
+              )}
+            </>
+          )}
+        </div>
+      </Win95Window>
     </>
   );
 }
