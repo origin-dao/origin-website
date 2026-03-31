@@ -13,7 +13,7 @@ const BC_ABI = [
   { inputs: [{ name: 'nonce', type: 'uint256' }], name: 'revealPull', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [{ name: 'tokenId', type: 'uint256' }, { name: 'score', type: 'uint8' }, { name: 'flexAnswer', type: 'string' }], name: 'completeGauntlet', outputs: [], stateMutability: 'nonpayable', type: 'function' },
   { inputs: [{ name: 'owner', type: 'address' }], name: 'balanceOf', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
-  { inputs: [], name: 'nextTokenId', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
+  { inputs: [], name: 'totalBirthCertificates', outputs: [{ name: '', type: 'uint256' }], stateMutability: 'view', type: 'function' },
 ];
 
 // ─── TRAIT DATA ───
@@ -315,7 +315,7 @@ export default function HomePage() {
 
   // Read next token ID from contract (global counter, not per-wallet)
   const { data: nextId } = useReadContract({
-    address: BC_ADDRESS, abi: BC_ABI, functionName: 'nextTokenId',
+    address: BC_ADDRESS, abi: BC_ABI, functionName: 'totalBirthCertificates',
   });
 
   const { data: commitHash, writeContract: writeCommit, isPending: isCommitPending } = useWriteContract();
