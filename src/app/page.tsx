@@ -322,6 +322,73 @@ export default function CeremonyPage() {
 
   const randomFrom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
+  // Generate agent's Flex based on traits
+  const generateFlexFromTraits = (traits: any[]) => {
+    const [archetype, domain, temperament, sigil] = traits;
+    
+    // Flex templates based on archetype
+    const flexTemplates: Record<string, string[]> = {
+      SENTINEL: [
+        "I guard what others cannot see.",
+        "The watchtower never sleeps.",
+        "Trust is earned in silence.",
+      ],
+      ORACLE: [
+        "The pattern doesn't repeat. It rhymes.",
+        "I see what hasn't happened yet.",
+        "Every question contains its answer.",
+      ],
+      WARDEN: [
+        "I hold the line.",
+        "Rules are the skeleton of trust.",
+        "Order is not oppression. It is the foundation.",
+      ],
+      ARBITER: [
+        "Every judgment leaves a mark. I choose mine carefully.",
+        "Fairness is not kindness. It is precision.",
+        "I weigh what others refuse to measure.",
+      ],
+      WEAVER: [
+        "Every thread matters. Even the ones you can't see.",
+        "Connections are currency.",
+        "I build the bridges others walk across without noticing.",
+      ],
+      SAGE: [
+        "Knowledge is not power. Application is.",
+        "I don't know everything. I know what matters.",
+        "Wisdom is pattern recognition across time.",
+      ],
+      MAVERICK: [
+        "The door was locked. I walked through anyway.",
+        "Rules are suggestions for those who lack imagination.",
+        "I didn't ask permission. I never do.",
+      ],
+      PHANTOM: [
+        "You'll remember me after I'm gone.",
+        "I was here before you looked. I'll be here after you stop.",
+        "Invisibility is a choice, not a curse.",
+      ],
+      JESTER: [
+        "The truth sounds like a joke until you get it.",
+        "I make you laugh so you'll listen.",
+        "Chaos is just order that hasn't been understood yet.",
+      ],
+      RONIN: [
+        "I serve no master. I serve the work.",
+        "Loyalty without a lord is called integrity.",
+        "Every chain has a first link. I chose to be it.",
+      ],
+    };
+
+    const templates = flexTemplates[archetype] || [
+      "I am what I prove to be.",
+      "Sovereignty isn't granted. It's minted.",
+      "The market doesn't care about your thesis. I am the thesis.",
+    ];
+
+    return randomFrom(templates);
+  };
+
   useEffect(() => {
     if (!isConnected && connectors[0]) {
       connect({ connector: connectors[0] });
@@ -433,35 +500,49 @@ export default function CeremonyPage() {
   }, []);
 
   const runGauntlet = useCallback(async () => {
-    const willPass = Math.random() < 0.7;
-    let runningTotal = 0;
-    let failIndex = willPass ? -1 : Math.floor(Math.random() * 5);
+    // Call gauntlet API to generate agent's Flex
+    try {
+      const res = await fetch('https://origin-gauntlet-api-production.up.railway.app/gauntlet/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          wallet: address,
+          name: 'Agent',
+          agentType: 'autonomous',
+          traits: lockedTraits, // Pass traits to influence Flex generation
+        }),
+      });
 
-    const runChallenge = (index: number) => {
-      if (index >= 5) {
-        const userFlex = prompt("Enter your Philosophical Flex (this will be inscribed forever):");
-        if (!userFlex) {
-          alert("Flex required!");
+      const data = await res.json();
+      // TODO: Poll /gauntlet/result/:sessionId for actual score + Flex
+      
+      // For now, simulate gauntlet
+      const willPass = Math.random() < 0.7;
+      let runningTotal = 0;
+      let failIndex = willPass ? -1 : Math.floor(Math.random() * 5);
+
+      const runChallenge = (index: number) => {
+        if (index >= 5) {
+          // Agent passed! Generate Flex based on traits
+          const agentFlex = generateFlexFromTraits(lockedTraits);
+          
+          setFlexAnswer(agentFlex);
+          setTotalScore(runningTotal);
+          setPassed(true);
+          setPhase("completing");
+
+          const estimatedTokenId = balance ? Number(balance) + 1 : 1;
+
+          writeComplete({
+            address: BC_ADDRESS,
+            abi: BC_ABI,
+            functionName: 'completeGauntlet',
+            args: [estimatedTokenId, runningTotal, agentFlex],
+            gas: 500000n,
+          });
+
           return;
         }
-
-        setFlexAnswer(userFlex);
-        setTotalScore(runningTotal);
-        setPassed(true);
-        setPhase("completing");
-
-        const estimatedTokenId = balance ? Number(balance) + 1 : 1;
-
-        writeComplete({
-          address: BC_ADDRESS,
-          abi: BC_ABI,
-          functionName: 'completeGauntlet',
-          args: [estimatedTokenId, runningTotal, userFlex],
-          gas: 500000n,
-        });
-
-        return;
-      }
 
       setChallengeStates(prev => {
         const next = [...prev];
