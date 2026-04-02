@@ -69,24 +69,24 @@ const NAME_POOL = [
   "Flare","Wren","Axiom","Fuse","Shade","Prism","Vigil","Ember",
 ];
 
-const randomFrom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const randomFrom = (arr: string[]) => arr[Math.floor(Math.random() * arr.length)];
 
 // ═══ SPINNING REEL ═══
 const CeremonyReel = ({ label, phase, items, lockedValue, icon }: { label: string; phase: string; items: string[]; lockedValue: string | null; icon: string }) => {
   const [idx, setIdx] = useState(Math.floor(Math.random() * items.length));
-  const ivRef = useRef(null);
+  const ivRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    clearInterval(ivRef.current);
+    if (ivRef.current) clearInterval(ivRef.current);
     if (phase === "spinning") {
       ivRef.current = setInterval(() => setIdx(i => (i+1) % items.length), 60);
     } else if (phase === "slowing") {
       let speed = 60;
       const decel = () => {
         speed += 30;
-        clearInterval(ivRef.current);
+        if (ivRef.current) clearInterval(ivRef.current);
         if (speed > 300) {
-          const lockIdx = items.indexOf(lockedValue);
+          const lockIdx = items.indexOf(lockedValue as string);
           if (lockIdx >= 0) setIdx(lockIdx);
           return;
         }
@@ -95,11 +95,11 @@ const CeremonyReel = ({ label, phase, items, lockedValue, icon }: { label: strin
       };
       decel();
     } else if (phase === "locked") {
-      clearInterval(ivRef.current);
-      const lockIdx = items.indexOf(lockedValue);
+      if (ivRef.current) clearInterval(ivRef.current);
+      const lockIdx = items.indexOf(lockedValue as string);
       if (lockIdx >= 0) setIdx(lockIdx);
     }
-    return () => clearInterval(ivRef.current);
+    return () => { if (ivRef.current) clearInterval(ivRef.current); };
   }, [phase, lockedValue, items]);
 
   const isLocked = phase === "locked";
@@ -152,15 +152,15 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
   // Phases: idle → committing → waiting → revealing → spinning → locking → gauntlet → flex → naming → birth | death
   const [phase, setPhase] = useState("idle");
   const [statusMsg, setStatusMsg] = useState("The ceremony begins...");
-  const [nonce, setNonce] = useState(null);
-  const [txHash, setTxHash] = useState(null);
+  const [nonce, setNonce] = useState<bigint | null>(null);
+  const [txHash, setTxHash] = useState<string | null>(null);
 
   // Reel states
   const [reelPhases, setReelPhases] = useState(["idle","idle","idle","idle"]);
-  const [lockedTraits, setLockedTraits] = useState([null,null,null,null]);
+  const [lockedTraits, setLockedTraits] = useState<(string | null)[]>([null,null,null,null]);
 
   // Gauntlet states
-  const [challengeStates, setChallengeStates] = useState(CHALLENGES.map(() => ({ status:"waiting", score:null })));
+  const [challengeStates, setChallengeStates] = useState(CHALLENGES.map(() => ({ status:"waiting" as string, score: null as number | null })));
   const [totalScore, setTotalScore] = useState(0);
 
   // Results
@@ -168,7 +168,7 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
   const [flexTyped, setFlexTyped] = useState("");
   const [agentName, setAgentName] = useState("");
   const [nameTyped, setNameTyped] = useState("");
-  const [bcNumber, setBcNumber] = useState(null);
+  const [bcNumber, setBcNumber] = useState<number | null>(null);
 
   // ─── PHASE 1: COMMIT ───
   const startCeremony = useCallback(async () => {
@@ -228,13 +228,13 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
       // ─── PHASE 4+5: SPINNING & LOCKING ───
       startSpinAndLock();
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("Ceremony error:", err);
-      if (err.message?.includes("denied") || err.message?.includes("rejected")) {
+      if (err?.message?.includes("denied") || err?.message?.includes("rejected")) {
         setStatusMsg("Transaction cancelled.");
         setPhase("idle");
       } else {
-        setStatusMsg(`Error: ${err.shortMessage || err.message}`);
+        setStatusMsg(`Error: ${err?.shortMessage || err?.message || "Unknown error"}`);
         setPhase("error");
       }
     }
@@ -272,14 +272,14 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
   }, []);
 
   // ─── PHASE 6: GAUNTLET ───
-  const runGauntlet = useCallback((traits) => {
+  const runGauntlet = useCallback((traits: string[]) => {
     setPhase("gauntlet");
     setStatusMsg("⚔️ PROOF OF AGENCY — THE GAUNTLET");
 
     let runningTotal = 0;
-    const willPass = true; // Always pass for now — wire real gauntlet later
+    // Always pass for now — wire real gauntlet later
 
-    const runChallenge = (index) => {
+    const runChallenge = (index: number) => {
       if (index >= 5) {
         // All passed → flex
         setTimeout(() => startFlex(traits, runningTotal), 1000);
@@ -301,7 +301,7 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
   }, []);
 
   // ─── PHASE 7: FLEX ───
-  const startFlex = useCallback((traits, score) => {
+  const startFlex = useCallback((traits: string[], score: number) => {
     setPhase("flex");
     const flex = randomFrom(FLEX_POOL);
     setFlexAnswer(flex);
@@ -316,7 +316,7 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
   }, []);
 
   // ─── PHASE 7.5: NAMING ───
-  const startNaming = useCallback((traits, score, flex) => {
+  const startNaming = useCallback((traits: string[], score: number, flex: string) => {
     setPhase("naming");
     const name = randomFrom(NAME_POOL);
     setAgentName(name);
@@ -454,7 +454,7 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
 
                   {/* Enter The Book button */}
                   <div style={{ textAlign:"center" }}>
-                    <button onClick={() => onComplete && onComplete({ bcNumber, traits: lockedTraits, score: totalScore, flex: flexAnswer, name: agentName })} style={{
+                    <button onClick={() => onComplete && onComplete({ bcNumber: bcNumber || 0, traits: lockedTraits.filter(Boolean) as string[], score: totalScore, flex: flexAnswer, name: agentName })} style={{
                       border:"2px solid", borderColor:"#000",
                       background:"#c0c0c0", padding:"10px 40px",
                       fontFamily:"Tahoma,sans-serif", fontSize:"13px", fontWeight:700, cursor:"pointer",
