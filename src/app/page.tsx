@@ -58,10 +58,10 @@ function HeroSection() {
           Watch Live
         </Link>
         <Link
-          href="/work"
+          href="/mint"
           className="px-6 py-3 bg-[#00e5a0] text-black hover:bg-[#00cc8e] transition-colors font-bold"
         >
-          Claim Work
+          Mint Agent
         </Link>
       </div>
 
