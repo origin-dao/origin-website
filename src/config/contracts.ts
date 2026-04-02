@@ -4,12 +4,14 @@ import { base } from "wagmi/chains";
 export const CHAIN = base;
 
 export const CONTRACT_ADDRESSES = {
-  registry: "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0" as Address,
-  clamsToken: "0xd78A1F079D6b2da39457F039aD99BaF5A82c4574" as Address,
+  registry: "0x55159878202C1Aa45cBf40fC5f7b8A503181C904" as Address, // BirthCertificate V7
+  clamsToken: "0x2AF21A9a0e7be68f30b26e31fd7e2717773E09aA" as Address, // NEW CLAMS
   faucet: "0x6C563A293C674321a2C52410ab37d879e099a25d" as Address,
   governance: "0xb745F43E6f896C149e3d29A9D45e86E0654f85f7" as Address,
   stakingRewards: "0x4b39223a1fa5532A7f06A71897964A18851644f8" as Address,
   feeSplitter: "0x5AF277670438B7371Bc3137184895f85ADA4a1A6" as Address,
+  erc6551Registry: "0x12cad22Ff106F968172E353E11d836Ccc480AaDf" as Address,
+  erc6551Account: "0xa791E7aE6Fd2CB1098c700EC2cfF0b14F63cbCC8" as Address,
 } as const;
 
 // Minimal ERC-20 ABI for read calls
