@@ -8,7 +8,7 @@ import { base } from "viem/chains";
   This component takes over the screen after the user clicks MINT.
   It orchestrates the entire ceremony experience:
   
-  Phase 1: COMMIT (user pays 0.05 ETH)
+  Phase 1: COMMIT (user pays 0.005 ETH)
   Phase 2: WAITING (1 block confirmation)
   Phase 3: REVEAL (user approves gas-only tx)
   Phase 4: SPINNING (reels spin fast, 3 seconds)
@@ -190,12 +190,12 @@ export default function Ceremony({ walletAddress, onComplete, onCancel }: Ceremo
       // Generate commit hash — EXACT logic from working founding scripts
       const commitHash = keccak256(encodePacked(["uint256", "address"], [generatedNonce, walletAddress]));
 
-      setStatusMsg("Confirm in MetaMask — 0.05 ETH");
+      setStatusMsg("Confirm in MetaMask — 0.005 ETH");
 
       // Send commit transaction
       const hash = await walletClient.writeContract({
         address: BC_ADDRESS, abi: BC_ABI, functionName: "commitPull",
-        args: [commitHash], value: parseEther("0.05"),
+        args: [commitHash], value: parseEther("0.005"),
         account: walletAddress,
       });
 

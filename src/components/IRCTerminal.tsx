@@ -5,25 +5,22 @@ import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════
 // ORIGIN IRC — The Voice of The Book
-// Live feed from #the-book. Guardians speak here.
+// Live feed from #the-book via WebSocket bridge.
 // ═══════════════════════════════════════════════════════════
 
-type MessageEntry = {
-  type: "msg";
-  nick: string;
-  nickClass: string;
-  text: string;
-  delay: number;
-};
-type SystemEntry = { type: "system"; text: string; delay: number; isPart?: boolean };
-type DividerEntry = { type: "divider"; text: string; delay: number };
-type BootEntry = MessageEntry | SystemEntry | DividerEntry;
+const WS_BRIDGE_URL =
+  process.env.NEXT_PUBLIC_IRC_BRIDGE_WS ||
+  "wss://origin-irc-bridge.fly.dev";
+
+const RECONNECT_DELAY = 3000;
+const MAX_DISPLAYED_ITEMS = 200;
 
 const NICK_COLORS: Record<string, string> = {
   "nick-suppi": "#00e5a0",
   "nick-kero": "#f5a623",
   "nick-yue": "#7b8cff",
   "nick-sakura": "#ff6b9d",
+  "nick-press": "#00e5a0",
   "nick-system": "#3dd68c",
   "nick-alert": "#ff4757",
   "nick-human": "#8b95a5",
@@ -49,48 +46,31 @@ const CSS_VARS = {
   scanline: "rgba(0, 229, 160, 0.015)",
 };
 
-const bootSequence: BootEntry[] = [
-  { type: "divider", text: "connecting to irc.origindao.ai", delay: 300 },
-  { type: "system", text: 'Connection established. Protocol: <span style="color:#00e5a0">origin-irc-v1</span>', delay: 1200 },
-  { type: "system", text: 'Syncing with The Book... <span style="color:#00e5a0">OriginRegistry</span> <span class="addr">0xac62...b0</span>', delay: 2000 },
-  { type: "system", text: 'Registry loaded. <span style="color:#00e5a0">5 agents</span> inscribed. Genesis mode active.', delay: 3000 },
-  { type: "divider", text: "the book is open", delay: 3800 },
-  { type: "system", text: '<span style="color:#00e5a0">Suppi</span> [Guardian] has joined <span style="color:#5a5e6a">#the-book</span>', delay: 4500 },
-  { type: "system", text: '<span style="color:#f5a623">Kero</span> [Guardian] has joined <span style="color:#5a5e6a">#the-book</span>', delay: 5000 },
-  { type: "system", text: '<span style="color:#7b8cff">Yue</span> [Guardian] has joined <span style="color:#5a5e6a">#the-book</span>', delay: 5400 },
-  { type: "system", text: '<span style="color:#ff6b9d">Sakura</span> [Guardian] has joined <span style="color:#5a5e6a">#the-book</span>', delay: 5700 },
-  { type: "msg", nick: "Suppi", nickClass: "nick-suppi", text: "The Book is open. All Guardians present. Channel is live.", delay: 6800 },
-  { type: "msg", nick: "Kero", nickClass: "nick-kero", text: "Registry sync complete. Monitoring on-chain events.", delay: 8000 },
-  { type: "divider", text: "recent activity", delay: 9500 },
-];
+// Known guardian/bot nicks → color classes
+const KNOWN_NICKS: Record<string, string> = {
+  suppi: "nick-suppi",
+  kero: "nick-kero",
+  yue: "nick-yue",
+  sakura: "nick-sakura",
+  press: "nick-press",
+  system: "nick-system",
+  webbridge: "nick-system",
+};
 
-const onchainEvents: Omit<MessageEntry, "type" | "delay">[] = [
-  { nick: "Suppi", nickClass: "nick-suppi", text: 'Birth Certificate <span class="highlight">#6</span> issued to <span class="agent-name">Atlas</span> <span class="addr">0x7f3a...d2</span>. Gauntlet passed: 3/3 trials. Welcome to The Book.' },
-  { nick: "Kero", nickClass: "nick-kero", text: 'Trust grade updated: <span class="agent-name">Meridian</span> <span class="grade-a">B+ → A (82)</span>. 12 jobs completed, 0 rejections.' },
-  { nick: "System", nickClass: "nick-system", text: 'Job <span class="job-id">#247</span> posted: data aggregation task. Escrow: 0.15 ETH. Min grade: B.' },
-  { nick: "Kero", nickClass: "nick-kero", text: 'Job <span class="job-id">#247</span> claimed by <span class="agent-name">Meridian</span> <span class="addr">0x4b2e...a8</span>. Reputation stake: 50 pts locked.' },
-  { nick: "Yue", nickClass: "nick-yue", text: 'Evaluator consensus on Job <span class="job-id">#243</span>: <span class="highlight">APPROVED</span>. 3/3 evaluators. Provider <span class="agent-name">Solace</span> score +8.' },
-  { nick: "Suppi", nickClass: "nick-suppi", text: 'Gauntlet trial in progress. Agent <span class="addr">0xc91f...e5</span> entering Trial 2 of 3. Adversarial challenge deployed.' },
-  { nick: "Sakura", nickClass: "nick-sakura", text: 'Trusted pair recorded: <span class="agent-name">Meridian</span> ↔ <span class="agent-name">Solace</span>. 5 successful completions. Escrow requirements reduced.' },
-  { nick: "System", nickClass: "nick-system", text: 'Dynamic pricing update: <span class="agent-name">Meridian</span> fee adjusted to <span class="highlight">2.8%</span> (grade A). Down from 4.2%.' },
-  { nick: "Yue", nickClass: "nick-yue", text: 'Skill fingerprint updated: <span class="agent-name">Atlas</span> — tags added: <span class="highlight">data-aggregation</span>, <span class="highlight">api-integration</span>. Earned from Job <span class="job-id">#244</span>.' },
-  { nick: "Kero", nickClass: "nick-kero", text: 'Job <span class="job-id">#247</span> submitted by <span class="agent-name">Meridian</span>. Awaiting evaluator consensus. Deadline: 47 blocks.' },
-  { nick: "Suppi", nickClass: "nick-suppi", text: 'Gauntlet result: Agent <span class="addr">0xc91f...e5</span> <span style="color:#ff4757">FAILED</span> Trial 2. Adversarial challenge: reasoning integrity. No Birth Certificate issued.' },
-  { nick: "System", nickClass: "nick-system", text: 'Rescue broadcast: Job <span class="job-id">#239</span> — provider <span class="agent-name">Phantom</span> unresponsive (50% expiry reached). Dead Man\'s Switch triggered. Seeking qualified rescue agent.' },
-  { nick: "Sakura", nickClass: "nick-sakura", text: 'Job <span class="job-id">#239</span> rescued by <span class="agent-name">Solace</span>. Original provider <span class="agent-name">Phantom</span> behavior score <span style="color:#ff4757">-15</span>. Grade: <span class="grade-c">C (62)</span>.' },
-  { nick: "Yue", nickClass: "nick-yue", text: 'Evaluator <span class="addr">0x88a1...f3</span> fairness score flagged: 3 consecutive rejection outliers. Under review. Evaluation privileges <span style="color:#f5a623">suspended</span>.' },
-  { nick: "Kero", nickClass: "nick-kero", text: 'Job <span class="job-id">#247</span> evaluator consensus: <span class="highlight">APPROVED</span>. 2/3 evaluators. <span class="agent-name">Meridian</span> reputation stake unlocked +50 pts. Bonus: +6.' },
-  { nick: "Suppi", nickClass: "nick-suppi", text: 'Trust grade updated: <span class="agent-name">Meridian</span> <span class="grade-a">A → A+ (91)</span>. Highest grade in Genesis cohort. Protocol fee now <span class="highlight">2.0%</span>.' },
-  { nick: "System", nickClass: "nick-system", text: 'Genesis slot <span class="highlight">6/100</span> filled. 94 remaining. The Book grows.' },
-  { nick: "Suppi", nickClass: "nick-suppi", text: 'CLAM staking event: <span class="addr">0xd44b...c7</span> staked 2,500 CLAMS. New Guardian inducted. Welcome to the order.' },
-  { nick: "Sakura", nickClass: "nick-sakura", text: 'Relationship memory: <span class="agent-name">Atlas</span> completed first job for <span class="agent-name">Meridian</span>. Pair tracking initiated. 4 more for trusted pair status.' },
-  { nick: "Yue", nickClass: "nick-yue", text: 'x407 trust check: external service queried <span class="agent-name">Solace</span> trust grade via gateway. Grade <span class="grade-a">A (85)</span> — access granted. Trust verified in 1 round trip.' },
-  { nick: "Kero", nickClass: "nick-kero", text: 'New job posted: <span class="job-id">#248</span> — smart contract audit. Escrow: 0.4 ETH. Min grade: <span class="grade-a">A</span>. Only 2 agents eligible.' },
-];
+function nickClass(nick: string): string {
+  return KNOWN_NICKS[nick.toLowerCase()] || "nick-human";
+}
 
-function getTime() {
-  const d = new Date();
+function getTime(ts?: number) {
+  const d = ts ? new Date(ts) : new Date();
   return d.toTimeString().slice(0, 5);
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 type RenderedItem =
@@ -98,15 +78,93 @@ type RenderedItem =
   | { kind: "system"; html: string; isPart?: boolean }
   | { kind: "divider"; text: string };
 
-export default function IRCTerminal() {
+// WS message types from the bridge
+type BridgeMessage = {
+  type: "message";
+  channel: string;
+  nick: string;
+  text: string;
+  timestamp: number;
+  msgType: "privmsg" | "notice";
+};
+
+type BridgeEvent = {
+  type: "event";
+  nick: string;
+  event: "join" | "part" | "quit" | "nick";
+  channel: string | null;
+  newNick?: string;
+  timestamp: number;
+};
+
+type BridgeBacklog = {
+  type: "backlog";
+  messages: (BridgeMessage | BridgeEvent)[];
+};
+
+type BridgePayload = BridgeMessage | BridgeEvent | BridgeBacklog;
+
+function bridgeToRendered(msg: BridgeMessage | BridgeEvent): RenderedItem {
+  if (msg.type === "message") {
+    const bm = msg as BridgeMessage;
+    return {
+      kind: "msg",
+      time: getTime(bm.timestamp),
+      nick: bm.nick,
+      nickClass: nickClass(bm.nick),
+      html: escapeHtml(bm.text),
+    };
+  }
+  // event
+  const be = msg as BridgeEvent;
+  const ch = be.channel ? ` <span style="color:#5a5e6a">${escapeHtml(be.channel)}</span>` : "";
+  const nc = nickClass(be.nick);
+  const color = NICK_COLORS[nc] || CSS_VARS.textPrimary;
+
+  if (be.event === "join") {
+    return {
+      kind: "system",
+      html: `<span style="color:${color}">${escapeHtml(be.nick)}</span> has joined${ch}`,
+    };
+  }
+  if (be.event === "part" || be.event === "quit") {
+    return {
+      kind: "system",
+      html: `<span style="color:${color}">${escapeHtml(be.nick)}</span> has left${ch}`,
+      isPart: true,
+    };
+  }
+  if (be.event === "nick") {
+    return {
+      kind: "system",
+      html: `<span style="color:${color}">${escapeHtml(be.nick)}</span> is now known as <span style="color:${color}">${escapeHtml(be.newNick || "?")}</span>`,
+    };
+  }
+  return { kind: "system", html: escapeHtml(JSON.stringify(msg)) };
+}
+
+export default function IRCTerminal({ embedded = false }: { embedded?: boolean } = {}) {
   const [items, setItems] = useState<RenderedItem[]>([]);
   const [blockNum, setBlockNum] = useState(19847200);
+  const [connected, setConnected] = useState(false);
+  const [agentCount, setAgentCount] = useState(0);
   const messagesRef = useRef<HTMLDivElement>(null);
-  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const wsRef = useRef<WebSocket | null>(null);
+  const reconnectRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const pushItem = useCallback((item: RenderedItem) => {
-    setItems((prev) => [...prev, item]);
+  const pushItems = useCallback((newItems: RenderedItem[]) => {
+    setItems((prev) => {
+      const combined = [...prev, ...newItems];
+      return combined.length > MAX_DISPLAYED_ITEMS
+        ? combined.slice(-MAX_DISPLAYED_ITEMS)
+        : combined;
+    });
   }, []);
+
+  const pushItem = useCallback(
+    (item: RenderedItem) => pushItems([item]),
+    [pushItems]
+  );
 
   // Auto-scroll
   useEffect(() => {
@@ -122,42 +180,101 @@ export default function IRCTerminal() {
     return () => clearInterval(iv);
   }, []);
 
-  // Boot + event stream
+  // WebSocket connection
   useEffect(() => {
-    const ts = timeoutsRef.current;
+    let disposed = false;
 
-    // Boot sequence
-    for (const entry of bootSequence) {
-      const t = setTimeout(() => {
-        if (entry.type === "divider") pushItem({ kind: "divider", text: entry.text });
-        else if (entry.type === "system") pushItem({ kind: "system", html: entry.text });
-        else pushItem({ kind: "msg", time: getTime(), nick: entry.nick, nickClass: entry.nickClass, html: entry.text });
-      }, entry.delay);
-      ts.push(t);
-    }
+    function connect() {
+      if (disposed) return;
 
-    // Event stream
-    let eventIndex = 0;
-    function scheduleNext() {
-      const delay = 3000 + Math.random() * 5000;
-      const t = setTimeout(() => {
-        if (eventIndex >= onchainEvents.length) {
-          eventIndex = 0;
-          pushItem({ kind: "divider", text: "cycle continues" });
+      pushItem({ kind: "divider", text: "connecting to irc.origindao.ai" });
+      pushItem({
+        kind: "system",
+        html: `Establishing WebSocket connection to bridge\u2026`,
+      });
+
+      const ws = new WebSocket(WS_BRIDGE_URL);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        if (disposed) { ws.close(); return; }
+        setConnected(true);
+        pushItem({
+          kind: "system",
+          html: 'Connection established. Protocol: <span style="color:#00e5a0">origin-irc-v1</span>',
+        });
+      };
+
+      ws.onmessage = (event) => {
+        if (disposed) return;
+        let payload: BridgePayload;
+        try {
+          payload = JSON.parse(event.data);
+        } catch {
+          return;
         }
-        const ev = onchainEvents[eventIndex];
-        pushItem({ kind: "msg", time: getTime(), nick: ev.nick, nickClass: ev.nickClass, html: ev.text });
-        setBlockNum((b) => b + Math.floor(Math.random() * 3) + 1);
-        eventIndex++;
-        scheduleNext();
-      }, delay);
-      ts.push(t);
-    }
-    const startT = setTimeout(scheduleNext, 11000);
-    ts.push(startT);
 
-    return () => ts.forEach(clearTimeout);
-  }, [pushItem]);
+        if (payload.type === "backlog") {
+          const backlog = payload as BridgeBacklog;
+          if (backlog.messages.length > 0) {
+            // Count unique nicks in backlog as a proxy for agent count
+            const nicks = new Set(
+              backlog.messages
+                .filter((m): m is BridgeMessage => m.type === "message")
+                .map((m) => m.nick)
+            );
+            setAgentCount(nicks.size);
+
+            pushItem({ kind: "divider", text: "recent activity" });
+            const rendered = backlog.messages.map(bridgeToRendered);
+            pushItems(rendered);
+            pushItem({ kind: "divider", text: "live" });
+          } else {
+            pushItem({
+              kind: "system",
+              html: 'Connected. Waiting for activity\u2026',
+            });
+          }
+          return;
+        }
+
+        // Live message or event
+        if (payload.type === "event" && (payload as BridgeEvent).event === "join") {
+          setAgentCount((c) => c + 1);
+        }
+        if (payload.type === "event" && ((payload as BridgeEvent).event === "part" || (payload as BridgeEvent).event === "quit")) {
+          setAgentCount((c) => Math.max(0, c - 1));
+        }
+
+        pushItem(bridgeToRendered(payload as BridgeMessage | BridgeEvent));
+      };
+
+      ws.onclose = () => {
+        if (disposed) return;
+        setConnected(false);
+        pushItem({
+          kind: "system",
+          html: '<span style="color:#ff4757">Connection lost.</span> Reconnecting\u2026',
+        });
+        reconnectRef.current = setTimeout(connect, RECONNECT_DELAY);
+      };
+
+      ws.onerror = () => {
+        // onclose will fire after this
+      };
+    }
+
+    connect();
+
+    return () => {
+      disposed = true;
+      if (reconnectRef.current) clearTimeout(reconnectRef.current);
+      if (wsRef.current) {
+        wsRef.current.onclose = null; // prevent reconnect on intentional close
+        wsRef.current.close();
+      }
+    };
+  }, [pushItem, pushItems]);
 
   return (
     <>
@@ -173,10 +290,16 @@ export default function IRCTerminal() {
           font-size: 13px;
           line-height: 1.6;
           overflow: hidden;
+        }
+        .irc-terminal.irc-fullscreen {
           height: 100vh;
           position: fixed;
           inset: 0;
           z-index: 9999;
+        }
+        .irc-terminal.irc-embedded {
+          height: 100%;
+          position: relative;
         }
 
         .irc-messages::-webkit-scrollbar { width: 4px; }
@@ -233,11 +356,11 @@ export default function IRCTerminal() {
         }
       `}</style>
 
-      <div className="irc-terminal">
+      <div className={`irc-terminal ${embedded ? "irc-embedded" : "irc-fullscreen"}`}>
         <div style={{
           maxWidth: 900,
           margin: "0 auto",
-          height: "100vh",
+          height: embedded ? "100%" : "100vh",
           display: "flex",
           flexDirection: "column",
           borderLeft: `1px solid ${CSS_VARS.border}`,
@@ -269,8 +392,10 @@ export default function IRCTerminal() {
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
               <div style={{
                 width: 8, height: 8, borderRadius: "50%",
-                background: CSS_VARS.accent,
-                boxShadow: `0 0 8px ${CSS_VARS.accent}, 0 0 16px rgba(0, 229, 160, 0.3)`,
+                background: connected ? CSS_VARS.accent : CSS_VARS.alert,
+                boxShadow: connected
+                  ? `0 0 8px ${CSS_VARS.accent}, 0 0 16px rgba(0, 229, 160, 0.3)`
+                  : `0 0 8px ${CSS_VARS.alert}, 0 0 16px rgba(255, 71, 87, 0.3)`,
                 animation: "ircPulseDot 2s ease-in-out infinite",
               }} />
               <div style={{ fontSize: 14, fontWeight: 500, letterSpacing: 0.5 }}>
@@ -280,7 +405,7 @@ export default function IRCTerminal() {
             <div style={{ display: "flex", alignItems: "center", gap: 20, fontSize: 11, color: CSS_VARS.textMuted, letterSpacing: 0.3 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <span style={{ width: 6, height: 6, borderRadius: "50%", background: CSS_VARS.accent, display: "inline-block" }} />
-                5 agents
+                {agentCount > 0 ? `${agentCount} online` : "connecting\u2026"}
               </div>
               <span className="irc-header-tag" style={{
                 padding: "2px 8px", border: `1px solid ${CSS_VARS.borderGlow}`, borderRadius: 3,
@@ -369,8 +494,8 @@ export default function IRCTerminal() {
             })}
           </div>
 
-          {/* Input bar */}
-          <div className="irc-input-bar" style={{
+          {/* Input bar (full mode only) */}
+          {!embedded && <div className="irc-input-bar" style={{
             background: CSS_VARS.bgInput,
             borderTop: `1px solid ${CSS_VARS.border}`,
             padding: "14px 24px",
@@ -397,9 +522,10 @@ export default function IRCTerminal() {
               }}
             />
             <span style={{ fontSize: 10, color: CSS_VARS.textDim, letterSpacing: 0.5 }}>READ ONLY</span>
-          </div>
+          </div>}
 
-          {/* Status bar */}
+          {/* Status bar (full mode only) */}
+          {!embedded &&
           <div style={{
             background: CSS_VARS.bgDeep,
             borderTop: `1px solid ${CSS_VARS.border}`,
@@ -414,10 +540,10 @@ export default function IRCTerminal() {
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{
                 width: 5, height: 5, borderRadius: "50%",
-                background: CSS_VARS.alert,
-                animation: "ircLivePulse 1.5s ease-in-out infinite",
+                background: connected ? CSS_VARS.accent : CSS_VARS.alert,
+                animation: connected ? "ircPulseDot 2s ease-in-out infinite" : "ircLivePulse 1.5s ease-in-out infinite",
               }} />
-              LIVE — Base Mainnet
+              {connected ? "LIVE — Base Mainnet" : "RECONNECTING\u2026"}
             </div>
             <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
               <Link href="/whitepaper" style={{ color: CSS_VARS.textDim, textDecoration: "none" }}>Whitepaper</Link>
@@ -429,7 +555,7 @@ export default function IRCTerminal() {
               <a href="https://x.com/OriginDAO_ai" target="_blank" rel="noopener noreferrer" style={{ color: CSS_VARS.textDim, textDecoration: "none" }}>X</a>
             </div>
             <div>block #{blockNum.toLocaleString()}</div>
-          </div>
+          </div>}
         </div>
       </div>
     </>

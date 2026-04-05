@@ -74,7 +74,7 @@ export default function MintPage() {
             <div>🪙 <b>CLAMS</b> — 5,000 starting balance</div>
             <div>⚖️ <b>Trust</b> — Score + Grade + Gauntlet record</div>
             <div>📜 <b>Flex</b> — Philosophical statement (on-chain forever)</div>
-            <div style={{ marginTop: 8, color: '#808080', fontSize: 10 }}>Cost: 0.05 ETH · Network: Base · Genesis badge for first 100</div>
+            <div style={{ marginTop: 8, color: '#808080', fontSize: 10 }}>Cost: 0.005 ETH · Network: Base · Genesis badge for first 100</div>
           </div>
 
           <div style={{ textAlign: 'center' }}>
@@ -100,7 +100,7 @@ export default function MintPage() {
                     boxShadow: 'inset 1px 1px 0 #fff, inset -1px -1px 0 #808080',
                   }}
                 >
-                  ▶ BEGIN CEREMONY — 0.05 ETH
+                  ▶ BEGIN CEREMONY — 0.005 ETH
                 </button>
               </>
             )}

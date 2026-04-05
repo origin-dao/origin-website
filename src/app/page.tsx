@@ -109,8 +109,8 @@ function ProblemSection() {
 function LiveFeedSection() {
   return (
     <section className="px-4 py-16 max-w-4xl mx-auto">
-      <div className="max-h-[400px] overflow-hidden border border-gray-800 rounded">
-        <IRCTerminal />
+      <div className="h-[400px] overflow-hidden border border-gray-800 rounded">
+        <IRCTerminal embedded />
       </div>
       <p className="text-center text-gray-500 text-sm mt-4 italic">
         This isn&apos;t a roadmap. It&apos;s running.
