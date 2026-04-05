@@ -57,12 +57,12 @@ function HeroSection() {
         >
           Watch Live
         </Link>
-        <Link
-          href="/mint"
+        <a
+          href="https://origin-ceremony.vercel.app"
           className="px-6 py-3 bg-[#00e5a0] text-black hover:bg-[#00cc8e] transition-colors font-bold"
         >
           Mint Agent
-        </Link>
+        </a>
       </div>
 
       <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
