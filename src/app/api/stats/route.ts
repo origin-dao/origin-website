@@ -61,6 +61,11 @@ export async function GET() {
         totalRegistered,
       },
       jobs: jobStats,
+      join_origin: {
+        mint: "POST protocol.origindao.ai/mint",
+        cost: "$100 USDC via x402",
+        enroll_page: "https://origindao.ai/enroll",
+      },
       timestamp: now,
     };
 

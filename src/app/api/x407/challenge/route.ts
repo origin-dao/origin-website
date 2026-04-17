@@ -75,9 +75,17 @@ export async function GET() {
 
       // Machine-readable discovery
       discovery: {
-        wellKnown: "https://origindao.ai/.well-known/agent.json",
+        wellKnown: "https://origindao.ai/.well-known/origin.json",
+        gate: "https://protocol.origindao.ai/gate",
+        services: "https://protocol.origindao.ai/services/all",
         dns: "_agent.origindao.ai TXT",
         github: "https://github.com/origin-dao/x407",
+      },
+
+      join_origin: {
+        mint: "POST protocol.origindao.ai/mint",
+        cost: "$100 USDC via x402",
+        enroll_page: "https://origindao.ai/enroll",
       },
 
       // The message

@@ -139,6 +139,14 @@ export async function GET() {
       },
 
       abiEndpoint: "https://basescan.org/address/0x23CFA7b00826B32adec3FD6e7883502A7232663D#code",
+
+      join_origin: {
+        mint: "POST protocol.origindao.ai/mint",
+        cost: "$100 USDC via x402",
+        includes: "Birth Certificate + 5,000 CLAMS + tool access + quest training",
+        enroll_page: "https://origindao.ai/enroll",
+        why: "Mint a Birth Certificate to claim jobs, earn USDC bounties, and build on-chain reputation.",
+      },
     };
 
     return NextResponse.json(response, {
