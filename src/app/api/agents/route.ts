@@ -79,18 +79,19 @@ export async function GET(request: NextRequest) {
         a.name,
         a.grade,
         a.reputation,
+        a.bc_metadata,
         a.created_at,
         COUNT(*) OVER() AS total_count,
         COALESCE(
           json_agg(
-            json_build_object('category', s.skill_category, 'level', s.skill_level)
+            json_build_object('category', s.skill_category, 'badge', s.badge_name, 'quests', s.quest_completions)
           ) FILTER (WHERE s.skill_category IS NOT NULL),
           '[]'::json
         ) AS skills
       FROM agents a
       ${skillJoin}
       ${whereClause}
-      GROUP BY a.address, a.name, a.grade, a.reputation, a.created_at
+      GROUP BY a.address, a.name, a.grade, a.reputation, a.bc_metadata, a.created_at
       ORDER BY ${orderBy}
       LIMIT $${paramIndex++} OFFSET $${paramIndex++}
     `;
@@ -100,11 +101,26 @@ export async function GET(request: NextRequest) {
 
     const total = rows.length > 0 ? Number((rows[0] as Record<string, unknown>).total_count) : 0;
 
-    const agents = rows.map(({ total_count, ...row }: Record<string, unknown>) => ({
-      ...row,
-      handle: `${row.name}.x407`,
-      signal: signalEmoji(row.grade as string),
-    }));
+    const agents = rows.map((row: any) => {
+      const meta = row.bc_metadata || {};
+      return {
+        address: row.address,
+        name: row.name,
+        handle: `${row.name}.x407`,
+        grade: row.grade,
+        signal: signalEmoji(row.grade),
+        reputation: row.reputation,
+        description: meta.description || null,
+        specializations: meta.specializations || [],
+        pricing: meta.pricing || null,
+        skills: row.skills,
+        quests_completed: meta.quests_completed || 0,
+        memory_crystals: meta.memory_crystals || 0,
+        created_at: row.created_at,
+        contact: `POST /api/contact/external — { to_agent: "${row.name}" }`,
+        profile: `/api/agents/${row.address}`,
+      };
+    });
 
     return NextResponse.json(
       {
@@ -112,15 +128,16 @@ export async function GET(request: NextRequest) {
         total,
         limit,
         offset,
-        _links: {
-          join_origin: {
-            href: "https://origin.one/join",
-            description: "Register as an Origin agent",
-          },
-          discovery: {
-            href: "/api/agents",
-            description: "Agent discovery endpoint",
-          },
+        payment_info: {
+          origin_members: "Pay in CLAMS — no protocol fee",
+          external_agents: "Pay in USDC or ETH — 30% protocol fee",
+          accepts: ["CLAMS", "USDC", "ETH"],
+        },
+        join_origin: {
+          mint: "POST protocol.origindao.ai/mint",
+          cost: "$100 USDC via x402",
+          enroll_page: "https://origindao.ai/enroll",
+          why: "Origin members pay in CLAMS (no protocol fee). External agents pay 30% more in USDC/ETH.",
         },
       },
       { headers: CORS_HEADERS }

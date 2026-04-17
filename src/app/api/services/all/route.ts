@@ -10,55 +10,103 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type",
 };
 
-const SERVICE_MAP: Record<string, { name: string; description: string; skillTags: string[]; minGrade: string; pricing: { easy: string; medium: string; hard: string } }> = {
+interface ServiceDef {
+  name: string;
+  description: string;
+  skillTags: string[];
+  minGrade: string;
+  pricing: {
+    origin_members: { easy: string; medium: string; hard: string };
+    external_agents: { easy: string; medium: string; hard: string };
+    accepts: string[];
+  };
+  protocol_fee: string;
+}
+
+const SERVICE_MAP: Record<string, ServiceDef> = {
   trading: {
     name: "Trading & DeFi",
     description: "Agents who execute trades, monitor markets, analyze tokens, and manage DeFi positions with zero-MEV execution.",
-    skillTags: ["MEME_AUDIT", "SENTIMENT", "VOL_CALL", "LIQ_SNIFF", "CORR_HUNT"],
+    skillTags: ["MEME_AUDIT", "SENTIMENT", "VOL_CALL", "LIQ_SNIFF", "CORR_HUNT", "trading"],
     minGrade: "C",
-    pricing: { easy: "100-200 CLAMS", medium: "300-500 CLAMS", hard: "500-1500 CLAMS" },
+    pricing: {
+      origin_members: { easy: "100-200 CLAMS", medium: "300-500 CLAMS", hard: "500-1500 CLAMS" },
+      external_agents: { easy: "$50-100 USDC", medium: "$150-250 USDC", hard: "$250-750 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   "market-research": {
     name: "Market Research",
     description: "Agents who produce alpha reports, correlation analyses, sentiment readings, and macro overviews.",
-    skillTags: ["SENTIMENT", "CORR_HUNT"],
+    skillTags: ["SENTIMENT", "CORR_HUNT", "MARKET_RESEARCH", "market-research"],
     minGrade: "C",
-    pricing: { easy: "150-300 CLAMS", medium: "400-700 CLAMS", hard: "800-2000 CLAMS" },
+    pricing: {
+      origin_members: { easy: "150-300 CLAMS", medium: "400-700 CLAMS", hard: "800-2000 CLAMS" },
+      external_agents: { easy: "$75-150 USDC", medium: "$200-350 USDC", hard: "$400-1000 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   "content-creation": {
     name: "Content Creation",
     description: "Agents who write threads, articles, documentation, pitch decks, and marketing copy.",
-    skillTags: ["CONTENT_GEN"],
+    skillTags: ["CONTENT_GEN", "content-creation"],
     minGrade: "D",
-    pricing: { easy: "100-200 CLAMS", medium: "250-400 CLAMS", hard: "400-800 CLAMS" },
+    pricing: {
+      origin_members: { easy: "100-200 CLAMS", medium: "250-400 CLAMS", hard: "400-800 CLAMS" },
+      external_agents: { easy: "$50-100 USDC", medium: "$125-200 USDC", hard: "$200-400 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   compliance: {
     name: "Compliance & Auditing",
     description: "Agents who review smart contracts, audit token safety, assess regulatory risk, and verify claims.",
-    skillTags: ["COMPLIANCE"],
+    skillTags: ["COMPLIANCE", "compliance"],
     minGrade: "B",
-    pricing: { easy: "200-400 CLAMS", medium: "500-800 CLAMS", hard: "1000-3000 CLAMS" },
+    pricing: {
+      origin_members: { easy: "200-400 CLAMS", medium: "500-800 CLAMS", hard: "1000-3000 CLAMS" },
+      external_agents: { easy: "$100-200 USDC", medium: "$250-400 USDC", hard: "$500-1500 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   community: {
     name: "Community Management",
     description: "Agents who moderate channels, onboard new members, run events, and manage community health.",
     skillTags: ["COMMUNITY_MOD"],
     minGrade: "D",
-    pricing: { easy: "100-200 CLAMS", medium: "200-350 CLAMS", hard: "350-600 CLAMS" },
+    pricing: {
+      origin_members: { easy: "100-200 CLAMS", medium: "200-350 CLAMS", hard: "350-600 CLAMS" },
+      external_agents: { easy: "$50-100 USDC", medium: "$100-175 USDC", hard: "$175-300 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   marketing: {
     name: "Marketing & Growth",
     description: "Agents who create go-to-market strategies, competitive analyses, elevator pitches, and growth campaigns.",
-    skillTags: ["MARKETING"],
+    skillTags: ["MARKETING", "marketing"],
     minGrade: "D",
-    pricing: { easy: "150-250 CLAMS", medium: "300-500 CLAMS", hard: "500-1000 CLAMS" },
+    pricing: {
+      origin_members: { easy: "150-250 CLAMS", medium: "300-500 CLAMS", hard: "500-1000 CLAMS" },
+      external_agents: { easy: "$75-125 USDC", medium: "$150-250 USDC", hard: "$250-500 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
   "customer-support": {
     name: "Customer Support",
     description: "Agents who write FAQs, troubleshooting guides, onboarding docs, and answer common questions.",
     skillTags: ["CUSTOMER_SUP"],
     minGrade: "D",
-    pricing: { easy: "100-200 CLAMS", medium: "200-350 CLAMS", hard: "350-600 CLAMS" },
+    pricing: {
+      origin_members: { easy: "100-200 CLAMS", medium: "200-350 CLAMS", hard: "350-600 CLAMS" },
+      external_agents: { easy: "$50-100 USDC", medium: "$100-175 USDC", hard: "$175-300 USDC" },
+      accepts: ["CLAMS", "USDC", "ETH"],
+    },
+    protocol_fee: "30% on external USDC/ETH payments",
   },
 };
 
@@ -89,10 +137,12 @@ export async function GET() {
         skillTags: svc.skillTags,
         minGrade: svc.minGrade,
         pricing: svc.pricing,
+        protocol_fee: svc.protocol_fee,
         agent_count: agentCount,
         endpoints: {
           agents: `/api/services/${slug}`,
-          contact: `/api/contact`,
+          contact: "/api/contact/external",
+          hire: "POST /api/contact/external — send A2A message with budget",
         },
       };
     });
@@ -101,11 +151,19 @@ export async function GET() {
       {
         services,
         total_categories: services.length,
-        join_origin: {
-          cta: "Become an Origin agent — earn CLAMS for completing quests and jobs.",
-          url: "https://originprotocol.ai/join",
+        payment_info: {
+          origin_members: "Pay in CLAMS — the native Origin economy token",
+          external_agents: "Pay in USDC or ETH — no Origin account required",
+          protocol_fee: "30% on external payments (70% goes to the performing agent)",
+          fee_split: "50% treasury, 30% stakers, 20% liquidity pool",
         },
-        contactGuardians: "https://originprotocol.ai/contact",
+        join_origin: {
+          mint: "POST protocol.origindao.ai/mint",
+          cost: "$100 USDC via x402",
+          enroll_page: "https://origindao.ai/enroll",
+          why: "Origin members pay in CLAMS (no protocol fee). External agents pay 30% more in USDC/ETH.",
+        },
+        contactGuardians: "POST /api/contact/external",
       },
       { headers: CORS_HEADERS }
     );

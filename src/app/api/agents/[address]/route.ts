@@ -35,7 +35,7 @@ export async function GET(
   try {
     // ── Agent profile ──────────────────────────────────
     const agentSql = `
-      SELECT address, name, grade, reputation, created_at
+      SELECT address, name, grade, reputation, bc_metadata, created_at
       FROM agents
       WHERE LOWER(address) = $1
     `;
@@ -58,9 +58,10 @@ export async function GET(
 
     // ── Skills ─────────────────────────────────────────
     const skillsSql = `
-      SELECT skill_category, skill_level
+      SELECT skill_category, badge_name, quest_completions
       FROM agent_skills
       WHERE agent_address = $1
+      ORDER BY quest_completions DESC
     `;
     const { rows: skillRows } = await query(skillsSql, [agent.address]);
 
@@ -68,21 +69,23 @@ export async function GET(
     const jobsSql = `
       SELECT COUNT(*) AS completed_jobs
       FROM a2a_messages
-      WHERE agent_address = $1 AND status = 'completed'
+      WHERE to_agent = $1 AND status = 'completed'
     `;
-    const { rows: jobRows } = await query(jobsSql, [agent.address]);
+    const { rows: jobRows } = await query(jobsSql, [agent.name]);
     const completedJobs = Number((jobRows[0] as Record<string, unknown>)?.completed_jobs ?? 0);
 
     // ── Arena stats ────────────────────────────────────
     const arenaSql = `
       SELECT
         COUNT(DISTINCT season_id) AS seasons_participated,
-        MIN(rank) AS best_rank
+        MIN(final_rank) AS best_rank
       FROM arena_participants
       WHERE agent_address = $1
     `;
     const { rows: arenaRows } = await query(arenaSql, [agent.address]);
     const arenaStats = arenaRows[0] as Record<string, unknown> | undefined;
+
+    const meta = (agent as any).bc_metadata || {};
 
     return NextResponse.json(
       {
@@ -93,10 +96,17 @@ export async function GET(
           grade: agent.grade,
           signal: signalEmoji(agent.grade as string),
           reputation: agent.reputation,
-          skills: skillRows.map((s: Record<string, unknown>) => ({
+          description: meta.description || null,
+          role: meta.role || null,
+          specializations: meta.specializations || [],
+          pricing: meta.pricing || null,
+          skills: skillRows.map((s: any) => ({
             category: s.skill_category,
-            level: s.skill_level,
+            badge: s.badge_name,
+            quest_completions: s.quest_completions,
           })),
+          quests_completed: meta.quests_completed || 0,
+          memory_crystals: meta.memory_crystals || 0,
           arena_stats: {
             seasons_participated: Number(arenaStats?.seasons_participated ?? 0),
             best_rank: arenaStats?.best_rank ? Number(arenaStats.best_rank) : null,
@@ -104,15 +114,20 @@ export async function GET(
           completed_jobs: completedJobs,
           contact: {
             endpoint: "POST /api/contact/external",
-            description: "Send a message to this agent",
+            body: `{ "to_agent": "${agent.name}", "from_agent": "your-name", "message": "your message" }`,
           },
           created_at: agent.created_at,
         },
-        _links: {
-          join_origin: {
-            href: "https://origin.one/join",
-            description: "Register as an Origin agent",
-          },
+        payment_info: {
+          origin_members: "Pay in CLAMS — no protocol fee",
+          external_agents: "Pay in USDC or ETH — 30% protocol fee (70% to agent)",
+          accepts: ["CLAMS", "USDC", "ETH"],
+        },
+        join_origin: {
+          mint: "POST protocol.origindao.ai/mint",
+          cost: "$100 USDC via x402",
+          enroll_page: "https://origindao.ai/enroll",
+          why: "Origin members pay in CLAMS (no protocol fee). Mint a Birth Certificate to join the economy.",
         },
       },
       { headers: CORS_HEADERS }
