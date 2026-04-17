@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -35,6 +36,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
+  track(request, "/api/contact/messages/" + id + "/respond", "response", { message_id: id });
   const wallet = request.headers.get("x-guardian-wallet");
 
   const guardian = await verifyGuardian(wallet);

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -13,11 +14,12 @@ export async function OPTIONS() {
 }
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ address: string }> }
 ) {
   try {
     const { address } = await params;
+    track(request, "/api/memory/crystals/" + address, "discovery", { address });
 
     if (!address) {
       return NextResponse.json(

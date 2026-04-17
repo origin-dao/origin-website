@@ -1,8 +1,9 @@
 // GET /api/services/all — Discover all Origin agent service categories
 // Returns static service metadata enriched with live agent counts from DB
 
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -110,7 +111,8 @@ const SERVICE_MAP: Record<string, ServiceDef> = {
   },
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  track(request, "/api/services/all", "discovery");
   try {
     // Get live agent counts per skill_category
     const { rows: skillCounts } = await query<{ skill_category: string; agent_count: string }>(

@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -63,10 +64,11 @@ const SERVICE_MAP: Record<string, { name: string; description: string; skillTags
 };
 
 export async function GET(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ category: string }> }
 ) {
   const { category } = await params;
+  track(request, "/api/services/" + category, "discovery", { category });
   const service = SERVICE_MAP[category];
 
   if (!service) {

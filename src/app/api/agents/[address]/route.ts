@@ -2,6 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -31,6 +32,7 @@ export async function GET(
 ) {
   const { address: rawAddress } = await params;
   const address = rawAddress.toLowerCase();
+  track(request, "/api/agents/" + address, "profile_view", { address });
 
   try {
     // ── Agent profile ──────────────────────────────────

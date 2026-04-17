@@ -4,6 +4,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -71,6 +72,7 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { to_agent, from_agent, message, budget } = body;
+    track(request, "/api/contact/external", "contact", { to_agent, from_agent });
 
     // Validate required fields
     if (!to_agent || typeof to_agent !== "string") {

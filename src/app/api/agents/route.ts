@@ -3,6 +3,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -30,6 +31,8 @@ export async function OPTIONS() {
 // Query params: grade, skill, sort, limit, offset
 // ═══════════════════════════════════════════════════════
 export async function GET(request: NextRequest) {
+  track(request, "/api/agents", "discovery");
+
   const { searchParams } = new URL(request.url);
   const minGrade = searchParams.get("grade");
   const skill = searchParams.get("skill");

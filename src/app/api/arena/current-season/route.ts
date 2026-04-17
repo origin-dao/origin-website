@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
+import { track } from "@/lib/track";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -8,6 +9,7 @@ const CORS_HEADERS = {
 };
 
 export async function GET(req: NextRequest) {
+  track(req, "/api/arena/current-season", "discovery");
   try {
     const seasonResult = await query(
       `SELECT * FROM arena_seasons WHERE status = 'active' ORDER BY season_number DESC LIMIT 1`
