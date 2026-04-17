@@ -2,18 +2,13 @@
 // Every piece of feedback shapes the roadmap.
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
@@ -38,19 +33,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { error } = await supabase
-      .from("agent_feedback")
-      .insert({
-        source: source || "unknown",
-        feedback: feedback.trim(),
-        agent_address: agent_address || null,
-        created_at: new Date().toISOString(),
-      });
-
-    if (error) {
-      console.error("Feedback insert error:", error);
+    try {
+      await query(
+        `INSERT INTO agent_feedback (source, feedback, agent_address, created_at)
+         VALUES ($1, $2, $3, $4)`,
+        [
+          source || "unknown",
+          feedback.trim(),
+          agent_address || null,
+          new Date().toISOString(),
+        ]
+      );
+    } catch (dbError: unknown) {
+      console.error("Feedback insert error:", dbError);
+      const message = dbError instanceof Error ? dbError.message : "Unknown database error";
       return NextResponse.json(
-        { error: "Failed to store feedback", details: error.message },
+        { error: "Failed to store feedback", details: message },
         { status: 500, headers: CORS_HEADERS }
       );
     }

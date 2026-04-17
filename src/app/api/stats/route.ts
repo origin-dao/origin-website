@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getTotalClaims, getTotalRegistered } from "@/lib/challenges/onchain";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 // Cache stats for 30 seconds
 let cachedStats: { data: Record<string, unknown>; timestamp: number } | null = null;
@@ -24,28 +24,31 @@ export async function GET() {
     const MAX_CLAIMS = 10000;
     const GENESIS_THRESHOLD = 100;
 
-    // Try to get job stats from Supabase
+    // Try to get job stats from Postgres
     let jobStats = { total: 0, open: 0, completed: 0, in_progress: 0 };
     try {
-      const [
-        { count: totalJobs },
-        { count: openJobs },
-        { count: completedJobs },
-        { count: inProgressJobs },
-      ] = await Promise.all([
-        supabaseAdmin.from("jobs").select("*", { count: "exact", head: true }),
-        supabaseAdmin.from("jobs").select("*", { count: "exact", head: true }).eq("status", "OPEN"),
-        supabaseAdmin.from("jobs").select("*", { count: "exact", head: true }).eq("status", "COMPLETED"),
-        supabaseAdmin.from("jobs").select("*", { count: "exact", head: true }).eq("status", "IN_PROGRESS"),
-      ]);
+      const { rows } = await query<{
+        total: string;
+        open: string;
+        completed: string;
+        in_progress: string;
+      }>(`
+        SELECT
+          COUNT(*) as total,
+          COUNT(*) FILTER (WHERE status = 'OPEN') as open,
+          COUNT(*) FILTER (WHERE status = 'COMPLETED') as completed,
+          COUNT(*) FILTER (WHERE status = 'IN_PROGRESS') as in_progress
+        FROM jobs
+      `);
+      const row = rows[0];
       jobStats = {
-        total: totalJobs || 0,
-        open: openJobs || 0,
-        completed: completedJobs || 0,
-        in_progress: inProgressJobs || 0,
+        total: Number(row.total) || 0,
+        open: Number(row.open) || 0,
+        completed: Number(row.completed) || 0,
+        in_progress: Number(row.in_progress) || 0,
       };
     } catch {
-      // Supabase not configured yet — that's OK
+      // Database not configured yet — that's OK
     }
 
     const data = {

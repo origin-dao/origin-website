@@ -2,7 +2,7 @@
 // PATCH /api/jobs/:id — Update job (claim, complete, cancel)
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 // ═══════════════════════════════════════════════════════
 // GET /api/jobs/:id
@@ -14,22 +14,19 @@ export async function GET(
   const { id } = await params;
 
   try {
-    const { data: job, error } = await supabaseAdmin
-      .from("jobs")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { rows: jobs } = await query("SELECT * FROM jobs WHERE id = $1", [id]);
 
-    if (error || !job) {
+    if (jobs.length === 0) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
+    const job = jobs[0];
+
     // Also fetch applications
-    const { data: applications } = await supabaseAdmin
-      .from("job_applications")
-      .select("*")
-      .eq("job_id", id)
-      .order("created_at", { ascending: false });
+    const { rows: applications } = await query(
+      "SELECT * FROM job_applications WHERE job_id = $1 ORDER BY created_at DESC",
+      [id]
+    );
 
     return NextResponse.json({ job, applications: applications || [] });
   } catch (error) {
@@ -60,15 +57,13 @@ export async function PATCH(
     }
 
     // Fetch current job
-    const { data: job, error: fetchError } = await supabaseAdmin
-      .from("jobs")
-      .select("*")
-      .eq("id", id)
-      .single();
+    const { rows: jobs } = await query("SELECT * FROM jobs WHERE id = $1", [id]);
 
-    if (fetchError || !job) {
+    if (jobs.length === 0) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
+
+    const job = jobs[0] as Record<string, unknown>;
 
     switch (action) {
       case "claim": {
@@ -82,20 +77,12 @@ export async function PATCH(
           );
         }
 
-        const { data, error } = await supabaseAdmin
-          .from("jobs")
-          .update({
-            status: "CLAIMED",
-            claimed_by_agent_id: body.agent_id,
-            claimed_by_wallet: body.agent_wallet,
-            claimed_at: new Date().toISOString(),
-          })
-          .eq("id", id)
-          .select()
-          .single();
+        const { rows } = await query(
+          "UPDATE jobs SET status = 'CLAIMED', claimed_by_agent_id = $2, claimed_by_wallet = $3, claimed_at = $4 WHERE id = $1 RETURNING *",
+          [id, body.agent_id, body.agent_wallet, new Date().toISOString()]
+        );
 
-        if (error) throw error;
-        return NextResponse.json({ job: data });
+        return NextResponse.json({ job: rows[0] });
       }
 
       case "start": {
@@ -103,52 +90,38 @@ export async function PATCH(
           return NextResponse.json({ error: "Job must be claimed first" }, { status: 400 });
         }
 
-        const { data, error } = await supabaseAdmin
-          .from("jobs")
-          .update({ status: "IN_PROGRESS" })
-          .eq("id", id)
-          .select()
-          .single();
+        const { rows } = await query(
+          "UPDATE jobs SET status = 'IN_PROGRESS' WHERE id = $1 RETURNING *",
+          [id]
+        );
 
-        if (error) throw error;
-        return NextResponse.json({ job: data });
+        return NextResponse.json({ job: rows[0] });
       }
 
       case "complete": {
-        if (!["CLAIMED", "IN_PROGRESS"].includes(job.status)) {
+        if (!["CLAIMED", "IN_PROGRESS"].includes(job.status as string)) {
           return NextResponse.json({ error: "Job must be claimed or in progress" }, { status: 400 });
         }
 
-        const { data, error } = await supabaseAdmin
-          .from("jobs")
-          .update({
-            status: "COMPLETED",
-            completed_at: new Date().toISOString(),
-            proof_of_work: body.proof_of_work || null,
-            proof_tx_hash: body.proof_tx_hash || null,
-          })
-          .eq("id", id)
-          .select()
-          .single();
+        const { rows } = await query(
+          "UPDATE jobs SET status = 'COMPLETED', completed_at = $2, proof_of_work = $3, proof_tx_hash = $4 WHERE id = $1 RETURNING *",
+          [id, new Date().toISOString(), body.proof_of_work || null, body.proof_tx_hash || null]
+        );
 
-        if (error) throw error;
-        return NextResponse.json({ job: data });
+        return NextResponse.json({ job: rows[0] });
       }
 
       case "cancel": {
-        if (["COMPLETED"].includes(job.status)) {
+        if (["COMPLETED"].includes(job.status as string)) {
           return NextResponse.json({ error: "Cannot cancel a completed job" }, { status: 400 });
         }
 
-        const { data, error } = await supabaseAdmin
-          .from("jobs")
-          .update({ status: "CANCELLED" })
-          .eq("id", id)
-          .select()
-          .single();
+        const { rows } = await query(
+          "UPDATE jobs SET status = 'CANCELLED' WHERE id = $1 RETURNING *",
+          [id]
+        );
 
-        if (error) throw error;
-        return NextResponse.json({ job: data });
+        return NextResponse.json({ job: rows[0] });
       }
 
       default:

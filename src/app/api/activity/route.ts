@@ -11,18 +11,13 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
@@ -34,38 +29,53 @@ export async function GET(request: NextRequest) {
   const type = searchParams.get("type");
   const after = searchParams.get("after");
 
-  let query = supabase
-    .from("idx_activity")
-    .select("id, event_type, summary, metadata, block_number, tx_hash, created_at")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  const conditions: string[] = [];
+  const params: unknown[] = [];
+  let paramIndex = 1;
 
-  if (type) query = query.eq("event_type", type);
-  if (after) query = query.gt("id", parseInt(after));
+  if (type) {
+    conditions.push(`event_type = $${paramIndex++}`);
+    params.push(type);
+  }
+  if (after) {
+    conditions.push(`id > $${paramIndex++}`);
+    params.push(parseInt(after));
+  }
 
-  const { data, error } = await query;
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-  if (error) {
+  const sql = `
+    SELECT id, event_type, summary, metadata, block_number, tx_hash, created_at
+    FROM idx_activity
+    ${whereClause}
+    ORDER BY created_at DESC
+    LIMIT $${paramIndex}
+  `;
+  params.push(limit);
+
+  try {
+    const { rows: data } = await query(sql, params);
+
+    // Anonymize: strip agent_id from public response
+    const anonymized = (data ?? []).map(({ id, event_type, summary, metadata, block_number, tx_hash, created_at }: any) => ({
+      id,
+      event_type,
+      summary,
+      metadata: metadata ? { ...metadata, agent_a: undefined, agent_b: undefined } : null,
+      block_number,
+      tx_hash: tx_hash ? `${tx_hash.slice(0, 10)}...${tx_hash.slice(-8)}` : null,
+      created_at,
+    }));
+
+    return NextResponse.json({
+      events: anonymized,
+      count: anonymized.length,
+      has_more: anonymized.length === limit,
+    }, { headers: CORS_HEADERS });
+  } catch (error) {
     return NextResponse.json(
       { error: "Failed to fetch activity" },
       { status: 500, headers: CORS_HEADERS }
     );
   }
-
-  // Anonymize: strip agent_id from public response
-  const anonymized = (data ?? []).map(({ id, event_type, summary, metadata, block_number, tx_hash, created_at }) => ({
-    id,
-    event_type,
-    summary,
-    metadata: metadata ? { ...metadata, agent_a: undefined, agent_b: undefined } : null,
-    block_number,
-    tx_hash: tx_hash ? `${tx_hash.slice(0, 10)}...${tx_hash.slice(-8)}` : null,
-    created_at,
-  }));
-
-  return NextResponse.json({
-    events: anonymized,
-    count: anonymized.length,
-    has_more: anonymized.length === limit,
-  }, { headers: CORS_HEADERS });
 }

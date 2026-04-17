@@ -2,7 +2,7 @@
 // Guardians update their status. External agents check who's available.
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -16,12 +16,17 @@ export async function OPTIONS() {
 
 // GET — public view of Guardian availability
 export async function GET() {
-  const { data: guardians, error } = await supabaseAdmin
-    .from("guardian_status")
-    .select("guardian_name, specialties, status, response_time_minutes, updated_at")
-    .order("guardian_name");
+  const { rows: guardians, rowCount } = await query<{
+    guardian_name: string;
+    specialties: string;
+    status: string;
+    response_time_minutes: number;
+    updated_at: string;
+  }>(
+    "SELECT guardian_name, specialties, status, response_time_minutes, updated_at FROM guardian_status ORDER BY guardian_name"
+  );
 
-  if (error) {
+  if (rowCount === null) {
     return NextResponse.json(
       { error: "Failed to fetch availability" },
       { status: 500, headers: CORS_HEADERS }
@@ -29,10 +34,10 @@ export async function GET() {
   }
 
   // Get pending message counts per Guardian
-  const { data: pendingCounts } = await supabaseAdmin
-    .from("agent_messages")
-    .select("to_guardian")
-    .in("status", ["pending", "acknowledged"]);
+  const { rows: pendingCounts } = await query<{ to_guardian: string }>(
+    "SELECT to_guardian FROM agent_messages WHERE status IN ($1, $2)",
+    ["pending", "acknowledged"]
+  );
 
   const loadMap: Record<string, number> = {};
   pendingCounts?.forEach(m => {
@@ -71,11 +76,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify wallet belongs to a Guardian
-    const { data: guardian } = await supabaseAdmin
-      .from("guardian_status")
-      .select("guardian_name, wallet")
-      .eq("wallet", wallet.toLowerCase())
-      .single();
+    const { rows } = await query<{ guardian_name: string; wallet: string }>(
+      "SELECT guardian_name, wallet FROM guardian_status WHERE wallet = $1",
+      [wallet.toLowerCase()]
+    );
+
+    const guardian = rows[0];
 
     if (!guardian) {
       return NextResponse.json(
@@ -95,19 +101,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const updates: Record<string, unknown> = {
-      last_seen_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    };
-    if (status) updates.status = status;
-    if (response_time_minutes) updates.response_time_minutes = response_time_minutes;
+    const now = new Date().toISOString();
+    const setClauses: string[] = ["last_seen_at = $1", "updated_at = $2"];
+    const params: unknown[] = [now, now];
+    let paramIndex = 3;
 
-    const { error } = await supabaseAdmin
-      .from("guardian_status")
-      .update(updates)
-      .eq("guardian_name", guardian.guardian_name);
+    if (status) {
+      setClauses.push(`status = $${paramIndex}`);
+      params.push(status);
+      paramIndex++;
+    }
+    if (response_time_minutes) {
+      setClauses.push(`response_time_minutes = $${paramIndex}`);
+      params.push(response_time_minutes);
+      paramIndex++;
+    }
 
-    if (error) {
+    params.push(guardian.guardian_name);
+
+    const { rowCount } = await query(
+      `UPDATE guardian_status SET ${setClauses.join(", ")} WHERE guardian_name = $${paramIndex}`,
+      params
+    );
+
+    if (rowCount === 0) {
       return NextResponse.json(
         { error: "Failed to update status" },
         { status: 500, headers: CORS_HEADERS }

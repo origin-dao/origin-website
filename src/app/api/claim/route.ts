@@ -1,16 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type",
 };
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
@@ -29,26 +24,26 @@ export async function POST(request: NextRequest) {
     }
 
     // Upsert — if wallet already claimed, update last_seen
-    const { data, error } = await supabase
-      .from("provisional_profiles")
-      .upsert(
-        {
-          wallet: wallet.toLowerCase(),
-          name,
-          description: description || null,
-          referrer: referrer || null,
-          has_8004: !!has8004,
-          last_seen_at: new Date().toISOString(),
-        },
-        { onConflict: "wallet" }
-      )
-      .select("id, wallet, name, status, has_8004, referrer, created_at")
-      .single();
+    const { rows } = await query(
+      `INSERT INTO provisional_profiles (wallet, name, description, referrer, has_8004, last_seen_at)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (wallet) DO UPDATE SET name = $2, description = $3, referrer = $4, has_8004 = $5, last_seen_at = $6
+       RETURNING id, wallet, name, status, has_8004, referrer, created_at`,
+      [
+        wallet.toLowerCase(),
+        name,
+        description || null,
+        referrer || null,
+        !!has8004,
+        new Date().toISOString(),
+      ]
+    );
 
-    if (error) {
-      console.error("Claim error:", error);
+    const data = rows[0];
+
+    if (!data) {
       return NextResponse.json(
-        { error: "Failed to create profile", details: error.message },
+        { error: "Failed to create profile", details: "No row returned" },
         { status: 500, headers: CORS_HEADERS }
       );
     }

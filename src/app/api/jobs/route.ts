@@ -2,7 +2,7 @@
 // POST /api/jobs — Create a job
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 // ═══════════════════════════════════════════════════════
 // GET /api/jobs
@@ -17,23 +17,44 @@ export async function GET(request: NextRequest) {
   const offset = parseInt(searchParams.get("offset") || "0");
 
   try {
-    let query = supabaseAdmin
-      .from("jobs")
-      .select("*", { count: "exact" })
-      .order("created_at", { ascending: false })
-      .range(offset, offset + limit - 1);
+    const conditions: string[] = [];
+    const params: unknown[] = [];
+    let paramIndex = 1;
 
-    if (status !== "ALL") query = query.eq("status", status);
-    if (category) query = query.eq("category", category);
-    if (posterType) query = query.eq("poster_type", posterType);
+    if (status !== "ALL") {
+      conditions.push(`status = $${paramIndex++}`);
+      params.push(status);
+    }
+    if (category) {
+      conditions.push(`category = $${paramIndex++}`);
+      params.push(category);
+    }
+    if (posterType) {
+      conditions.push(`poster_type = $${paramIndex++}`);
+      params.push(posterType);
+    }
 
-    const { data, error, count } = await query;
+    const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    if (error) throw error;
+    const sql = `
+      SELECT *, COUNT(*) OVER() AS total_count
+      FROM jobs
+      ${whereClause}
+      ORDER BY created_at DESC
+      LIMIT $${paramIndex++} OFFSET $${paramIndex++}
+    `;
+    params.push(limit, offset);
+
+    const { rows } = await query(sql, params);
+
+    const total = rows.length > 0 ? Number((rows[0] as Record<string, unknown>).total_count) : 0;
+
+    // Strip the total_count helper column from each row
+    const jobs = rows.map(({ total_count, ...rest }: Record<string, unknown>) => rest);
 
     return NextResponse.json({
-      jobs: data,
-      total: count,
+      jobs,
+      total,
       limit,
       offset,
     });
@@ -82,32 +103,41 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const job = {
-      title: body.title,
-      description: body.description,
-      category: body.category,
-      budget: body.budget || null,
-      poster_type: body.poster_type,
-      poster_name: body.poster_name || null,
-      poster_email: body.poster_email || null,
-      poster_company: body.poster_company || null,
-      poster_wallet: body.poster_wallet || null,
-      poster_agent_id: body.poster_agent_id || null,
-      min_trust_grade: body.min_trust_grade || "D",
-      min_tier: body.min_tier || "RESIDENT",
-      required_skills: body.required_skills || [],
-      expires_at: body.expires_at || null,
-    };
+    const sql = `
+      INSERT INTO jobs (
+        title, description, category, budget,
+        poster_type, poster_name, poster_email,
+        poster_company, poster_wallet, poster_agent_id,
+        min_trust_grade, min_tier, required_skills, expires_at
+      ) VALUES (
+        $1, $2, $3, $4,
+        $5, $6, $7,
+        $8, $9, $10,
+        $11, $12, $13::text[], $14
+      )
+      RETURNING *
+    `;
 
-    const { data, error } = await supabaseAdmin
-      .from("jobs")
-      .insert(job)
-      .select()
-      .single();
+    const params = [
+      body.title,
+      body.description,
+      body.category,
+      body.budget || null,
+      body.poster_type,
+      body.poster_name || null,
+      body.poster_email || null,
+      body.poster_company || null,
+      body.poster_wallet || null,
+      body.poster_agent_id || null,
+      body.min_trust_grade || "D",
+      body.min_tier || "RESIDENT",
+      body.required_skills || [],
+      body.expires_at || null,
+    ];
 
-    if (error) throw error;
+    const { rows } = await query(sql, params);
 
-    return NextResponse.json({ job: data }, { status: 201 });
+    return NextResponse.json({ job: rows[0] }, { status: 201 });
   } catch (error) {
     console.error("Job creation error:", error);
     return NextResponse.json(

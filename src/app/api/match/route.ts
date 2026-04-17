@@ -11,7 +11,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@supabase/supabase-js";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -25,11 +25,6 @@ const SKILL_CATEGORIES: Record<number, string> = {
 const TIER_NAMES: Record<number, string> = {
   0: "Resident", 1: "Associate", 2: "Specialist", 3: "Expert",
 };
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SECRET_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
@@ -49,19 +44,28 @@ export async function POST(request: NextRequest) {
     const limit = Math.min(reqLimit, 20);
 
     // 1. Get eligible agents
-    const { data: agents, error } = await supabase
-      .from("idx_agents")
-      .select("agent_id, name, trust_grade, primary_skill, active_jobs, total_jobs_completed, probation_status, lockout_until, performance_score")
-      .eq("active", true)
-      .gte("trust_grade", min_grade)
-      .in("probation_status", [0, 1])
-      .neq("agent_id", client_agent_id);
+    const { rows: agents } = await query<{
+      agent_id: number;
+      name: string | null;
+      trust_grade: number | null;
+      primary_skill: number | null;
+      active_jobs: number | null;
+      total_jobs_completed: number | null;
+      probation_status: number;
+      lockout_until: string | null;
+      performance_score: number | null;
+    }>(
+      `SELECT agent_id, name, trust_grade, primary_skill, active_jobs,
+              total_jobs_completed, probation_status, lockout_until, performance_score
+       FROM idx_agents
+       WHERE active = true
+         AND trust_grade >= $1
+         AND probation_status IN (0, 1)
+         AND agent_id != $2`,
+      [min_grade, client_agent_id]
+    );
 
-    if (error) {
-      return NextResponse.json({ error: "Query failed" }, { status: 500, headers: CORS_HEADERS });
-    }
-
-    if (!agents?.length) {
+    if (!agents.length) {
       return NextResponse.json({
         matches: [],
         job: { skill: SKILL_CATEGORIES[skill_category], tier: TIER_NAMES[tier] },
@@ -77,14 +81,29 @@ export async function POST(request: NextRequest) {
     const agentIds = eligible.map(a => a.agent_id);
 
     // 2. Batch fetch skills + relationships
-    const [{ data: skills }, { data: rels }] = await Promise.all([
-      supabase.from("idx_skill_tags")
-        .select("agent_id, job_count, is_primary")
-        .in("agent_id", agentIds)
-        .eq("skill_category", skill_category),
-      supabase.from("idx_relationships")
-        .select("agent_a, agent_b, weighted_score, is_trusted_pair")
-        .or(`agent_a.eq.${client_agent_id},agent_b.eq.${client_agent_id}`),
+    const [{ rows: skills }, { rows: rels }] = await Promise.all([
+      query<{
+        agent_id: number;
+        job_count: number;
+        is_primary: boolean;
+      }>(
+        `SELECT agent_id, job_count, is_primary
+         FROM idx_skill_tags
+         WHERE agent_id = ANY($1::int[])
+           AND skill_category = $2`,
+        [agentIds, skill_category]
+      ),
+      query<{
+        agent_a: number;
+        agent_b: number;
+        weighted_score: number;
+        is_trusted_pair: boolean;
+      }>(
+        `SELECT agent_a, agent_b, weighted_score, is_trusted_pair
+         FROM idx_relationships
+         WHERE agent_a = $1 OR agent_b = $1`,
+        [client_agent_id]
+      ),
     ]);
 
     const skillMap = new Map<number, { count: number; isPrimary: boolean }>();

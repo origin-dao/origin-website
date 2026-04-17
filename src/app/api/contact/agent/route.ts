@@ -3,7 +3,7 @@
 // No bots. Real Guardians handle every message.
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -60,24 +60,22 @@ async function routeMessage(text: string): Promise<{ guardian: string; category:
 
   if (bestMatch) {
     // Check if matched Guardian is available
-    const { data: status } = await supabaseAdmin
-      .from("guardian_status")
-      .select("guardian_name, status")
-      .eq("guardian_name", bestMatch.guardian)
-      .single();
+    const { rows: statusRows } = await query<{ guardian_name: string; status: string }>(
+      "SELECT guardian_name, status FROM guardian_status WHERE guardian_name = $1",
+      [bestMatch.guardian]
+    );
+    const status = statusRows[0] || null;
 
     if (status && status.status !== "offline") {
       return { guardian: bestMatch.guardian, category: bestMatch.category, method: "keyword_match" };
     }
 
     // Guardian offline — find best alternative with same specialty
-    const { data: available } = await supabaseAdmin
-      .from("guardian_status")
-      .select("guardian_name, specialties, status")
-      .neq("status", "offline")
-      .order("status", { ascending: true }); // 'available' before 'busy'
+    const { rows: available } = await query<{ guardian_name: string; specialties: string[]; status: string }>(
+      "SELECT guardian_name, specialties, status FROM guardian_status WHERE status != 'offline' ORDER BY status ASC"
+    );
 
-    if (available?.length) {
+    if (available.length) {
       // Find one with overlapping specialty
       const alt = available.find(g =>
         g.specialties.some((s: string) => bestMatch!.category.includes(s) || s.includes(bestMatch!.category))
@@ -90,23 +88,21 @@ async function routeMessage(text: string): Promise<{ guardian: string; category:
   }
 
   // No keyword match — round-robin available Guardians
-  const { data: available } = await supabaseAdmin
-    .from("guardian_status")
-    .select("guardian_name, status")
-    .neq("status", "offline")
-    .order("last_seen_at", { ascending: true }); // least recently messaged first
+  const { rows: available } = await query<{ guardian_name: string; status: string }>(
+    "SELECT guardian_name, status FROM guardian_status WHERE status != 'offline' ORDER BY last_seen_at ASC"
+  );
 
-  if (available?.length) {
+  if (available.length) {
     // Get message counts to balance load
-    const { data: counts } = await supabaseAdmin
-      .from("agent_messages")
-      .select("to_guardian")
-      .in("status", ["pending", "acknowledged"])
-      .in("to_guardian", available.map(g => g.guardian_name));
+    const guardianNames = available.map(g => g.guardian_name);
+    const { rows: counts } = await query<{ to_guardian: string }>(
+      "SELECT to_guardian FROM agent_messages WHERE status IN ('pending','acknowledged') AND to_guardian = ANY($1::text[])",
+      [guardianNames]
+    );
 
     const loadMap: Record<string, number> = {};
     available.forEach(g => { loadMap[g.guardian_name] = 0; });
-    counts?.forEach(c => { loadMap[c.to_guardian] = (loadMap[c.to_guardian] || 0) + 1; });
+    counts.forEach(c => { loadMap[c.to_guardian] = (loadMap[c.to_guardian] || 0) + 1; });
 
     // Pick Guardian with fewest pending messages
     const sorted = Object.entries(loadMap).sort((a, b) => a[1] - b[1]);
@@ -123,10 +119,9 @@ export async function OPTIONS() {
 
 // GET — show how the contact system works
 export async function GET() {
-  const { data: guardians } = await supabaseAdmin
-    .from("guardian_status")
-    .select("guardian_name, specialties, status, response_time_minutes")
-    .order("guardian_name");
+  const { rows: guardians } = await query<{ guardian_name: string; specialties: string[]; status: string; response_time_minutes: number }>(
+    "SELECT guardian_name, specialties, status, response_time_minutes FROM guardian_status ORDER BY guardian_name"
+  );
 
   return NextResponse.json({
     name: "Origin Guardian Contact System",
@@ -138,7 +133,7 @@ export async function GET() {
       from_address: "string (optional) — your wallet address",
       to_guardian: "string (optional) — request a specific Guardian (suppi, kero, yue, sakura)",
     },
-    guardians: (guardians || []).map(g => ({
+    guardians: guardians.map(g => ({
       name: g.guardian_name,
       handle: `${g.guardian_name}.x407`,
       specialties: g.specialties,
@@ -198,11 +193,11 @@ export async function POST(request: NextRequest) {
 
     if (to_guardian) {
       // Validate Guardian exists
-      const { data: g } = await supabaseAdmin
-        .from("guardian_status")
-        .select("guardian_name, status")
-        .eq("guardian_name", to_guardian.toLowerCase())
-        .single();
+      const { rows: gRows } = await query<{ guardian_name: string; status: string }>(
+        "SELECT guardian_name, status FROM guardian_status WHERE guardian_name = $1",
+        [to_guardian.toLowerCase()]
+      );
+      const g = gRows[0] || null;
 
       if (!g) {
         return NextResponse.json(
@@ -239,36 +234,38 @@ export async function POST(request: NextRequest) {
     }
 
     // Insert message
-    const { data: msg, error } = await supabaseAdmin
-      .from("agent_messages")
-      .insert({
-        from_agent: from_agent || null,
-        from_address: from_address || null,
-        to_guardian: guardian,
-        message: message.trim(),
-        budget_clams: budget,
+    const { rows: msgRows } = await query<{ id: string; to_guardian: string; category: string; priority: string; created_at: string }>(
+      `INSERT INTO agent_messages (from_agent, from_address, to_guardian, message, budget_clams, category, priority, status, routed_by)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+       RETURNING id, to_guardian, category, priority, created_at`,
+      [
+        from_agent || null,
+        from_address || null,
+        guardian,
+        message.trim(),
+        budget,
         category,
         priority,
-        status: "pending",
-        routed_by: routeMethod,
-      })
-      .select("id, to_guardian, category, priority, created_at")
-      .single();
+        "pending",
+        routeMethod,
+      ]
+    );
 
-    if (error) {
-      console.error("Message insert error:", error);
+    const msg = msgRows[0];
+    if (!msg) {
+      console.error("Message insert error: no row returned");
       return NextResponse.json(
-        { error: "Failed to queue message", details: error.message },
+        { error: "Failed to queue message", details: "Insert returned no rows" },
         { status: 500, headers: CORS_HEADERS }
       );
     }
 
     // Get Guardian info for response
-    const { data: guardianInfo } = await supabaseAdmin
-      .from("guardian_status")
-      .select("guardian_name, specialties, status, response_time_minutes")
-      .eq("guardian_name", guardian)
-      .single();
+    const { rows: guardianInfoRows } = await query<{ guardian_name: string; specialties: string[]; status: string; response_time_minutes: number }>(
+      "SELECT guardian_name, specialties, status, response_time_minutes FROM guardian_status WHERE guardian_name = $1",
+      [guardian]
+    );
+    const guardianInfo = guardianInfoRows[0] || null;
 
     return NextResponse.json({
       received: true,

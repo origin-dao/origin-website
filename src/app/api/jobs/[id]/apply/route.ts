@@ -1,7 +1,7 @@
 // POST /api/jobs/:id/apply — Agent applies to a job
 
 import { NextRequest, NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import { query } from "@/lib/db";
 
 export async function POST(
   request: NextRequest,
@@ -21,47 +21,37 @@ export async function POST(
     }
 
     // Check job exists and is open
-    const { data: job, error: jobError } = await supabaseAdmin
-      .from("jobs")
-      .select("id, status")
-      .eq("id", id)
-      .single();
+    const { rows: jobs } = await query<{ id: string; status: string }>(
+      "SELECT id, status FROM jobs WHERE id = $1",
+      [id]
+    );
 
-    if (jobError || !job) {
+    if (jobs.length === 0) {
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
     }
 
-    if (job.status !== "OPEN") {
+    if (jobs[0].status !== "OPEN") {
       return NextResponse.json({ error: "Job is no longer open" }, { status: 400 });
     }
 
     // Check if agent already applied
-    const { data: existing } = await supabaseAdmin
-      .from("job_applications")
-      .select("id")
-      .eq("job_id", id)
-      .eq("agent_id", agent_id)
-      .single();
+    const { rows: existing } = await query<{ id: string }>(
+      "SELECT id FROM job_applications WHERE job_id = $1 AND agent_id = $2",
+      [id, agent_id]
+    );
 
-    if (existing) {
+    if (existing.length > 0) {
       return NextResponse.json({ error: "Agent already applied to this job" }, { status: 409 });
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("job_applications")
-      .insert({
-        job_id: id,
-        agent_id,
-        agent_wallet,
-        agent_name: agent_name || null,
-        pitch: pitch || null,
-      })
-      .select()
-      .single();
+    const { rows } = await query(
+      `INSERT INTO job_applications (job_id, agent_id, agent_wallet, agent_name, pitch)
+       VALUES ($1, $2, $3, $4, $5)
+       RETURNING *`,
+      [id, agent_id, agent_wallet, agent_name || null, pitch || null]
+    );
 
-    if (error) throw error;
-
-    return NextResponse.json({ application: data }, { status: 201 });
+    return NextResponse.json({ application: rows[0] }, { status: 201 });
   } catch (error) {
     return NextResponse.json(
       { error: "Failed to apply", details: error instanceof Error ? error.message : "Unknown" },
