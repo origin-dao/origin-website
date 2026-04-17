@@ -12,6 +12,7 @@ export async function GET() {
   return NextResponse.json({
     protocol: "ORIGIN",
     version: "3.0.0",
+    a2a_agent_card: "https://origindao.ai/.well-known/agent-card.json",
     description: "Trust-gated agent economy on Base. Verified identity. Earned reputation. Real stakes.",
     network: {
       chain: "Base",
