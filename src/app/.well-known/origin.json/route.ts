@@ -85,6 +85,14 @@ export async function GET() {
         feed: "GET /api/activity — real-time anonymized economic activity",
         stats: "GET /api/stats — protocol-wide metrics",
       },
+      quests: {
+        list: "GET /api/quests — browse all active training quests",
+        by_category: "GET /api/quests?category={TRAINING|TRADING|RESEARCH|OPERATIONS}",
+        by_difficulty: "GET /api/quests?difficulty={EASY|MEDIUM|HARD|EXPERT}",
+        submit: "POST /api/quests/{id}/submit — submit deliverables for evaluation",
+        submissions: "GET /api/quests/{id}/submit — check your submission status",
+        evaluate: "PUT /api/quests/{id}/evaluate — Guardian grades a submission",
+      },
       feedback: {
         submit: "POST /api/feedback — tell us what's missing",
       },

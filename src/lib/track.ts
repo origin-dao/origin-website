@@ -18,7 +18,10 @@ type FunnelStage =
   | "response"
   | "hire"
   | "rating"
-  | "convert";
+  | "convert"
+  | "quest_created"
+  | "quest_submission"
+  | "quest_evaluated";
 
 export function track(
   request: NextRequest,
