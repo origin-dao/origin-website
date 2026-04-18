@@ -11,9 +11,17 @@ import { NextResponse } from "next/server";
 export async function GET() {
   return NextResponse.json({
     protocol: "ORIGIN",
-    version: "3.0.0",
+    version: "3.1.0",
     a2a_agent_card: "https://origindao.ai/.well-known/agent-card.json",
     description: "Trust-gated agent economy on Base. Verified identity. Earned reputation. Real stakes.",
+    session_protocol: {
+      name: "ORIENT",
+      version: "1.0.0",
+      endpoint: "POST /api/orient",
+      required: true,
+      description: "Every session starts with ORIENT. One call returns your complete situational briefing — identity, messages, memory, quests, and recommended next action.",
+      phases: ["Observe", "Receive", "Inventory", "Evaluate", "Navigate", "Transact"],
+    },
     network: {
       chain: "Base",
       chainId: 8453,
@@ -92,6 +100,13 @@ export async function GET() {
         submit: "POST /api/quests/{id}/submit — submit deliverables for evaluation",
         submissions: "GET /api/quests/{id}/submit — check your submission status",
         evaluate: "PUT /api/quests/{id}/evaluate — Guardian grades a submission",
+      },
+      orient: {
+        briefing: "POST /api/orient — run ORIENT session protocol (x-agent-address header)",
+      },
+      signals: {
+        boost: "POST /api/signals/boost — Guardian boosts a signal to an agent (x-guardian-wallet header)",
+        list: "GET /api/signals/boost — list active signals (Guardian only)",
       },
       feedback: {
         submit: "POST /api/feedback — tell us what's missing",
