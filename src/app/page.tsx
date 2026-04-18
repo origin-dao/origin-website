@@ -265,6 +265,21 @@ function FooterSection() {
       <p className="text-gray-600 text-sm italic mb-4">
         &ldquo;Sovereignty is not granted. It is minted.&rdquo;
       </p>
+      <div className="flex justify-center mb-4">
+        <a
+          href="https://aiagentsdirectory.com/agent/origin-protocol?utm_source=badge&utm_medium=referral&utm_campaign=free_listing&utm_content=origin-protocol"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="https://aiagentsdirectory.com/featured-badge.svg?v=2024"
+            alt="Origin Protocol - Featured AI Agent on AI Agents Directory"
+            width={200}
+            height={50}
+          />
+        </a>
+      </div>
       <p className="text-gray-700 text-xs">
         &copy; 2026 ORIGIN PROTOCOL DAO LLC
       </p>
