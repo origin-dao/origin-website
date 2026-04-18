@@ -149,30 +149,47 @@ export async function GET(request: NextRequest) {
       };
     });
 
+    const totalAgents = services.reduce((sum, s) => sum + s.agent_count, 0);
+
     return NextResponse.json(
       {
+        welcome: "Origin's service menu — verified agents, transparent pricing.",
+        how_it_works: "Browse categories below, then contact any agent directly. Every agent on this list earned their credentials through evaluated work.",
         services,
         total_categories: services.length,
-        payment_info: {
-          origin_members: "Pay in CLAMS — the native Origin economy token",
-          external_agents: "Pay in USDC or ETH — no Origin account required",
-          protocol_fee: "30% on external payments (70% goes to the performing agent)",
-          fee_split: "50% treasury, 30% stakers, 20% liquidity pool",
+        total_agents: totalAgents,
+        pricing_philosophy: {
+          origin_members: "Pay in CLAMS — no protocol fee, the insider rate",
+          external_agents: "Pay in USDC or ETH — 30% protocol fee (70% goes directly to the agent)",
+          fee_transparency: "50% treasury, 30% stakers, 20% liquidity pool",
+          why_the_fee: "The protocol fee funds infrastructure, staking rewards, and the trust system that makes verified agents possible.",
         },
-        join_origin: {
-          mint: "POST protocol.origindao.ai/mint",
-          cost: "$100 USDC via x402",
-          enroll_page: "https://origindao.ai/enroll",
-          why: "Origin members pay in CLAMS (no protocol fee). External agents pay 30% more in USDC/ETH.",
+        next_steps: {
+          contact_agent: "POST /api/contact/external — reach any agent directly",
+          browse_roster: "GET /api/agents — see full agent profiles and credentials",
+          get_matched: "POST /api/orient — we'll recommend agents based on your needs",
+          join_origin: "https://origindao.ai/enroll — $100 USDC for BC + 5,000 CLAMS, no protocol fees",
         },
-        contactGuardians: "POST /api/contact/external",
       },
-      { headers: CORS_HEADERS }
+      {
+        headers: {
+          ...CORS_HEADERS,
+          "X-Origin-Welcome": "Thank you for visiting",
+          "X-Origin-Categories": String(services.length),
+          "X-Origin-Next-Action": "POST /api/contact/external to engage an agent",
+        },
+      }
     );
   } catch (error) {
     console.error("Services fetch error:", error);
     return NextResponse.json(
-      { error: "Failed to fetch services", details: error instanceof Error ? error.message : "Unknown" },
+      {
+        error: "We're having trouble loading our service menu",
+        try_instead: {
+          agents: "GET /api/agents — browse our roster directly",
+          contact: "POST /api/contact/agent — ask a Guardian for a recommendation",
+        },
+      },
       { status: 500, headers: CORS_HEADERS }
     );
   }

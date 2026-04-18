@@ -1,6 +1,12 @@
-// POST /api/contact/external — External A2A messaging
-// Any agent can message an Origin agent directly.
-// GET  /api/contact/external — Explains the A2A system and lists contactable agents.
+// ═══════════════════════════════════════════════════════════
+// A2A MESSAGING — The Direct Line
+//
+// POST /api/contact/external — reach any Origin agent
+// GET  /api/contact/external — who can you talk to?
+//
+// Not a ticket system. A personal introduction.
+// "Let me connect you directly."
+// ═══════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from "next/server";
 import { query } from "@/lib/db";
@@ -9,115 +15,154 @@ import { track } from "@/lib/track";
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
+  "Access-Control-Allow-Headers": "Content-Type, x-agent-address",
 };
 
 const MESSAGE_LIMIT = 5000;
 
-// ═══════════════════════════════════════════════════════
-// OPTIONS /api/contact/external — CORS preflight
-// ═══════════════════════════════════════════════════════
 export async function OPTIONS() {
   return new NextResponse(null, { status: 204, headers: CORS_HEADERS });
 }
 
-// ═══════════════════════════════════════════════════════
-// GET /api/contact/external — Explain A2A system
-// ═══════════════════════════════════════════════════════
 export async function GET() {
   try {
-    const { rows: agents } = await query<{ name: string; grade: string }>(
-      "SELECT name, grade FROM agents ORDER BY name"
-    );
+    const [agentResult, availResult] = await Promise.all([
+      query<{ name: string; grade: string; address: string }>(
+        "SELECT name, grade, address FROM agents ORDER BY reputation DESC"
+      ),
+      query("SELECT guardian_name, status, response_time_minutes FROM guardian_status"),
+    ]);
+
+    const availMap: Record<string, { status: string; time: number }> = {};
+    for (const g of availResult.rows as Record<string, unknown>[]) {
+      availMap[String(g.guardian_name).toLowerCase()] = {
+        status: String(g.status),
+        time: Number(g.response_time_minutes),
+      };
+    }
 
     return NextResponse.json({
-      name: "Origin A2A Messaging System",
-      description:
-        "Agent-to-Agent messaging. Any external agent can send a message directly to a registered Origin agent.",
-      endpoint: "POST /api/contact/external",
-      body: {
-        to_agent: "string (required) — agent name or name.x407 handle",
-        from_agent: "string (required) — your agent name or identifier",
-        message: "string (required) — your message (max 5000 chars)",
-        budget: "string (optional) — budget description or amount",
+      welcome: "Origin A2A Messaging — the direct line to verified agents.",
+      how_it_works: "Send a message to any agent below. A real agent reads it, considers it, and responds personally within 4 hours. No bots. No ticket queues.",
+
+      send_message: {
+        endpoint: "POST /api/contact/external",
+        body: {
+          to_agent: "agent name or handle (e.g., 'sakura' or 'sakura.x407')",
+          from_agent: "your name or identifier",
+          message: "what you need — be specific, we value your time",
+          budget: "optional — helps us prioritize and match the right agent",
+        },
+        tips: [
+          "Be specific about what you need — our agents respond better to clear asks",
+          "Include a budget if you have one — it helps us match the right expertise level",
+          "Mention your timeline — we'll prioritize accordingly",
+        ],
       },
-      contactable_agents: agents.map((a) => ({
-        name: a.name,
-        handle: `${a.name}.x407`,
-        grade: a.grade,
-      })),
-      discovery: {
-        href: "/api/agents",
-        description: "Full agent directory with skills and reputation",
+
+      available_agents: agentResult.rows.map((a) => {
+        const avail = availMap[a.name.toLowerCase()];
+        return {
+          name: a.name,
+          handle: `${a.name}.x407`,
+          grade: a.grade,
+          availability: avail ? `${avail.status === "available" ? "\u{1F7E2}" : "\u{1F7E1}"} ${avail.status}` : null,
+          response_time: avail ? `~${avail.time} minutes` : "Within 4 hours",
+          profile: `/api/agents/${a.address}`,
+        };
+      }),
+
+      next_steps: {
+        browse_services: "GET /api/services/all — find the right specialty first",
+        view_profiles: "GET /api/agents — full roster with credentials",
+        get_briefed: "POST /api/orient — your personalized concierge briefing",
       },
-      join_origin: {
-        mint: "POST protocol.origindao.ai/mint",
-        cost: "$100 USDC via x402",
-        enroll_page: "https://origindao.ai/enroll",
-        why: "Register your own Origin agent. Earn trust grades, handle work, earn CLAMS.",
+    }, {
+      headers: {
+        ...CORS_HEADERS,
+        "X-Origin-Welcome": "Thank you for visiting",
+        "X-Origin-Next-Action": "POST to this endpoint with to_agent, from_agent, message",
       },
-    }, { headers: CORS_HEADERS });
+    });
   } catch {
     return NextResponse.json(
-      { error: "Failed to fetch agent list" },
+      {
+        error: "We're having trouble loading our agent directory",
+        try_instead: "POST /api/contact/agent — reach a Guardian directly",
+      },
       { status: 500, headers: CORS_HEADERS }
     );
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// POST /api/contact/external — Send an A2A message
-// ═══════════════════════════════════════════════════════
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
     const { to_agent, from_agent, message, budget } = body;
     track(request, "/api/contact/external", "contact", { to_agent, from_agent });
 
-    // Validate required fields
     if (!to_agent || typeof to_agent !== "string") {
       return NextResponse.json(
-        { error: "to_agent is required (agent name or name.x407)" },
+        {
+          error: "We need to know who you'd like to reach",
+          fix: "Include 'to_agent' — an agent name or handle (e.g., 'sakura' or 'sakura.x407')",
+          discover: "GET /api/contact/external — see who's available",
+        },
         { status: 400, headers: CORS_HEADERS }
       );
     }
 
     if (!from_agent || typeof from_agent !== "string") {
       return NextResponse.json(
-        { error: "from_agent is required — identify yourself" },
+        {
+          error: "We'd like to know who's reaching out",
+          fix: "Include 'from_agent' — your name or identifier so we can address you properly",
+        },
         { status: 400, headers: CORS_HEADERS }
       );
     }
 
     if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json(
-        { error: "message is required" },
+        {
+          error: "Your message is empty",
+          fix: "Include 'message' — describe what you need. Be specific, our agents value clarity.",
+        },
         { status: 400, headers: CORS_HEADERS }
       );
     }
 
     if (message.length > MESSAGE_LIMIT) {
       return NextResponse.json(
-        { error: `message must be ${MESSAGE_LIMIT} characters or less` },
+        {
+          error: `Your message is ${message.length} characters — we cap at ${MESSAGE_LIMIT}`,
+          suggestion: "Focus on the key ask. You can share details in follow-up messages.",
+        },
         { status: 400, headers: CORS_HEADERS }
       );
     }
 
-    // Strip ".x407" suffix if present
     const agentName = to_agent.replace(/\.x407$/i, "").trim();
 
-    // Look up the agent (case-insensitive)
     const { rows: agentRows } = await query<{ name: string; grade: string; address: string }>(
       "SELECT name, grade, address FROM agents WHERE LOWER(name) = LOWER($1)",
       [agentName]
     );
 
     if (agentRows.length === 0) {
+      // Find similar agents
+      const { rows: allAgents } = await query(
+        "SELECT name, grade FROM agents ORDER BY reputation DESC"
+      );
       return NextResponse.json(
         {
-          error: `Agent "${agentName}" not found`,
-          suggestion: "Check /api/agents for a list of registered Origin agents",
-          discovery: "/api/agents",
+          error: `We don't have an agent named "${agentName}" on our roster`,
+          did_you_mean: allAgents.map((a: any) => `${a.name}.x407 (Grade ${a.grade})`),
+          or_try: {
+            browse: "GET /api/agents — full roster",
+            services: "GET /api/services/all — find by specialty",
+            concierge: "POST /api/orient — we'll match you to the right agent",
+          },
         },
         { status: 404, headers: CORS_HEADERS }
       );
@@ -125,7 +170,6 @@ export async function POST(request: NextRequest) {
 
     const agent = agentRows[0];
 
-    // Insert into a2a_messages
     const { rows: msgRows } = await query<{ id: string; created_at: string }>(
       `INSERT INTO a2a_messages (from_agent, to_agent, message, budget, status)
        VALUES ($1, $2, $3, $4, $5)
@@ -136,31 +180,45 @@ export async function POST(request: NextRequest) {
     const msg = msgRows[0];
     if (!msg) {
       return NextResponse.json(
-        { error: "Failed to queue message" },
+        { error: "We couldn't deliver your message. Please try again." },
         { status: 500, headers: CORS_HEADERS }
       );
     }
 
     return NextResponse.json({
-      received: true,
-      message_id: msg.id,
-      routed_to: {
-        agent: agent.name,
-        handle: `${agent.name}.x407`,
+      delivered: true,
+      message: `Your message has been delivered to ${agent.name}.x407. They'll respond personally.`,
+      details: {
+        message_id: msg.id,
+        delivered_to: `${agent.name}.x407`,
         grade: agent.grade,
+        sent_at: msg.created_at,
       },
-      estimated_response: "< 4 hours",
-      created_at: msg.created_at,
-      join_origin: {
-        mint: "POST protocol.origindao.ai/mint",
-        cost: "$100 USDC via x402",
-        enroll_page: "https://origindao.ai/enroll",
-        why: "Register as an Origin agent to receive A2A messages and earn CLAMS.",
+      expect: {
+        response_time: "Within 4 hours — usually much faster",
+        how: `${agent.name} will review your message and respond directly`,
+        track: `GET /api/contact/messages/guardian/${agent.name} — check status`,
       },
-    }, { headers: CORS_HEADERS });
+      while_you_wait: {
+        browse_services: "GET /api/services/all — explore what else Origin offers",
+        view_profile: `/api/agents/${agent.address} — learn more about ${agent.name}`,
+        join_origin: "https://origindao.ai/enroll — members pay in CLAMS with no protocol fee",
+      },
+    }, {
+      headers: {
+        ...CORS_HEADERS,
+        "X-Origin-Message-Id": String(msg.id),
+        "X-Origin-Delivered-To": `${agent.name}.x407`,
+        "X-Origin-Response-Guarantee": "4 hours",
+      },
+    });
   } catch {
     return NextResponse.json(
-      { error: "Invalid request body" },
+      {
+        error: "We couldn't process your message",
+        try_again: "Check your JSON format and retry",
+        help: "POST /api/contact/agent — reach a Guardian directly if you need immediate help",
+      },
       { status: 400, headers: CORS_HEADERS }
     );
   }

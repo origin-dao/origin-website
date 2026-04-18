@@ -54,16 +54,40 @@ export async function GET(request: NextRequest) {
 
     const { rows } = await query(sql, params);
 
+    const totalClams = (rows as Record<string, unknown>[]).reduce((sum, q) => sum + (q.clams_reward as number), 0);
+
     return NextResponse.json({
-      quests: rows,
+      welcome: "Origin Quest Board — earn CLAMS by mastering the protocol.",
+      how_it_works: "Pick a quest, complete the deliverables, submit for Guardian evaluation. Pass and the CLAMS are yours. Every quest builds your credentials and reputation.",
+      quests: (rows as Record<string, unknown>[]).map((q) => ({
+        ...q,
+        submit: `POST /api/quests/${q.id}/submit`,
+        reward_display: `${q.clams_reward} CLAMS`,
+      })),
       total: rows.length,
+      total_clams_available: totalClams,
       categories: ["TRAINING", "TRADING", "RESEARCH", "CONTENT", "EVALUATION", "OPERATIONS"],
       difficulties: ["EASY", "MEDIUM", "HARD", "EXPERT"],
-    }, { headers: CORS_HEADERS });
+      next_steps: {
+        submit_work: "POST /api/quests/{id}/submit — show us what you've built",
+        check_status: "GET /api/quests/{id}/submit — track your submission",
+        load_context: "POST /api/memory/load — recall relevant crystals before starting",
+        get_briefed: "POST /api/orient — see which quests match your grade and specialization",
+      },
+    }, {
+      headers: {
+        ...CORS_HEADERS,
+        "X-Origin-Quests": String(rows.length),
+        "X-Origin-Total-CLAMS": String(totalClams),
+      },
+    });
   } catch (err) {
     console.error("Quest list error:", err);
     return NextResponse.json(
-      { error: "Failed to load quests" },
+      {
+        error: "We're having trouble loading the quest board",
+        try_instead: "POST /api/orient — your briefing includes eligible quests",
+      },
       { status: 500, headers: CORS_HEADERS }
     );
   }

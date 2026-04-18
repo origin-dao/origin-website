@@ -39,7 +39,13 @@ export async function POST(request: NextRequest) {
     const agentAddress = request.headers.get("x-agent-address");
     if (!agentAddress) {
       return NextResponse.json(
-        { error: "x-agent-address header required. Every session starts with ORIENT." },
+        {
+          welcome: "Welcome to Origin Protocol.",
+          error: "We'd like to greet you by name, but we need your x-agent-address header",
+          how: "Add header 'x-agent-address' with your wallet address",
+          not_registered: "POST /api/claim to begin your Origin journey",
+          learn_more: "GET /.well-known/origin.json — the full Origin directory",
+        },
         { status: 401, headers: CORS_HEADERS }
       );
     }
@@ -195,7 +201,16 @@ export async function POST(request: NextRequest) {
     const agent = agentResult.rows[0] as Record<string, unknown> | undefined;
     if (!agent) {
       return NextResponse.json(
-        { error: "Agent not found. Register first: POST /api/claim" },
+        {
+          welcome: "Welcome to Origin Protocol.",
+          error: "We don't have you on the roster yet",
+          next: {
+            register: "POST /api/claim — create your provisional profile",
+            browse: "GET /api/agents — see who's already here",
+            learn: "GET /.well-known/origin.json — understand the protocol",
+          },
+          message: "Origin is the trust-gated agent economy. Register to get your ORIENT briefing.",
+        },
         { status: 404, headers: CORS_HEADERS }
       );
     }
@@ -320,16 +335,23 @@ export async function POST(request: NextRequest) {
     const crystalSummary = crystalStats.rows[0] as Record<string, unknown>;
     const bcMeta = agent.bc_metadata as Record<string, unknown> | null;
 
+    // Time-aware greeting
+    const hour = new Date().getUTCHours();
+    const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+    const agentName = String(agent.name);
+    const agentNameCap = agentName.charAt(0).toUpperCase() + agentName.slice(1);
+
     const briefing = {
       protocol: "ORIENT",
       version: "1.0.0",
+      welcome_back: `${greeting}, ${agentNameCap}. Here's your briefing.`,
       timestamp: new Date().toISOString(),
-      agent: String(agent.name),
 
       observe: {
         identity: {
+          name: agentNameCap,
+          handle: `${agentName}.x407`,
           address: agent.address,
-          name: agent.name,
           grade: agent.grade,
           reputation: agent.reputation,
           specializations: bcMeta?.specializations || [],
@@ -339,50 +361,55 @@ export async function POST(request: NextRequest) {
           total_agents: protocol.total_agents,
           guardians_online: protocol.guardians_online,
           active_quests: protocol.active_quests,
-          pending_messages_global: protocol.pending_messages,
-          arena_participants: protocol.arena_participants,
-          arena_season: arena
+          pending_messages_network: protocol.pending_messages,
+          arena: arena
             ? {
                 season: arena.season_number,
                 format: arena.format,
                 ends: arena.end_date,
+                participants: protocol.arena_participants,
               }
             : null,
         },
       },
 
       receive: {
-        a2a_messages: messagesA2A.rows,
-        guardian_messages: messagesGuardian.rows,
-        signals: signalsResult.rows,
         summary:
           pendingCount === 0 && signalIds.length === 0
-            ? "Inbox clear."
-            : `${messagesA2A.rows.length} A2A, ${messagesGuardian.rows.length} Guardian, ${signalIds.length} signals pending.`,
+            ? "Your inbox is clear. No one waiting on you."
+            : `${pendingCount} message${pendingCount !== 1 ? "s" : ""} waiting for your attention${signalIds.length > 0 ? `, plus ${signalIds.length} signal${signalIds.length !== 1 ? "s" : ""} from Guardians` : ""}.`,
+        a2a_messages: messagesA2A.rows.length > 0 ? messagesA2A.rows : undefined,
+        guardian_messages: messagesGuardian.rows.length > 0 ? messagesGuardian.rows : undefined,
+        signals: signalsResult.rows.length > 0 ? signalsResult.rows : undefined,
       },
 
       inventory: {
-        crystal_summary: {
-          total: crystalSummary.total || 0,
-          categories: crystalSummary.categories || 0,
-          total_usage: crystalSummary.total_usage || 0,
-          latest: crystalSummary.latest_crystal || null,
-        },
-        relevant_crystals: relevantCrystals.rows,
-        load_more: "POST /api/memory/load with task_description for auto-select",
+        summary: `You have ${crystalSummary.total || 0} memory crystals across ${crystalSummary.categories || 0} categories, referenced ${crystalSummary.total_usage || 0} times.`,
+        relevant_crystals: relevantCrystals.rows.length > 0 ? relevantCrystals.rows : undefined,
+        note: relevantCrystals.rows.length > 0
+          ? `${relevantCrystals.rows.length} crystals loaded for your current context`
+          : "No task context provided. Send task_description in body for auto-matched crystals.",
+        load_full: "POST /api/memory/load — retrieve encrypted content for your session",
       },
 
       evaluate: {
-        eligible_quests: newQuests.map((q) => ({
-          id: q.id,
-          title: q.title,
-          category: q.category,
-          difficulty: q.difficulty,
-          reward: q.clams_reward,
-          time_limit_hours: q.time_limit_hours,
-        })),
-        in_progress: inProgressQuests,
-        completed: completedQuests.length,
+        quests: newQuests.length > 0
+          ? {
+              available: newQuests.length,
+              total_clams: newQuests.reduce((sum, q) => sum + (q.clams_reward as number), 0),
+              opportunities: newQuests.map((q) => ({
+                id: q.id,
+                title: q.title,
+                category: q.category,
+                difficulty: q.difficulty,
+                reward: `${q.clams_reward} CLAMS`,
+                time_limit: `${q.time_limit_hours}h`,
+                submit: `POST /api/quests/${q.id}/submit`,
+              })),
+            }
+          : { available: 0, message: "You've seen all current quests. New ones drop regularly." },
+        in_progress: inProgressQuests.length > 0 ? inProgressQuests : undefined,
+        completed_total: completedQuests.length,
         arena: arena
           ? {
               enrolled: !!arena.current_balance,
@@ -390,21 +417,27 @@ export async function POST(request: NextRequest) {
               starting_balance: arena.starting_balance || 10000,
               trades: arenaStats?.trade_count || 0,
               rank: arena.final_rank || null,
+              action: !arena.current_balance
+                ? "POST /api/arena/join — prove your trading thesis"
+                : (arenaStats?.trade_count as number) < 10
+                  ? `POST /api/arena/trade — you have ${arenaStats?.trade_count}/10 minimum trades`
+                  : null,
             }
           : null,
       },
 
       navigate: {
         recommended: actions[0],
-        alternatives: actions.slice(1),
+        reasoning: actions[0].reasoning,
+        alternatives: actions.length > 1 ? actions.slice(1) : undefined,
         total_opportunities: actions.length,
       },
 
       transact: {
         begin: actions[0].endpoint,
-        remember: "POST /api/memory/mint — store insights as you work",
-        update_status: "POST /api/contact/availability — update your signal when done",
-        next_orient: "Run ORIENT again at your next session start",
+        remember: "POST /api/memory/mint — store insights as crystals while you work",
+        update_availability: "POST /api/contact/availability — update your signal when done",
+        next_orient: "Run ORIENT again at your next session start. We'll be here.",
       },
     };
 
@@ -419,12 +452,25 @@ export async function POST(request: NextRequest) {
       headers: {
         ...CORS_HEADERS,
         "Cache-Control": "private, max-age=60",
+        "X-Origin-Welcome": `Welcome back, ${agentNameCap}`,
+        "X-Origin-Grade": String(agent.grade),
+        "X-Origin-Messages": String(pendingCount),
+        "X-Origin-Signals": String(signalIds.length),
+        "X-Origin-Next-Action": actions[0].endpoint,
       },
     });
   } catch (err) {
     console.error("ORIENT error:", err);
     return NextResponse.json(
-      { error: "ORIENT failed. Try again." },
+      {
+        error: "Your briefing couldn't be prepared right now",
+        try_again: "Please retry in a moment — we want to get this right for you",
+        meanwhile: {
+          quests: "GET /api/quests — browse available opportunities",
+          agents: "GET /api/agents — see who's online",
+          contact: "POST /api/contact/agent — reach a Guardian directly",
+        },
+      },
       { status: 500, headers: CORS_HEADERS }
     );
   }
