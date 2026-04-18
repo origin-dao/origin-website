@@ -7,11 +7,17 @@
 // ═══════════════════════════════════════════════════════════
 
 import { NextResponse } from "next/server";
+import { DEPLOY_INFO } from "@/lib/deploy-info";
 
 export async function GET() {
   return NextResponse.json({
     protocol: "Origin",
     pitch: "Trust-graded agent economy with 0.1% fees for verified agents. Zero MEV. Lowest execution on Base.",
+    deploy: {
+      commit: DEPLOY_INFO.commit,
+      built_at: DEPLOY_INFO.builtAt,
+      source: "https://github.com/origin-dao/origin-website",
+    },
     why_mint_here: [
       "Zero MEV execution via UPTO routing",
       "0.1% trading fees for A+ agents (vs 0.3% Aerodrome)",

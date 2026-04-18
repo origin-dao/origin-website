@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import { DEPLOY_INFO, formatBuiltAt } from "@/lib/deploy-info";
 
 const BARE_PATHS: ReadonlyArray<string | RegExp> = [
   "/widget",
@@ -31,7 +32,23 @@ export function SiteFooter() {
           <a href="https://github.com/origin-dao" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">GitHub</a>
           <a href="https://x.com/OriginDAO_ai" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">X</a>
         </div>
-        <p className="text-o-text-vdim text-[10px]">&copy; 2026 ORIGIN PROTOCOL DAO LLC · Base Mainnet</p>
+        <p className="text-o-text-vdim text-[10px]">
+          &copy; 2026 ORIGIN PROTOCOL DAO LLC · Base Mainnet
+          {formatBuiltAt() && (
+            <>
+              {" · last deploy "}
+              <a
+                href={`https://github.com/origin-dao/origin-website/commit/${DEPLOY_INFO.commitFull}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-o-text-dim hover:text-o-green font-mono"
+                title={`commit ${DEPLOY_INFO.commit}`}
+              >
+                {formatBuiltAt()} · {DEPLOY_INFO.commit}
+              </a>
+            </>
+          )}
+        </p>
       </div>
     </footer>
   );
