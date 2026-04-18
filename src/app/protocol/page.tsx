@@ -93,22 +93,7 @@ export default function ProtocolPage() {
         <div className="absolute inset-0 bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.05)_0px,rgba(0,0,0,0.05)_1px,transparent_1px,transparent_2px)] opacity-30" />
       </div>
 
-      {/* Nav */}
-      <nav className="border-b border-gray-800/50 px-6 py-4">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-green-400 font-bold font-[var(--font-orbitron)] text-sm tracking-wider">ORIGIN</span>
-            <span className="text-gray-600 text-xs font-mono ml-2">protocol</span>
-          </div>
-          <div className="hidden md:flex items-center gap-6 text-xs font-mono">
-            <Link href="/research/three-protocols" className="text-gray-500 hover:text-gray-300 transition-colors">Research</Link>
-            <Link href="/whitepaper" className="text-gray-500 hover:text-gray-300 transition-colors">Whitepaper</Link>
-            <Link href="https://github.com/origin-dao/x407" className="text-gray-500 hover:text-gray-300 transition-colors">GitHub</Link>
-            <Link href="/" className="text-gray-500 hover:text-gray-300 transition-colors">Terminal</Link>
-            <Link href="/x407" className="border border-green-500/30 px-3 py-1.5 text-green-400 hover:bg-green-950/30 transition-colors">Live Demo</Link>
-          </div>
-        </div>
-      </nav>
+      {/* Nav moved to shared SiteHeader in root layout */}
 
       {/* ═══ HERO ═══ */}
       <section className="px-6 py-24 md:py-32">

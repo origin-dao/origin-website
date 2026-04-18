@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 
 const CONTRACTS = [
   { name: "ORIGIN Registry", desc: "ERC-721 Birth Certificate & Identity Registry. Soulbound.", addr: "0xac62E9d0bE9b88674f7adf38821F6e8BAA0e59b0", type: "ERC-721" },
@@ -17,7 +15,6 @@ const CONTRACTS = [
 export default function Contracts() {
   return (
     <div style={{ minHeight: "100vh", background: "#030808", color: "#C8D6D0" }}>
-      <Header />
       <main style={{ maxWidth: 900, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 11, color: "#3A4A42", marginBottom: 16 }}>
           guest@origin:~/contracts$ ls -la
@@ -94,7 +91,6 @@ export default function Contracts() {
           </div>
         </div>
       </main>
-      <Footer />
       <style dangerouslySetInnerHTML={{ __html: `@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }` }} />
     </div>
   );

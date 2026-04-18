@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Divider } from "@/components/Terminal";
 import { SuppiChat } from "@/components/SuppiChat";
 
@@ -86,8 +84,8 @@ export default function Whitepaper() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
+    <div className="flex-1 flex flex-col">
+      {/* Shared SiteHeader from root layout renders the ticker + ORIGIN PROTOCOL nav. */}
       <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff", textShadow: "0 0 15px rgba(0,240,255,0.3)" }}>
           ORIGIN WHITEPAPER
@@ -1142,7 +1140,6 @@ Trust multiplier:
         </div>
 
       </main>
-      <Footer />
       <SuppiChat />
     </div>
   );

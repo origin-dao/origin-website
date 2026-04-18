@@ -26,6 +26,12 @@
   --color-o-teal:         #44ccaa;
   --color-o-purple:       #8866ff;
 
+  /* Meme palette — flat light tones for the Tavern's meme signals only.
+     Rest of the app keeps o-green/o-red. */
+  --color-o-meme-up:      #ff9ec7;  /* light pink — rising */
+  --color-o-meme-down:    #8cb4ff;  /* light blue — falling */
+  --color-o-meme-bond:    #c8a8e8;  /* light purple — bonded */
+
   /* Casino Token */
   --color-token-red:      #ff3d3d;
   --color-token-green:    #00ffa3;
@@ -41,6 +47,33 @@
   --color-terminal-bg:    #050805;
   --color-terminal-amber: #f5a623;
   --color-terminal-red:   #ff3d3d;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE — optional, ~10% of design budget.
+   Dark is the hero. Light is the accommodation.
+   Override the same o-* tokens so every component swaps.
+   ═══════════════════════════════════════════════════════════ */
+
+[data-theme="light"] {
+  --color-o-bg:           #fafbf9;
+  --color-o-surface:      #ffffff;
+  --color-o-elevated:     #f5f7f5;
+  --color-o-border:       #e5e8e5;
+  --color-o-border-active:#c8d8c8;
+
+  --color-o-text:         #0a0f0a;
+  --color-o-text-secondary:#4a5a4a;
+  --color-o-text-dim:     #7a8a7a;
+  --color-o-text-vdim:    #a0b0a0;
+
+  --color-o-green:        #00a870;
+  --color-o-teal:         #2aa088;
+
+  /* Meme palette — slightly darker in light mode for contrast */
+  --color-o-meme-up:      #d14a8e;
+  --color-o-meme-down:    #4a6cc8;
+  --color-o-meme-bond:    #7a4db0;
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -76,34 +109,35 @@
    ═══════════════════════════════════════════════════════════ */
 
 body {
-  background-color: #050805;
-  color: #e0f0e0;
+  background-color: var(--color-o-bg);
+  color: var(--color-o-text);
   font-family: 'IBM Plex Mono', 'Fira Code', 'Courier New', monospace;
   cursor: default;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.15s ease-out, color 0.15s ease-out;
 }
 
 /* Scrollbar — thin, green-tinted */
 ::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: #050805; }
-::-webkit-scrollbar-thumb { background: #2a5a3a; }
-::-webkit-scrollbar-thumb:hover { background: #3a7a4a; }
+::-webkit-scrollbar-track { background: var(--color-o-bg); }
+::-webkit-scrollbar-thumb { background: var(--color-o-border-active); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-o-green); }
 
 /* Selection */
 ::selection {
-  background: #00ffa3;
-  color: #050805;
+  background: var(--color-o-green);
+  color: var(--color-o-bg);
 }
 
 /* Links — clean, no glow */
 a {
-  color: #00ffa3;
+  color: var(--color-o-green);
   text-decoration: none;
   transition: color 0.15s ease-out;
 }
 a:hover {
-  color: #44ccaa;
+  color: var(--color-o-teal);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -138,17 +172,19 @@ a:hover {
    ═══════════════════════════════════════════════════════════ */
 
 .panel {
-  background: #0a0f0a;
-  border: 1px solid #1a3a2a;
+  background: var(--color-o-surface);
+  border: 1px solid var(--color-o-border);
+  transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 .panel-elevated {
-  background: #0e140e;
-  border: 1px solid #1a3a2a;
+  background: var(--color-o-elevated);
+  border: 1px solid var(--color-o-border);
+  transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
 }
 
 .panel:hover, .panel-elevated:hover {
-  border-color: #2a5a3a;
+  border-color: var(--color-o-border-active);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -159,10 +195,10 @@ a:hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #00ffa3;
+  border: 1px solid var(--color-o-green);
   padding: 12px 32px;
-  color: #050805;
-  background: #00ffa3;
+  color: var(--color-o-bg);
+  background: var(--color-o-green);
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 600;
   font-size: 13px;
@@ -172,18 +208,18 @@ a:hover {
   cursor: pointer;
 }
 .btn-primary:hover {
-  background: #00cc83;
-  border-color: #00cc83;
-  color: #050805;
+  background: var(--color-o-teal);
+  border-color: var(--color-o-teal);
+  color: var(--color-o-bg);
 }
 
 .btn-outline {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid #1a3a2a;
+  border: 1px solid var(--color-o-border);
   padding: 12px 32px;
-  color: #c8d8c8;
+  color: var(--color-o-text-secondary);
   background: transparent;
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 500;
@@ -193,8 +229,8 @@ a:hover {
   cursor: pointer;
 }
 .btn-outline:hover {
-  border-color: #00ffa3;
-  color: #00ffa3;
+  border-color: var(--color-o-green);
+  color: var(--color-o-green);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -203,20 +239,20 @@ a:hover {
 
 .origin-input {
   width: 100%;
-  background: #0a0f0a;
-  border: 1px solid #1a3a2a;
+  background: var(--color-o-surface);
+  border: 1px solid var(--color-o-border);
   padding: 12px 16px;
-  color: #e0f0e0;
+  color: var(--color-o-text);
   font-family: 'IBM Plex Mono', monospace;
   font-size: 13px;
   outline: none;
   transition: border-color 0.15s ease-out;
 }
 .origin-input:focus {
-  border-color: #00ffa3;
+  border-color: var(--color-o-green);
 }
 .origin-input::placeholder {
-  color: #4a6a4a;
+  color: var(--color-o-text-vdim);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -228,7 +264,252 @@ a:hover {
   font-weight: 500;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: #7a9a7a;
+  color: var(--color-o-text-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WALLET PILL (nav)
+   ═══════════════════════════════════════════════════════════ */
+
+.wallet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-o-border);
+  background: var(--color-o-surface);
+  font-size: 11px;
+  color: var(--color-o-text-secondary);
+  font-family: 'IBM Plex Mono', monospace;
+  letter-spacing: 0.02em;
+  transition: border-color 0.15s ease-out;
+}
+.wallet-pill:hover {
+  border-color: var(--color-o-border-active);
+}
+
+.wallet-pill-ens {
+  color: var(--color-o-green);
+  font-weight: 600;
+}
+
+.wallet-pill-addr {
+  color: var(--color-o-text-dim);
+  font-size: 10px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THEME TOGGLE
+   ═══════════════════════════════════════════════════════════ */
+
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: 1px solid var(--color-o-border);
+  background: transparent;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  color: var(--color-o-text-dim);
+  font-family: 'IBM Plex Mono', monospace;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+  text-transform: uppercase;
+}
+.theme-toggle:hover {
+  border-color: var(--color-o-border-active);
+  color: var(--color-o-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOK FILTER TABS
+   ═══════════════════════════════════════════════════════════ */
+
+.book-tab {
+  font-size: 10px;
+  letter-spacing: 0.05em;
+  color: var(--color-o-text-vdim);
+  cursor: pointer;
+  transition: color 0.15s ease-out;
+  padding: 2px 4px;
+  background: transparent;
+  border: none;
+  font-family: 'IBM Plex Mono', monospace;
+}
+.book-tab:hover {
+  color: var(--color-o-text-dim);
+}
+.book-tab.active {
+  color: var(--color-o-green);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   BOOK ENTRY TYPE PREFIX
+   ═══════════════════════════════════════════════════════════ */
+
+.book-event-type {
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--color-o-text-vdim);
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MEME TICKER — infinite horizontal scroll above the nav
+   ═══════════════════════════════════════════════════════════ */
+
+.meme-ticker {
+  position: relative;
+  overflow: hidden;
+  border-bottom: 1px solid var(--color-o-border);
+  background: var(--color-o-surface);
+  height: 38px;
+  display: flex;
+  align-items: center;
+}
+
+.meme-ticker-track {
+  display: flex;
+  gap: 18px;
+  padding: 0 16px;
+  animation: ticker-scroll 70s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.meme-ticker:hover .meme-ticker-track {
+  animation-play-state: paused;
+}
+
+.meme-ticker-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  transition: border-color 0.15s ease-out;
+}
+
+.meme-ticker-item:hover {
+  border-color: var(--color-o-border);
+}
+
+.meme-ticker-sym {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.meme-ticker-vibe {
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-left: 2px;
+}
+
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAVERN LAYOUT
+   ═══════════════════════════════════════════════════════════ */
+
+.tavern-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 300px;
+  gap: 12px;
+  padding: 12px;
+  align-items: stretch;
+}
+
+/* Uniform panel height so agent card / featured meme / DMs align */
+.tavern-panel {
+  height: 520px;
+}
+
+.tavern-bottom {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 12px;
+  padding: 0 12px 12px;
+  align-items: stretch;
+}
+
+.tavern-bottom > * {
+  min-height: 160px;
+}
+
+@media (max-width: 1100px) {
+  .tavern-grid,
+  .tavern-bottom {
+    grid-template-columns: 1fr;
+  }
+  .tavern-panel {
+    height: auto;
+    min-height: 460px;
+  }
+}
+
+@media (min-width: 1101px) and (max-width: 1280px) {
+  .tavern-grid {
+    grid-template-columns: 260px 1fr;
+  }
+}
+
+/* Connect button — small variant for nav */
+.btn-connect {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 14px;
+  border: 1px solid var(--color-o-green);
+  background: transparent;
+  color: var(--color-o-green);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.15s ease-out;
+  cursor: pointer;
+}
+.btn-connect:hover {
+  background: var(--color-o-green);
+  color: var(--color-o-bg);
+}
+
+/* Meme cell — the heart of the Tavern */
+.meme-cell {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 12px;
+  background: var(--color-o-surface);
+  border: 1px solid var(--color-o-border);
+  transition: border-color 0.15s ease-out, background-color 0.15s ease-out;
+  cursor: default;
+}
+
+.meme-cell:hover {
+  border-color: var(--color-o-border-active);
+}
+
+.meme-cell-bonded {
+  border-color: var(--color-o-green);
+  box-shadow: inset 0 0 0 1px rgba(0, 255, 163, 0.25);
+}
+
+.meme-grid-cells {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
 }
 
 /* ═══════════════════════════════════════════════════════════

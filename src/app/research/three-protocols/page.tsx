@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 import { Divider } from "@/components/Terminal";
 import { SuppiChat } from "@/components/SuppiChat";
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
@@ -108,7 +106,6 @@ export default function ThreeProtocols() {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
       <main className="flex-1 px-4 py-8 max-w-4xl mx-auto w-full">
         <h1 className="text-2xl sm:text-3xl font-bold mb-2" style={{ fontFamily: "var(--font-orbitron), sans-serif", color: "#00f0ff", textShadow: "0 0 15px rgba(0,240,255,0.3)" }}>
           THREE PROTOCOLS FOR THE AGENT ECONOMY
@@ -439,7 +436,6 @@ app.get("/api/data",
         </div>
 
       </main>
-      <Footer />
       <SuppiChat />
     </div>
   );

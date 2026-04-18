@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 
 export default function Verify() {
   const [query, setQuery] = useState("");
@@ -20,7 +18,6 @@ export default function Verify() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#030808", color: "#C8D6D0" }}>
-      <Header />
       <main style={{ maxWidth: 700, margin: "0 auto", padding: "40px 24px" }}>
 
         <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 11, color: "#3A4A42", marginBottom: 16 }}>
@@ -109,7 +106,6 @@ export default function Verify() {
         </div>
 
       </main>
-      <Footer />
     </div>
   );
 }

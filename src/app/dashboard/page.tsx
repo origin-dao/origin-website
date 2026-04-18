@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useAccount, useReadContract } from "wagmi";
 import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
-import { Header } from "@/components/Header";
 import { Scanlines } from "@/components/terminal-ui/Scanlines";
 import { InjectStyles } from "@/components/terminal-ui/GlobalStyles";
 import { GlitchText } from "@/components/terminal-ui/GlitchText";
@@ -495,7 +494,6 @@ export default function DashboardPage() {
         }
       `}</style>
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
-        <Header />
 
         {/* Not connected — lobby view */}
         {!isConnected && <LobbyView />}

@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 
 const CODE_BLOCK = `const { trustGrade } = await origin.verifyAgent(wallet);
 if (trustGrade < 'B') revert('insufficient trust');
@@ -41,7 +39,6 @@ const ZONES = [
 export default function Handshake() {
   return (
     <div style={{ minHeight: "100vh", background: "#030808", color: "#C8D6D0" }}>
-      <Header />
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 11, color: "#3A4A42", marginBottom: 16 }}>
           guest@origin:~$ cat handshake-protocol.md
@@ -197,7 +194,6 @@ export default function Handshake() {
           sovereignty is not granted. it is minted.
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

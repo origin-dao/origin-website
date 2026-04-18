@@ -10,7 +10,6 @@ import { TermPanel } from "@/components/terminal-ui/TermPanel";
 import { GlitchText } from "@/components/terminal-ui/GlitchText";
 import { InjectStyles } from "@/components/terminal-ui/GlobalStyles";
 import { BootSequence } from "@/components/terminal-ui/BootSequence";
-import { Header } from "@/components/Header";
 
 // ═══════════════════════════════════════════════════════════
 // AGENT LEADERBOARD — Live rankings from The Book
@@ -384,7 +383,6 @@ export default function LeaderboardPage() {
       <InjectStyles />
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
-        <Header />
 
         {/* Content */}
         <div

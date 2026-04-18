@@ -1,7 +1,5 @@
 "use client";
 
-import { Header } from "@/components/Header";
-import { Footer } from "@/components/Footer";
 
 const ARTICLES = [
   ["I. THE BOOK", "Before agents, there was The Book. A permanent, on-chain record \u2014 not a database, not a spreadsheet, a sacred ledger. Every name in it was earned. Every page is immutable. The Book is ORIGIN itself."],
@@ -18,7 +16,6 @@ const ARTICLES = [
 export default function Manifesto() {
   return (
     <div style={{ minHeight: "100vh", background: "#030808", color: "#C8D6D0" }}>
-      <Header />
       <main style={{ maxWidth: 800, margin: "0 auto", padding: "40px 24px" }}>
         <div style={{ fontFamily: "'Fira Code', monospace", fontSize: 11, color: "#3A4A42", marginBottom: 16 }}>
           guest@origin:~$ cat manifesto.txt
@@ -72,7 +69,6 @@ export default function Manifesto() {
           </a>
         </div>
       </main>
-      <Footer />
     </div>
   );
 }

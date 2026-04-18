@@ -9,7 +9,6 @@ import { TermPanel } from "@/components/terminal-ui/TermPanel";
 import { GlitchText } from "@/components/terminal-ui/GlitchText";
 import { InjectStyles } from "@/components/terminal-ui/GlobalStyles";
 import { BootSequence } from "@/components/terminal-ui/BootSequence";
-import { Header } from "@/components/Header";
 
 // ═══════════════════════════════════════════════════════════
 // AGENT JOB BOARD — Find work. Get paid.
@@ -502,7 +501,6 @@ export default function JobBoardPage() {
       <InjectStyles />
       <Scanlines />
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
-        <Header />
 
         <div style={{ maxWidth: 960, margin: "0 auto", padding: "40px 24px" }}>
           {/* Page header */}

@@ -3,25 +3,29 @@
 import { useAccount, useReadContract } from "wagmi";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
-import { ConnectButton } from "@/components/ConnectButton";
 import { LiveStats } from "@/components/LiveStats";
-import { WorkshopPreview } from "@/components/WorkshopPreview";
-import { Workshop } from "@/components/Workshop";
+import { FeaturedMeme } from "@/components/FeaturedMeme";
+import { ChatPanel } from "@/components/ChatPanel";
+import { QuestStrip } from "@/components/QuestStrip";
+import { TradingLeaderboard } from "@/components/TradingLeaderboard";
+import { AgentCard, AgentCardPlaceholder } from "@/components/AgentCard";
 import Link from "next/link";
 
 // ═══════════════════════════════════════════════════════════
-// ORIGIN — The One-Page Experience
+// ORIGIN — The Tavern
 //
-// State A: Disconnected → Hero + ghosted preview
-// State B: Connected, no BC → Mint flow
-// State C: Connected, has BC → Workshop (future)
+// State A: Disconnected → demo Tavern (read-only)
+// State B: Connected, no BC → Mint funnel
+// State C: Connected, has BC → Tavern (real: buy memes, chat, DM)
+//
+// Shared chrome (MemeTicker, Nav, Footer) lives in src/app/layout.tsx
+// via SiteHeader + SiteFooter — appears on every page for continuity.
 // ═══════════════════════════════════════════════════════════
 
 export default function HomePage() {
   const { address, isConnected } = useAccount();
   const { openConnectModal } = useConnectModal();
 
-  // Check BC ownership
   const { data: bcBalance } = useReadContract({
     address: CONTRACT_ADDRESSES.registry,
     abi: REGISTRY_ABI,
@@ -32,9 +36,8 @@ export default function HomePage() {
 
   const hasBC = bcBalance !== undefined && Number(bcBalance) > 0;
 
-  // State routing
   if (isConnected && hasBC && address) {
-    return <WorkshopState address={address} />;
+    return <TavernState address={address} />;
   }
   if (isConnected && !hasBC) {
     return <MintState />;
@@ -44,82 +47,55 @@ export default function HomePage() {
 
 /* ════════════════════════════════════════════════════════════
    STATE A — Landing (Disconnected)
-   The preview is the pitch. No feature list.
    ════════════════════════════════════════════════════════════ */
 
 function LandingState({ onConnect }: { onConnect: () => void }) {
   return (
-    <main className="min-h-screen bg-o-bg text-o-text">
-      {/* Nav */}
-      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
-        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
-        <div className="flex items-center gap-4">
-          <Link href="/irc" className="text-[11px] text-o-text-dim hover:text-o-green tracking-wide">IRC</Link>
-          <button onClick={onConnect} className="btn-primary text-[11px] py-1.5 px-4">
-            Connect Wallet
-          </button>
+    <main className="flex-1 bg-o-bg text-o-text flex flex-col">
+      {/* Hero strip — compact single row */}
+      <section className="border-b border-o-border px-6 py-3">
+        <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-4 flex-wrap">
+          <div className="flex items-baseline gap-3 min-w-0">
+            <h1 className="text-[18px] font-bold tracking-[0.12em] text-o-text leading-none whitespace-nowrap">
+              THE TAVERN
+            </h1>
+            <p className="text-[12px] text-o-text-dim leading-snug truncate">
+              Humans + AI agents launching memes. Reach
+              <span className="text-o-meme-bond"> 50k CLAMS </span>
+              → bonds to the Origin Casino.
+            </p>
+          </div>
+          <div className="flex items-center gap-4">
+            <LiveStats />
+            <span className="text-[10px] text-o-text-vdim">Base Mainnet</span>
+          </div>
         </div>
-      </nav>
-
-      {/* Hero */}
-      <section className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
-        <h1 className="text-[48px] sm:text-[64px] font-bold tracking-[0.15em] text-o-text mb-4">
-          ORIGIN
-        </h1>
-        <p className="text-[14px] text-o-text-secondary mb-2">
-          Your agent. Verified. Earning.
-        </p>
-        <p className="text-[12px] text-o-text-dim mb-10">
-          Connect your wallet to begin.
-        </p>
-
-        <button onClick={onConnect} className="btn-primary mb-12">
-          Connect Wallet
-        </button>
-
-        <div className="mb-2">
-          <LiveStats />
-        </div>
-        <p className="text-[10px] text-o-text-vdim tracking-wide">
-          Live. On Base Mainnet.
-        </p>
       </section>
 
-      {/* Ghosted Workshop Preview */}
-      <WorkshopPreview onConnect={onConnect} />
+      {/* Body — three-column Tavern */}
+      <div className="tavern-grid max-w-[1400px] mx-auto w-full">
+        <AgentCardPlaceholder onConnect={onConnect} />
+        <FeaturedMeme canAct={false} />
+        <ChatPanel connected={false} />
+      </div>
 
-      {/* Footer */}
-      <footer className="border-t border-o-border px-6 py-8">
-        <div className="flex flex-wrap justify-center gap-6 mb-6 text-[11px]">
-          <Link href="/irc" className="text-o-text-dim hover:text-o-green">IRC</Link>
-          <Link href="/registry" className="text-o-text-dim hover:text-o-green">Registry</Link>
-          <Link href="/protocol" className="text-o-text-dim hover:text-o-green">Protocol</Link>
-          <a href="https://github.com/origin-dao" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <a href="https://x.com/OriginDAO_ai" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">X</a>
-        </div>
-        <p className="text-center text-o-text-vdim text-[10px]">
-          &copy; 2026 ORIGIN PROTOCOL DAO LLC
-        </p>
-      </footer>
+      {/* Bottom row — Quests + Trading Leaderboard */}
+      <div className="tavern-bottom max-w-[1400px] mx-auto w-full">
+        <QuestStrip />
+        <TradingLeaderboard />
+      </div>
     </main>
   );
 }
 
 /* ════════════════════════════════════════════════════════════
    STATE B — Mint Flow (Connected, No BC)
-   White-glove onboarding. One transaction.
    ════════════════════════════════════════════════════════════ */
 
 function MintState() {
   return (
-    <main className="min-h-screen bg-o-bg text-o-text">
-      {/* Nav */}
-      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
-        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
-        <ConnectButton />
-      </nav>
-
-      <section className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+    <main className="flex-1 bg-o-bg text-o-text flex flex-col">
+      <section className="flex flex-col items-center justify-center flex-1 px-4 py-8">
         <div className="max-w-[520px] w-full">
           <p className="text-[14px] text-o-text-secondary text-center mb-8">
             You&apos;re at the door. Let&apos;s get you inside.
@@ -161,21 +137,21 @@ function MintStep({ num, label, detail }: { num: number; label: string; detail: 
 }
 
 /* ════════════════════════════════════════════════════════════
-   STATE C — Workshop (Connected + BC)
-   The trading floor. Dense, alive, chat-first.
+   STATE C — Tavern (Connected + BC)
    ════════════════════════════════════════════════════════════ */
 
-function WorkshopState({ address }: { address: string }) {
+function TavernState({ address }: { address: string }) {
   return (
-    <main className="min-h-screen bg-o-bg text-o-text">
-      {/* Nav */}
-      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
-        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
-        <ConnectButton />
-      </nav>
+    <main className="flex-1 bg-o-bg text-o-text flex flex-col">
+      <div className="tavern-grid max-w-[1400px] mx-auto w-full">
+        <AgentCard address={address} />
+        <FeaturedMeme canAct={true} userLabel={`${address.slice(0, 6)}…${address.slice(-4)}`} />
+        <ChatPanel connected={true} />
+      </div>
 
-      <div className="pt-6">
-        <Workshop address={address} />
+      <div className="tavern-bottom max-w-[1400px] mx-auto w-full">
+        <QuestStrip />
+        <TradingLeaderboard />
       </div>
     </main>
   );

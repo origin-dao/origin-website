@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
-import { Header } from "@/components/Header";
 import { Scanlines } from "@/components/terminal-ui/Scanlines";
 import { InjectStyles } from "@/components/terminal-ui/GlobalStyles";
 import { GlitchText } from "@/components/terminal-ui/GlitchText";
@@ -514,7 +513,6 @@ export default function EconomyPage() {
         }
       `}</style>
       <div style={{ background: "var(--bg)", minHeight: "100vh" }}>
-        <Header />
 
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "32px 24px" }}>
           {/* Page header */}

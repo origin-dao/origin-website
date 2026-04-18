@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 import { Web3Provider } from "@/components/Web3Provider";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
 
 const ibmPlexMono = IBM_Plex_Mono({
   variable: "--font-mono",
@@ -54,9 +56,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${ibmPlexMono.variable} font-mono antialiased`}>
+      <head>
+        {/* Prevent theme flash — read preference before React hydrates */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('origin-theme');if(t==='light'){document.documentElement.setAttribute('data-theme','light');}}catch(e){}})();`,
+          }}
+        />
+      </head>
+      <body className={`${ibmPlexMono.variable} font-mono antialiased min-h-screen flex flex-col`}>
         <Web3Provider>
-          {children}
+          <SiteHeader />
+          <div className="flex-1 flex flex-col">{children}</div>
+          <SiteFooter />
         </Web3Provider>
       </body>
     </html>
