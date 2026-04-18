@@ -42,9 +42,9 @@ export function ConnectButton() {
                 return (
                   <button
                     onClick={openConnectModal}
-                    className="border border-terminal-green px-4 py-1.5 text-terminal-green text-sm hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow"
+                    className="btn-primary"
                   >
-                    {">"} CONNECT
+                    Connect Wallet
                   </button>
                 );
               }
@@ -53,9 +53,9 @@ export function ConnectButton() {
                 return (
                   <button
                     onClick={openChainModal}
-                    className="border border-terminal-red px-4 py-1.5 text-terminal-red text-sm hover:bg-terminal-red hover:text-terminal-bg transition-all font-bold"
+                    className="border border-o-red px-4 py-2 text-o-red text-[13px] font-medium hover:bg-o-red hover:text-o-bg transition-all"
                   >
-                    ⚠ WRONG NETWORK
+                    Wrong Network
                   </button>
                 );
               }
@@ -65,22 +65,19 @@ export function ConnectButton() {
                 : "...";
 
               const clamsDisplay = clamsBalance !== undefined
-                ? `${Number(formatUnits(clamsBalance as bigint, 18)).toLocaleString()} 🦪`
+                ? `${Number(formatUnits(clamsBalance as bigint, 18)).toLocaleString()} CLAMS`
                 : "...";
 
               return (
-                <div className="flex items-center gap-3 text-sm">
-                  {/* Balances */}
-                  <div className="hidden sm:flex items-center gap-3 text-xs text-terminal-dim">
+                <div className="flex items-center gap-3 text-[13px]">
+                  <div className="hidden sm:flex items-center gap-3 text-[11px] text-o-text-dim">
                     <span>{ethDisplay}</span>
-                    <span className="text-terminal-dark">|</span>
-                    <span className="text-terminal-amber">{clamsDisplay}</span>
+                    <span className="text-o-text-vdim">|</span>
+                    <span className="text-o-yellow">{clamsDisplay}</span>
                   </div>
-
-                  {/* Address button */}
                   <button
                     onClick={openAccountModal}
-                    className="border border-terminal-green px-4 py-1.5 text-terminal-green hover:bg-terminal-green hover:text-terminal-bg transition-all font-bold glow"
+                    className="border border-o-border-active px-4 py-2 text-o-green text-[13px] font-medium hover:border-o-green transition-all"
                   >
                     {truncateAddress(account.address)}
                   </button>
@@ -94,10 +91,6 @@ export function ConnectButton() {
   );
 }
 
-/**
- * Inline wallet status for use inside pages (faucet, the book).
- * Shows address + CLAMS balance when connected, connect button otherwise.
- */
 export function WalletStatus() {
   const { address, isConnected } = useAccount();
 
@@ -118,15 +111,15 @@ export function WalletStatus() {
     : "...";
 
   return (
-    <div className="border border-terminal-green p-3 text-sm">
+    <div className="border border-o-border p-3 text-[13px]">
       <div className="flex flex-col sm:flex-row gap-2 sm:gap-6">
         <div>
-          <span className="text-terminal-dim">Wallet: </span>
-          <span className="text-terminal-green font-bold">{truncateAddress(address)}</span>
+          <span className="text-o-text-dim">Wallet: </span>
+          <span className="text-o-green font-medium">{truncateAddress(address)}</span>
         </div>
         <div>
-          <span className="text-terminal-dim">CLAMS: </span>
-          <span className="text-terminal-amber font-bold">{clamsDisplay} 🦪</span>
+          <span className="text-o-text-dim">CLAMS: </span>
+          <span className="text-o-yellow font-medium">{clamsDisplay}</span>
         </div>
       </div>
     </div>

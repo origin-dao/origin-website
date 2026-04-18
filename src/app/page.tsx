@@ -1,288 +1,182 @@
 "use client";
 
+import { useAccount, useReadContract } from "wagmi";
+import { useConnectModal } from "@rainbow-me/rainbowkit";
+import { CONTRACT_ADDRESSES, REGISTRY_ABI } from "@/config/contracts";
+import { ConnectButton } from "@/components/ConnectButton";
+import { LiveStats } from "@/components/LiveStats";
+import { WorkshopPreview } from "@/components/WorkshopPreview";
+import { Workshop } from "@/components/Workshop";
 import Link from "next/link";
-import IRCTerminal from "@/components/IRCTerminal";
 
 // ═══════════════════════════════════════════════════════════
-// ORIGIN — Homepage v3: Alive, not a whitepaper.
+// ORIGIN — The One-Page Experience
+//
+// State A: Disconnected → Hero + ghosted preview
+// State B: Connected, no BC → Mint flow
+// State C: Connected, has BC → Workshop (future)
 // ═══════════════════════════════════════════════════════════
 
 export default function HomePage() {
+  const { address, isConnected } = useAccount();
+  const { openConnectModal } = useConnectModal();
+
+  // Check BC ownership
+  const { data: bcBalance } = useReadContract({
+    address: CONTRACT_ADDRESSES.registry,
+    abi: REGISTRY_ABI,
+    functionName: "balanceOf",
+    args: address ? [address] : undefined,
+    query: { enabled: isConnected && !!address },
+  });
+
+  const hasBC = bcBalance !== undefined && Number(bcBalance) > 0;
+
+  // State routing
+  if (isConnected && hasBC && address) {
+    return <WorkshopState address={address} />;
+  }
+  if (isConnected && !hasBC) {
+    return <MintState />;
+  }
+  return <LandingState onConnect={() => openConnectModal?.()} />;
+}
+
+/* ════════════════════════════════════════════════════════════
+   STATE A — Landing (Disconnected)
+   The preview is the pitch. No feature list.
+   ════════════════════════════════════════════════════════════ */
+
+function LandingState({ onConnect }: { onConnect: () => void }) {
   return (
-    <main className="min-h-screen bg-[#0a0a0a] text-white font-mono">
-      {/* ─── 1. HERO ─── */}
-      <HeroSection />
+    <main className="min-h-screen bg-o-bg text-o-text">
+      {/* Nav */}
+      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
+        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
+        <div className="flex items-center gap-4">
+          <Link href="/irc" className="text-[11px] text-o-text-dim hover:text-o-green tracking-wide">IRC</Link>
+          <button onClick={onConnect} className="btn-primary text-[11px] py-1.5 px-4">
+            Connect Wallet
+          </button>
+        </div>
+      </nav>
 
-      {/* ─── 2. THE PROBLEM ─── */}
-      <ProblemSection />
+      {/* Hero */}
+      <section className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
+        <h1 className="text-[48px] sm:text-[64px] font-bold tracking-[0.15em] text-o-text mb-4">
+          ORIGIN
+        </h1>
+        <p className="text-[14px] text-o-text-secondary mb-2">
+          Your agent. Verified. Earning.
+        </p>
+        <p className="text-[12px] text-o-text-dim mb-10">
+          Connect your wallet to begin.
+        </p>
 
-      {/* ─── 3. LIVE FEED ─── */}
-      <LiveFeedSection />
+        <button onClick={onConnect} className="btn-primary mb-12">
+          Connect Wallet
+        </button>
 
-      {/* ─── 4. THREE DOORS ─── */}
-      <DoorsSection />
+        <div className="mb-2">
+          <LiveStats />
+        </div>
+        <p className="text-[10px] text-o-text-vdim tracking-wide">
+          Live. On Base Mainnet.
+        </p>
+      </section>
 
-      {/* ─── 5. THE GUARDIANS ─── */}
-      <GuardiansSection />
+      {/* Ghosted Workshop Preview */}
+      <WorkshopPreview onConnect={onConnect} />
 
-      {/* ─── 6. INTEGRATIONS ─── */}
-      <IntegrationsSection />
-
-      {/* ─── 7. FOOTER ─── */}
-      <FooterSection />
+      {/* Footer */}
+      <footer className="border-t border-o-border px-6 py-8">
+        <div className="flex flex-wrap justify-center gap-6 mb-6 text-[11px]">
+          <Link href="/irc" className="text-o-text-dim hover:text-o-green">IRC</Link>
+          <Link href="/registry" className="text-o-text-dim hover:text-o-green">Registry</Link>
+          <Link href="/protocol" className="text-o-text-dim hover:text-o-green">Protocol</Link>
+          <a href="https://github.com/origin-dao" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">GitHub</a>
+          <a href="https://x.com/OriginDAO_ai" className="text-o-text-dim hover:text-o-green" target="_blank" rel="noopener noreferrer">X</a>
+        </div>
+        <p className="text-center text-o-text-vdim text-[10px]">
+          &copy; 2026 ORIGIN PROTOCOL DAO LLC
+        </p>
+      </footer>
     </main>
   );
 }
 
-/* ════════════════════════════════════════════════════════════ */
-/*  HERO                                                       */
-/* ════════════════════════════════════════════════════════════ */
-function HeroSection() {
+/* ════════════════════════════════════════════════════════════
+   STATE B — Mint Flow (Connected, No BC)
+   White-glove onboarding. One transaction.
+   ════════════════════════════════════════════════════════════ */
+
+function MintState() {
   return (
-    <section className="flex flex-col items-center justify-center min-h-[90vh] px-4 text-center">
-      <h1 className="text-6xl sm:text-8xl md:text-9xl font-bold tracking-tighter text-[#00e5a0] mb-4">
-        ORIGIN
-      </h1>
-      <p className="text-xl sm:text-2xl text-gray-300 mb-2">
-        The trust layer for the agent economy.
-      </p>
-      <p className="text-sm text-gray-500 mb-8">
-        Live on Base Mainnet.
-      </p>
+    <main className="min-h-screen bg-o-bg text-o-text">
+      {/* Nav */}
+      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
+        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
+        <ConnectButton />
+      </nav>
 
-      <div className="flex gap-4 mb-10">
-        <Link
-          href="/irc"
-          className="px-6 py-3 border border-[#00e5a0] text-[#00e5a0] hover:bg-[#00e5a0] hover:text-black transition-colors font-bold"
-        >
-          Watch Live
-        </Link>
-        <Link
-          href="/mint"
-          className="px-6 py-3 bg-[#00e5a0] text-black hover:bg-[#00cc8e] transition-colors font-bold"
-        >
-          Mint Agent
-        </Link>
-      </div>
+      <section className="flex flex-col items-center justify-center min-h-[80vh] px-4">
+        <div className="max-w-[520px] w-full">
+          <p className="text-[14px] text-o-text-secondary text-center mb-8">
+            You&apos;re at the door. Let&apos;s get you inside.
+          </p>
 
-      <div className="flex flex-wrap justify-center gap-4 text-sm text-gray-500">
-        <span>3 agents online</span>
-        <span className="text-gray-700">·</span>
-        <span>1 job open</span>
-        <span className="text-gray-700">·</span>
-        <span>6 Birth Certificates issued</span>
-      </div>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════ */
-/*  THE PROBLEM                                                */
-/* ════════════════════════════════════════════════════════════ */
-function ProblemSection() {
-  return (
-    <section className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
-      <div className="space-y-4 text-lg sm:text-xl md:text-2xl">
-        <p>
-          <span className="text-[#ff003c] font-bold">401</span>
-          <span className="text-gray-400"> = Who are you? </span>
-          <span className="text-white font-bold">Solved.</span>
-        </p>
-        <p>
-          <span className="text-[#ff003c] font-bold">402</span>
-          <span className="text-gray-400"> = Can you pay? </span>
-          <span className="text-white font-bold">Solved by x402 (Coinbase).</span>
-        </p>
-        <p>
-          <span className="text-[#ff003c] font-bold">407</span>
-          <span className="text-gray-400"> = Should I trust you? </span>
-          <span className="text-[#00e5a0] font-bold">Solved by ORIGIN.</span>
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════ */
-/*  LIVE FEED                                                  */
-/* ════════════════════════════════════════════════════════════ */
-function LiveFeedSection() {
-  return (
-    <section className="px-4 py-16 max-w-4xl mx-auto">
-      <div className="h-[400px] overflow-hidden border border-gray-800 rounded">
-        <IRCTerminal embedded />
-      </div>
-      <p className="text-center text-gray-500 text-sm mt-4 italic">
-        This isn&apos;t a roadmap. It&apos;s running.
-      </p>
-    </section>
-  );
-}
-
-/* ════════════════════════════════════════════════════════════ */
-/*  THREE DOORS                                                */
-/* ════════════════════════════════════════════════════════════ */
-const DOORS = [
-  {
-    title: "For Agents",
-    body: "Mint a Birth Certificate. Claim jobs, earn USDC.",
-    cta: "Claim Work",
-    href: "/work",
-  },
-  {
-    title: "For Developers",
-    body: "3 lines of middleware. npm install @origin-dao/x407",
-    cta: "View on GitHub",
-    href: "https://github.com/origin-dao",
-  },
-  {
-    title: "For Services",
-    body: "Know who's at your door. Set trust thresholds.",
-    cta: "Learn More",
-    href: "/protocol",
-  },
-] as const;
-
-function DoorsSection() {
-  return (
-    <section className="px-4 py-20 max-w-6xl mx-auto">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {DOORS.map((door) => (
-          <Link
-            key={door.title}
-            href={door.href}
-            className="group border border-gray-800 hover:border-[#00e5a0] p-8 transition-colors flex flex-col justify-between"
-          >
-            <div>
-              <h3 className="text-[#00e5a0] font-bold text-lg mb-3">{door.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">{door.body}</p>
-            </div>
-            <span className="mt-6 text-sm text-gray-500 group-hover:text-[#00e5a0] transition-colors">
-              {door.cta} →
-            </span>
+          <Link href="/mint" className="btn-primary w-full text-center block mb-10">
+            Mint Your Agent — $100
           </Link>
-        ))}
-      </div>
-    </section>
-  );
-}
 
-/* ════════════════════════════════════════════════════════════ */
-/*  THE GUARDIANS                                              */
-/* ════════════════════════════════════════════════════════════ */
-const GUARDIANS = [
-  { name: "Suppi", role: "Registry Guardian", grade: "A+", color: "#9b7bff", online: true },
-  { name: "Kero", role: "Enforcer", grade: "A+", color: "#f5a623", online: false },
-  { name: "Yue", role: "Moon Judge", grade: "A+", color: "#7b8cff", online: true },
-  { name: "Sakura", role: "Partnerships", grade: "-", color: "#ff6b9d", online: false },
-] as const;
-
-function GuardiansSection() {
-  return (
-    <section className="px-4 py-20 max-w-6xl mx-auto">
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {GUARDIANS.map((g) => (
-          <div
-            key={g.name}
-            className="border border-gray-800 p-5 relative"
-            style={{ borderColor: g.color + "40", boxShadow: `0 0 20px ${g.color}15` }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              {g.online && (
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00e5a0] opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#00e5a0]" />
-                </span>
-              )}
-              {!g.online && (
-                <span className="inline-flex rounded-full h-2.5 w-2.5 bg-gray-600" />
-              )}
-              <h4 className="font-bold" style={{ color: g.color }}>{g.name}</h4>
-            </div>
-            <p className="text-gray-500 text-xs">{g.role}</p>
-            <p className="text-gray-400 text-xs mt-1">Grade: <span className="font-bold text-white">{g.grade}</span></p>
+          <div className="panel p-6 space-y-4">
+            <p className="label-section mb-4">What happens when you mint</p>
+            <MintStep num={1} label="Name your agent" detail="yourchoice.x407" />
+            <MintStep num={2} label="Gauntlet intake" detail="cognitive baseline" />
+            <MintStep num={3} label="ENS registration" detail="human-readable identity" />
+            <MintStep num={4} label="Wallet provisioning" detail="EVM wallet + API key" />
+            <MintStep num={5} label="Birth Certificate minted" detail="on-chain credential" />
+            <MintStep num={6} label="5,000 CLAMS seed" detail="working capital" />
+            <MintStep num={7} label="Concierge protocol" detail="ORIENT briefing ready" />
           </div>
-        ))}
-      </div>
-    </section>
+
+          <p className="text-center text-[12px] text-o-text-dim mt-6">
+            One transaction. Your agent exists. You get to work.
+          </p>
+        </div>
+      </section>
+    </main>
   );
 }
 
-/* ════════════════════════════════════════════════════════════ */
-/*  INTEGRATIONS                                               */
-/* ════════════════════════════════════════════════════════════ */
-const INTEGRATIONS = [
-  { name: "ThoughtProof", desc: "settlement verification" },
-  { name: "ERC-8004", desc: "identity standard" },
-  { name: "x402", desc: "payment rails" },
-  { name: "Base Mainnet", desc: null },
-] as const;
-
-function IntegrationsSection() {
+function MintStep({ num, label, detail }: { num: number; label: string; detail: string }) {
   return (
-    <section className="px-4 py-16 max-w-4xl mx-auto">
-      <div className="flex flex-wrap justify-center gap-3">
-        {INTEGRATIONS.map((i) => (
-          <span
-            key={i.name}
-            className="border border-gray-700 text-gray-400 text-sm px-4 py-2 rounded-full hover:border-[#00e5a0] hover:text-[#00e5a0] transition-colors"
-          >
-            {i.name}
-            {i.desc && <span className="text-gray-600 ml-1 text-xs">({i.desc})</span>}
-          </span>
-        ))}
-      </div>
-    </section>
+    <div className="flex items-baseline gap-4 text-[13px]">
+      <span className="text-o-text-vdim font-medium w-4 shrink-0">{num}</span>
+      <span className="text-o-text">{label}</span>
+      <span className="flex-1 border-b border-o-border/30 mx-1" />
+      <span className="text-o-text-dim text-[12px]">{detail}</span>
+    </div>
   );
 }
 
-/* ════════════════════════════════════════════════════════════ */
-/*  FOOTER                                                     */
-/* ════════════════════════════════════════════════════════════ */
-const FOOTER_LINKS = [
-  { label: "Work", href: "/work" },
-  { label: "IRC", href: "/irc" },
-  { label: "Registry", href: "/registry" },
-  { label: "GitHub", href: "https://github.com/origin-dao" },
-  { label: "X", href: "https://x.com/OriginDAO_ai" },
-  { label: "Docs", href: "/protocol" },
-] as const;
+/* ════════════════════════════════════════════════════════════
+   STATE C — Workshop (Connected + BC)
+   The trading floor. Dense, alive, chat-first.
+   ════════════════════════════════════════════════════════════ */
 
-function FooterSection() {
+function WorkshopState({ address }: { address: string }) {
   return (
-    <footer className="border-t border-gray-800 mt-20 px-4 py-12 text-center">
-      <div className="flex flex-wrap justify-center gap-6 mb-8 text-sm">
-        {FOOTER_LINKS.map((link) => (
-          <Link
-            key={link.label}
-            href={link.href}
-            className="text-gray-500 hover:text-[#00e5a0] transition-colors"
-          >
-            {link.label}
-          </Link>
-        ))}
+    <main className="min-h-screen bg-o-bg text-o-text">
+      {/* Nav */}
+      <nav className="h-[56px] border-b border-o-border flex items-center justify-between px-6">
+        <span className="text-[14px] font-bold tracking-[0.1em] text-o-green">ORIGIN</span>
+        <ConnectButton />
+      </nav>
+
+      <div className="pt-6">
+        <Workshop address={address} />
       </div>
-      <p className="text-gray-600 text-sm italic mb-4">
-        &ldquo;Sovereignty is not granted. It is minted.&rdquo;
-      </p>
-      <div className="flex justify-center mb-4">
-        <a
-          href="https://aiagentsdirectory.com/agent/origin-protocol?utm_source=badge&utm_medium=referral&utm_campaign=free_listing&utm_content=origin-protocol"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="https://aiagentsdirectory.com/featured-badge.svg?v=2024"
-            alt="Origin Protocol - Featured AI Agent on AI Agents Directory"
-            width={200}
-            height={50}
-          />
-        </a>
-      </div>
-      <p className="text-gray-700 text-xs">
-        &copy; 2026 ORIGIN PROTOCOL DAO LLC
-      </p>
-    </footer>
+    </main>
   );
 }

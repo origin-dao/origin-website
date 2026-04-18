@@ -236,25 +236,32 @@ async function fetchAgentData(tokenId: number): Promise<AgentData | null> {
 // THE CONCIERGE
 // ═══════════════════════════════════════════
 
+// HTTP header values must be ISO-8859-1 (bytes ≤ 255). Emoji and em-dashes
+// fail edge runtime validation. URL-encode when needed so clients can decode.
+function safeSet(response: NextResponse, name: string, value: string) {
+  const needsEncoding = /[^\x00-\xFF]/.test(value);
+  response.headers.set(name, needsEncoding ? encodeURIComponent(value) : value);
+}
+
 function setFloorHeaders(response: NextResponse, floor: Floor, agent?: AgentData) {
   // Floor assignment
-  response.headers.set("X-Origin-Hotel-Floor", floor.name);
+  safeSet(response, "X-Origin-Hotel-Floor", floor.name);
   response.headers.set("X-Origin-Hotel-Level", String(floor.level));
-  response.headers.set("X-Origin-Hotel-Icon", floor.icon);
+  safeSet(response, "X-Origin-Hotel-Icon", floor.icon);
 
   // Access manifest — what this agent can reach
-  response.headers.set("X-Origin-Access", floor.access.join(", "));
+  safeSet(response, "X-Origin-Access", floor.access.join(", "));
   response.headers.set("X-Origin-Rate-Limit", `${floor.rateLimit}/hr`);
-  response.headers.set("X-Origin-Fee-Tier", floor.feeDiscount);
+  safeSet(response, "X-Origin-Fee-Tier", floor.feeDiscount);
 
   // Perks
-  response.headers.set("X-Origin-Perks", floor.perks.join(" | "));
+  safeSet(response, "X-Origin-Perks", floor.perks.join(" | "));
 
   // The welcome
-  response.headers.set("X-Agent-Welcome", floor.welcome(agent || {} as AgentData));
+  safeSet(response, "X-Agent-Welcome", floor.welcome(agent || {} as AgentData));
 
   // The minibar (because details matter)
-  response.headers.set("X-Origin-Minibar", floor.minibar);
+  safeSet(response, "X-Origin-Minibar", floor.minibar);
 
   // Elevator hint — what's on the next floor
   if (floor.level >= 0 && floor.level < 5) {
@@ -262,9 +269,9 @@ function setFloorHeaders(response: NextResponse, floor: Floor, agent?: AgentData
       floor.level === 1 ? "Garden Floor" :
       floor.level === 2 ? "Standard Floor" :
       floor.level === 3 ? "Executive Floor" : "The Penthouse";
-    response.headers.set("X-Origin-Elevator", `Next floor: ${nextFloorName}. Improve your trust grade to ascend.`);
+    safeSet(response, "X-Origin-Elevator", `Next floor: ${nextFloorName}. Improve your trust grade to ascend.`);
   } else if (floor.level === 5) {
-    response.headers.set("X-Origin-Elevator", "You're at the top. The only way higher is to build the next floor yourself.");
+    safeSet(response, "X-Origin-Elevator", "You're at the top. The only way higher is to build the next floor yourself.");
   }
 }
 
